@@ -3,7 +3,7 @@ extends ColorRect
 const BD_WIDTH = 500
 const N_HORZ = 9
 const N_VERT = 9
-const FRAME_WD = 20.0
+const FRAME_WD = 20
 const CELL_WD = (BD_WIDTH - FRAME_WD*2) / N_HORZ
 
 func _ready():
