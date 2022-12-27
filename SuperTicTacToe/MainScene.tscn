@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://scripts/TitleBar.gd" type="Script" id=1]
 [ext_resource path="res://fonts/arialbd.ttf" type="DynamicFontData" id=2]
@@ -9,6 +9,8 @@
 [ext_resource path="res://images/big_close_black.png" type="Texture" id=7]
 [ext_resource path="res://images/white153x153.png" type="Texture" id=8]
 [ext_resource path="res://scripts/Grid.gd" type="Script" id=9]
+[ext_resource path="res://fonts/FlopDesignFONT.otf" type="DynamicFontData" id=10]
+[ext_resource path="res://scripts/MainScene.gd" type="Script" id=11]
 
 [sub_resource type="DynamicFont" id=1]
 size = 24
@@ -90,7 +92,12 @@ font_data = ExtResource( 2 )
 1/shapes = [  ]
 1/z_index = 0
 
+[sub_resource type="DynamicFont" id=5]
+size = 24
+font_data = ExtResource( 10 )
+
 [node name="MainScene" type="Node2D"]
+script = ExtResource( 11 )
 
 [node name="BG" type="ColorRect" parent="."]
 margin_right = 500.0
@@ -144,3 +151,12 @@ margin_right = 500.0
 margin_bottom = 500.0
 color = Color( 1, 1, 1, 0 )
 script = ExtResource( 9 )
+
+[node name="MessLabel" type="Label" parent="."]
+margin_left = 20.0
+margin_top = 715.0
+margin_right = 236.0
+margin_bottom = 740.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 5 )
+text = "次は○の手番です。"
