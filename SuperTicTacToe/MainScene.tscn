@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://scripts/TitleBar.gd" type="Script" id=1]
 [ext_resource path="res://fonts/arialbd.ttf" type="DynamicFontData" id=2]
@@ -7,10 +7,27 @@
 [ext_resource path="res://images/circle_black.png" type="Texture" id=5]
 [ext_resource path="res://images/big_circle_black.png" type="Texture" id=6]
 [ext_resource path="res://images/big_close_black.png" type="Texture" id=7]
+[ext_resource path="res://images/white153x153.png" type="Texture" id=8]
 
 [sub_resource type="DynamicFont" id=1]
 size = 24
 font_data = ExtResource( 2 )
+
+[sub_resource type="TileSet" id=4]
+0/name = "white153x153.png 0"
+0/texture = ExtResource( 8 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 0, 0, 153, 153 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shape_offset = Vector2( 0, 0 )
+0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+0/shape_one_way = false
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
+0/z_index = 0
 
 [sub_resource type="TileSet" id=2]
 0/name = "close_black.png 0"
@@ -100,14 +117,21 @@ margin_bottom = 700.0
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
 script = ExtResource( 3 )
 
-[node name="TileMap" type="TileMap" parent="Board"]
+[node name="TileMapBG" type="TileMap" parent="Board"]
+position = Vector2( 20, 20 )
+tile_set = SubResource( 4 )
+cell_size = Vector2( 153, 153 )
+format = 1
+tile_data = PoolIntArray( 65537, 0, 0, 131074, 0, 0 )
+
+[node name="TileMapLocal" type="TileMap" parent="Board"]
 position = Vector2( 20, 20 )
 tile_set = SubResource( 2 )
 cell_size = Vector2( 51, 51 )
 format = 1
 tile_data = PoolIntArray( 0, 0, 0, 2, 1, 0, 8, 0, 0, 65537, 1, 0, 131072, 1, 0, 262147, 1, 0, 262148, 1, 0, 262149, 1, 0, 393216, 0, 0, 393224, 1, 0, 458753, 0, 0, 458760, 1, 0, 524290, 0, 0, 524296, 1, 0 )
 
-[node name="TileMap3" type="TileMap" parent="Board"]
+[node name="TileMapGlobal" type="TileMap" parent="Board"]
 position = Vector2( 20, 20 )
 tile_set = SubResource( 3 )
 cell_size = Vector2( 153, 153 )
