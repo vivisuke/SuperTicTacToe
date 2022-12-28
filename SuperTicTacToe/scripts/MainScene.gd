@@ -31,7 +31,12 @@ func init_board():
 			$Board/TileMapGlobal.set_cell(x, y, -1)
 	pass
 
+func can_put_local(x : int, y : int):
+	return $Board/TileMapBG.get_cell(x, y) == NEXT_LOCAL_BOARD
+func is_empty(x : int, y : int):
+	return $Board/TileMapLocal.get_cell(x, y) == -1
 func put(x : int, y : int, col):
+	if !is_empty(x, y): return
 	$Board/TileMapLocal.set_cell(x, y, col)
 	var x3 : int = x % 3
 	var y3 : int = y % 3
@@ -51,6 +56,10 @@ func _input(event):
 			pressedPos = pos
 		elif pos == pressedPos:
 			print("released")
-			put(pos.x, pos.y, next_color);
+			if !is_empty(pos.x, pos.y): return
+			var gx = int(pos.x) / 3
+			var gy = int(pos.y) / 3
+			if !can_put_local(gx, gy): return
+			put(pos.x, pos.y, next_color)
 			next_color = (MARU + BATSU) - next_color
 	pass
