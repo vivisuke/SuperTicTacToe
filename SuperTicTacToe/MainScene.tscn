@@ -132,25 +132,25 @@ cell_size = Vector2( 153, 153 )
 format = 1
 tile_data = PoolIntArray( 131074, 0, 0 )
 
+[node name="Grid" type="ColorRect" parent="Board"]
+margin_right = 500.0
+margin_bottom = 500.0
+color = Color( 1, 1, 1, 0 )
+script = ExtResource( 9 )
+
 [node name="TileMapLocal" type="TileMap" parent="Board"]
 position = Vector2( 20, 20 )
 tile_set = SubResource( 2 )
 cell_size = Vector2( 51, 51 )
 format = 1
-tile_data = PoolIntArray( 0, 1, 0, 2, 1, 0, 3, 1, 0, 5, 1, 0, 6, 0, 0, 7, 0, 0, 65537, 1, 0, 65540, 1, 0, 65542, 0, 0, 65543, 0, 0, 131072, 1, 0, 131074, 1, 0, 131075, 1, 0, 131077, 1, 0, 196608, 1, 0, 196610, 1, 0, 196611, 1, 0, 196613, 1, 0, 196614, 0, 0, 196615, 0, 0, 262145, 1, 0, 262148, 1, 0, 262150, 0, 0, 262151, 0, 0, 327680, 1, 0, 327682, 1, 0, 327683, 1, 0, 327685, 1, 0, 393216, 0, 0, 393217, 0, 0, 393219, 0, 0, 393220, 0, 0, 393222, 0, 0, 393223, 0, 0, 458752, 0, 0, 458753, 0, 0, 458755, 0, 0, 458756, 0, 0, 458758, 0, 0, 458759, 0, 0 )
+tile_data = PoolIntArray( 0, 1, 0, 2, 1, 0, 3, 1, 0, 5, 1, 0, 6, 0, 0, 7, 0, 0, 65537, 1, 0, 65540, 1, 0, 65542, 0, 0, 65543, 0, 0, 131072, 1, 0, 131074, 1, 0, 131075, 1, 0, 131077, 1, 0, 196608, 1, 0, 196610, 1, 0, 196611, 1, 0, 196613, 1, 0, 196614, 0, 0, 196615, 0, 0, 262145, 1, 0, 262148, 1, 0, 262150, 0, 0, 262151, 0, 0, 262152, 0, 0, 327680, 1, 0, 327682, 1, 0, 327683, 1, 0, 327685, 1, 0, 393216, 0, 0, 393217, 0, 0, 393219, 0, 0, 393220, 0, 0, 393222, 0, 0, 393223, 0, 0, 458752, 0, 0, 458753, 0, 0, 458755, 0, 0, 458756, 0, 0, 458758, 0, 0, 458759, 0, 0, 458760, 1, 0 )
 
 [node name="TileMapGlobal" type="TileMap" parent="Board"]
 position = Vector2( 20, 20 )
 tile_set = SubResource( 3 )
 cell_size = Vector2( 153, 153 )
 format = 1
-tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 65536, 1, 0, 65537, 1, 0 )
-
-[node name="Grid" type="ColorRect" parent="Board"]
-margin_right = 500.0
-margin_bottom = 500.0
-color = Color( 1, 1, 1, 0 )
-script = ExtResource( 9 )
+tile_data = PoolIntArray( 0, 1, 0, 1, 1, 0, 65536, 1, 0, 65537, 1, 0, 65538, 0, 0 )
 
 [node name="MessLabel" type="Label" parent="."]
 margin_left = 20.0
