@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://scripts/TitleBar.gd" type="Script" id=1]
 [ext_resource path="res://fonts/arialbd.ttf" type="DynamicFontData" id=2]
@@ -96,6 +96,10 @@ font_data = ExtResource( 2 )
 size = 24
 font_data = ExtResource( 10 )
 
+[sub_resource type="DynamicFont" id=6]
+size = 24
+font_data = ExtResource( 2 )
+
 [node name="MainScene" type="Node2D"]
 script = ExtResource( 11 )
 
@@ -160,3 +164,13 @@ margin_bottom = 740.0
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_fonts/font = SubResource( 5 )
 text = "次は○の手番です。"
+
+[node name="StartStopButton" type="Button" parent="."]
+margin_left = 20.0
+margin_top = 66.0
+margin_right = 103.0
+margin_bottom = 86.0
+custom_fonts/font = SubResource( 6 )
+text = "Start Game"
+
+[connection signal="pressed" from="StartStopButton" to="." method="_on_StartStopButton_pressed"]

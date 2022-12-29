@@ -17,7 +17,7 @@ var n_put = 0					# 着手数
 var put_pos = [-1, -1]			# 直前着手位置
 var AI_thinking = false
 var waiting = 0;				# ウェイト中カウンタ
-var in_game = false				# ゲーム中
+var game_started = false				# ゲーム中
 var next_color = MARU
 var maru_player = AI
 var batsu_player = HUMAN
@@ -100,7 +100,7 @@ func AI_think_random():
 func _process(delta):
 	if waiting > 0:
 		waiting -= 1
-	elif in_game && !AI_thinking && next_color == MARU:
+	elif game_started && !AI_thinking && next_color == MARU:
 		AI_thinking = true
 		put_pos = AI_think_random()
 		print("AI put ", put_pos)
@@ -125,9 +125,9 @@ func _input(event):
 			pressedPos = pos
 		elif pos == pressedPos:
 			print("released")
-			if n_put == 0:
-				in_game = true
-				return
+			#if n_put == 0:
+			#	game_started = true
+			#	return
 			if pos.x < 0 || pos.x >= N_HORZ || pos.y < 0 || pos.y > N_VERT: return
 			if !is_empty(pos.x, pos.y): return
 			var gx = int(pos.x) / 3
@@ -140,3 +140,15 @@ func _input(event):
 			update_next_label()
 			waiting = WAIT
 	pass
+
+
+func _on_StartStopButton_pressed():
+	game_started = !game_started
+	if game_started:
+		init_board()
+		$StartStopButton.text = "Stop Game"
+		$MessLabel.text = "次の手番はＯです。"
+	else:
+		$StartStopButton.text = "Start Game"
+		$MessLabel.text = ""
+	pass # Replace with function body.
