@@ -105,8 +105,10 @@ func _process(delta):
 		put_pos = AI_think_random()
 		print("AI put ", put_pos)
 		put(put_pos[0], put_pos[1], next_color)
-		#if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(pos.x, pos.y):
-		#	$Board/TileMapGlobal.set_cell(gx, gy, next_color)
+		var gx = int(put_pos[0]) / 3
+		var gy = int(put_pos[1]) / 3
+		if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(put_pos[0], put_pos[1]):
+			$Board/TileMapGlobal.set_cell(gx, gy, next_color)
 		next_color = (MARU + BATSU) - next_color
 		update_next_label()
 		AI_thinking = false
