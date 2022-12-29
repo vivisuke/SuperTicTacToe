@@ -91,7 +91,12 @@ func AI_think_random():
 	else:
 		var x0 = next_logical_board[0] * 3
 		var y0 = next_logical_board[1] * 3
-		return [x0 + rng.randi_range(0, 2), y0 + rng.randi_range(0, 2)]
+		#return [x0 + rng.randi_range(0, 2), y0 + rng.randi_range(0, 2)]
+		var lst = []
+		for v in range(3):
+			for h in range(3):
+				if is_empty(x0+h, y0+v): lst.push_back([x0+h, y0+v])
+		return lst[rng.randi_range(0, lst.size() - 1)]
 func _process(delta):
 	if waiting > 0:
 		waiting -= 1
