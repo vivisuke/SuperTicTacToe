@@ -81,7 +81,7 @@ func _input(event):
 			var gy = int(pos.y) / 3
 			if !can_put_local(gx, gy): return
 			put(pos.x, pos.y, next_color)
-			if is_three_stones(pos.x, pos.y):
+			if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(pos.x, pos.y):
 				$Board/TileMapGlobal.set_cell(gx, gy, next_color)
 			next_color = (MARU + BATSU) - next_color
 			update_next_label()
