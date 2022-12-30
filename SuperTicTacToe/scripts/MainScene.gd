@@ -35,6 +35,7 @@ func _ready():
 	init_board()
 	update_next_label()
 	#put(2, 2, MARU)
+	$MessLabel.text = "【Start Game】を押してください。"
 	pass # Replace with function body.
 
 func init_board():
@@ -58,6 +59,9 @@ func is_empty(x : int, y : int):
 func put(x : int, y : int, col):
 	if !is_empty(x, y): return
 	n_put += 1
+	var gix = x/3 + (y/3)*3
+	n_put_board[gix] += 1
+	print("n = ", n_put_board[gix])
 	put_pos = [x, y]
 	$Board/TileMapLocal.set_cell(x, y, col)
 	# 次着手可能ローカルボード強調
@@ -113,6 +117,20 @@ func AI_think_random():
 			for h in range(3):
 				if is_empty(x0+h, y0+v): lst.push_back([x0+h, y0+v])
 		return lst[rng.randi_range(0, lst.size() - 1)]
+func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
+	put(x, y, next_color)
+	var gx = int(x) / 3
+	var gy = int(y) / 3
+	if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(x, y):
+		# ローカルボード内で三目並んだ場合
+		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
+		if is_game_over(gx, gy):
+			game_started = false
+			$MessLabel.text = "Human won."		# undone: AI が勝った場合対応
+			return true;		# ゲームオーバー
+	next_color = (MARU + BATSU) - next_color
+	update_next_label()
+	return false
 func _process(delta):
 	if waiting > 0:
 		waiting -= 1
@@ -120,15 +138,16 @@ func _process(delta):
 		AI_thinking = true
 		put_pos = AI_think_random()
 		print("AI put ", put_pos)
-		put(put_pos[0], put_pos[1], next_color)
-		var gx = int(put_pos[0]) / 3
-		var gy = int(put_pos[1]) / 3
-		if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(put_pos[0], put_pos[1]):
-			$Board/TileMapGlobal.set_cell(gx, gy, next_color)
-		next_color = (MARU + BATSU) - next_color
-		update_next_label()
-		AI_thinking = false
+		put_and_post_proc(put_pos[0], put_pos[1])
+		#put(put_pos[0], put_pos[1], next_color)
+		#var gx = int(put_pos[0]) / 3
+		#var gy = int(put_pos[1]) / 3
+		#if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(put_pos[0], put_pos[1]):
+		#	$Board/TileMapGlobal.set_cell(gx, gy, next_color)
+		#next_color = (MARU + BATSU) - next_color
+		#update_next_label()
 		waiting = WAIT*10
+		AI_thinking = false
 	pass
 func _input(event):
 	if event is InputEventMouseButton:
@@ -149,15 +168,16 @@ func _input(event):
 			var gx = int(pos.x) / 3
 			var gy = int(pos.y) / 3
 			if !can_put_local(gx, gy): return
-			put(pos.x, pos.y, next_color)
-			if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(pos.x, pos.y):
-				$Board/TileMapGlobal.set_cell(gx, gy, next_color)
-				if is_game_over(gx, gy):
-					game_started = false
-					$MessLabel.text = "Human won."
-					return;
-			next_color = (MARU + BATSU) - next_color
-			update_next_label()
+			if put_and_post_proc(pos.x, pos.y): return
+			#put(pos.x, pos.y, next_color)
+			#if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(pos.x, pos.y):
+			#	$Board/TileMapGlobal.set_cell(gx, gy, next_color)
+			#	if is_game_over(gx, gy):
+			#		game_started = false
+			#		$MessLabel.text = "Human won."
+			#		return;
+			#next_color = (MARU + BATSU) - next_color
+			#update_next_label()
 			waiting = WAIT
 	pass
 
