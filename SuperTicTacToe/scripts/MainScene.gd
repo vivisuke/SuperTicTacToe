@@ -14,6 +14,7 @@ var BOARD_ORG_X
 var BOARD_ORG_Y
 var BOARD_ORG
 var n_put = 0					# 着手数
+var n_put_board = []			# 各ローカルボードの着手数
 var put_pos = [-1, -1]			# 直前着手位置
 var AI_thinking = false
 var waiting = 0;				# ウェイト中カウンタ
@@ -22,6 +23,7 @@ var next_color = MARU
 var maru_player = AI
 var batsu_player = HUMAN
 var next_logical_board = [-1, -1]	# 着手可能ロジカルボード
+var next_board = -1				# [0, p): 着手可能ロジカルボード、-1 for すべてのボードに着手可能
 var pressedPos = Vector2(0, 0)
 var rng = RandomNumberGenerator.new()
 
@@ -37,6 +39,7 @@ func _ready():
 
 func init_board():
 	n_put = 0
+	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 	next_color = MARU
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
@@ -68,8 +71,21 @@ func put(x : int, y : int, col):
 				c = NEXT_LOCAL_BOARD
 				next_logical_board = [gx, gy]
 			$Board/TileMapBG.set_cell(gx, gy, c)
-func get_color(x : int, y : int):
+func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
 	return $Board/TileMapLocal.get_cell(x, y)
+func get_color_g(gx : int, gy : int):		# グローバルボード内のセル状態取得
+	return $Board/TileMapGlobal.get_cell(gx, gy)
+func is_game_over(gx : int, gy : int):		# グローバルボードで三目並んだか？
+	if get_color_g(0, gy) == get_color_g(1, gy) && get_color_g(0, gy) == get_color_g(2, gy):
+		return true;			# 横方向に三目並んだ
+	if get_color_g(gx, 0) == get_color_g(gx, 1) && get_color_g(gx, 0) == get_color_g(gx, 2):
+		return true;			# 縦方向に三目並んだ
+	if gx == gy:		# ＼斜め方向チェック
+		if get_color_g(0, 0) == get_color_g(1, 1) && get_color_g(0, 0) == get_color_g(2, 2):
+			return true;			# ＼斜め方向に三目並んだ
+	if gx == 2 - gy:		# ／斜め方向チェック
+		if get_color_g(0, 2) == get_color_g(1, 1) && get_color_g(0, 2) == get_color_g(2, 0):
+			return true;			# ／斜め方向に三目並んだ
 func is_three_stones(x : int, y : int):		# 三目並んだか？
 	var x3 : int = x % 3
 	var x0 : int = x - x3		# ローカルボード内左端座標
@@ -136,6 +152,10 @@ func _input(event):
 			put(pos.x, pos.y, next_color)
 			if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(pos.x, pos.y):
 				$Board/TileMapGlobal.set_cell(gx, gy, next_color)
+				if is_game_over(gx, gy):
+					game_started = false
+					$MessLabel.text = "Human won."
+					return;
 			next_color = (MARU + BATSU) - next_color
 			update_next_label()
 			waiting = WAIT
