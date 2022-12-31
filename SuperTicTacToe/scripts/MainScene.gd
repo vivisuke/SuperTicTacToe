@@ -15,6 +15,7 @@ var BOARD_ORG_Y
 var BOARD_ORG
 var n_put = 0					# 着手数
 var n_put_board = []			# 各ローカルボードの着手数
+var three_lined_up = []			# 各ローカルボード：三目並んだか？
 var put_pos = [-1, -1]			# 直前着手位置
 var AI_thinking = false
 var waiting = 0;				# ウェイト中カウンタ
@@ -22,8 +23,8 @@ var game_started = false				# ゲーム中
 var next_color = MARU
 var maru_player = AI
 var batsu_player = HUMAN
-var next_logical_board = [-1, -1]	# 着手可能ロジカルボード
-var next_board = -1				# [0, p): 着手可能ロジカルボード、-1 for すべてのボードに着手可能
+#var next_logical_board = [-1, -1]	# 着手可能ロジカルボード
+var next_board = -1				# [0, 9): 着手可能ロジカルボード、-1 for すべてのボードに着手可能
 var pressedPos = Vector2(0, 0)
 var rng = RandomNumberGenerator.new()
 
@@ -41,6 +42,7 @@ func _ready():
 func init_board():
 	n_put = 0
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+	three_lined_up = [false, false, false, false, false, false, false, false, false]
 	next_color = MARU
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
@@ -73,7 +75,8 @@ func put(x : int, y : int, col):
 			var c = -1
 			if gx == x3 && gy == y3:
 				c = NEXT_LOCAL_BOARD
-				next_logical_board = [gx, gy]
+				#next_logical_board = [gx, gy]
+				next_board = gx + gy * 3
 			$Board/TileMapBG.set_cell(gx, gy, c)
 func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
 	return $Board/TileMapLocal.get_cell(x, y)
@@ -109,8 +112,8 @@ func AI_think_random():
 	if n_put == 0:		# 初手
 		return [rng.randi_range(0, N_HORZ-1), rng.randi_range(0, N_VERT-1)]
 	else:
-		var x0 = next_logical_board[0] * 3
-		var y0 = next_logical_board[1] * 3
+		var x0 = (next_board % 3) * 3
+		var y0 = (next_board / 3) * 3
 		#return [x0 + rng.randi_range(0, 2), y0 + rng.randi_range(0, 2)]
 		var lst = []
 		for v in range(3):
@@ -123,11 +126,17 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 	var gy = int(y) / 3
 	if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(x, y):
 		# ローカルボード内で三目並んだ場合
+		three_lined_up[gx + gy*3] = true
 		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
 		if is_game_over(gx, gy):
 			game_started = false
 			$MessLabel.text = "Human won."		# undone: AI が勝った場合対応
 			return true;		# ゲームオーバー
+	if n_put_board[next_board] == 9 || three_lined_up[next_board]:	# 空欄が無い or すでに三目並んでいる
+		next_board = -1
+		for gy2 in range(N_VERT/3):
+			for gx2 in range(N_HORZ/3):
+				$Board/TileMapBG.set_cell(gx2, gy2, NEXT_LOCAL_BOARD)
 	next_color = (MARU + BATSU) - next_color
 	update_next_label()
 	return false
