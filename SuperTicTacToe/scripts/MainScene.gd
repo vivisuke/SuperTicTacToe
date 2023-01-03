@@ -200,10 +200,14 @@ func _input(event):
 func _on_StartStopButton_pressed():
 	game_started = !game_started
 	if game_started:
+		$MaruPlayer/OptionButton.disabled = true
+		$BatsuPlayer/OptionButton.disabled = true
 		init_board()
 		$StartStopButton.text = "Stop Game"
 		$MessLabel.text = "次の手番はＯです。"
 	else:
+		$MaruPlayer/OptionButton.disabled = false
+		$BatsuPlayer/OptionButton.disabled = false
 		$StartStopButton.text = "Start Game"
 		$MessLabel.text = ""
 	pass # Replace with function body.
