@@ -21,7 +21,7 @@ var AI_thinking = false
 var waiting = 0;				# ウェイト中カウンタ
 var game_started = false				# ゲーム中
 var next_color = MARU
-var maru_player = AI
+var maru_player = HUMAN
 var batsu_player = HUMAN
 #var next_logical_board = [-1, -1]	# 着手可能ロジカルボード
 var next_board = -1				# [0, 9): 着手可能ロジカルボード、-1 for すべてのボードに着手可能
@@ -149,7 +149,8 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 func _process(delta):
 	if waiting > 0:
 		waiting -= 1
-	elif game_started && !AI_thinking && next_color == MARU:
+	elif( game_started && !AI_thinking &&
+			next_color == MARU && maru_player == AI || next_color == BATSU && batsu_player == AI):
 		AI_thinking = true
 		put_pos = AI_think_random()
 		print("AI put ", put_pos)
