@@ -32,13 +32,17 @@ func _ready():
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
 	BOARD_ORG_Y = $Board/TileMapLocal.global_position.y
 	BOARD_ORG = Vector2(BOARD_ORG_X, BOARD_ORG_Y)
+	setup_player_option_button($MaruPlayer/OptionButton)
+	setup_player_option_button($BatsuPlayer/OptionButton)
 	rng.randomize()
 	init_board()
 	update_next_label()
 	#put(2, 2, MARU)
 	$MessLabel.text = "【Start Game】を押してください。"
 	pass # Replace with function body.
-
+func setup_player_option_button(ob):
+	ob.add_item(": Human", 0)	
+	ob.add_item(": Random", 1)	
 func init_board():
 	n_put = 0
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -54,6 +58,8 @@ func init_board():
 	pass
 func update_next_label():
 	$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
+	$MaruPlayer/Underline.visible = next_color == MARU
+	$BatsuPlayer/Underline.visible = next_color == BATSU
 func can_put_local(x : int, y : int):
 	return $Board/TileMapBG.get_cell(x, y) == NEXT_LOCAL_BOARD
 func is_empty(x : int, y : int):
@@ -200,4 +206,12 @@ func _on_StartStopButton_pressed():
 	else:
 		$StartStopButton.text = "Start Game"
 		$MessLabel.text = ""
+	pass # Replace with function body.
+
+
+func _on_MaruOptionButton_item_selected(index):
+	pass # Replace with function body.
+
+
+func _on_BatsuOptionButton_item_selected(index):
 	pass # Replace with function body.

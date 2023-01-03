@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://scripts/TitleBar.gd" type="Script" id=1]
 [ext_resource path="res://fonts/arialbd.ttf" type="DynamicFontData" id=2]
@@ -105,6 +105,15 @@ font_data = ExtResource( 2 )
 size = 20
 font_data = ExtResource( 12 )
 
+[sub_resource type="DynamicFont" id=8]
+size = 20
+font_data = ExtResource( 12 )
+
+[sub_resource type="StyleBoxFlat" id=9]
+bg_color = Color( 0.6, 0.6, 0.6, 0 )
+
+[sub_resource type="StyleBoxFlat" id=10]
+
 [node name="MainScene" type="Node2D"]
 script = ExtResource( 11 )
 
@@ -191,6 +200,7 @@ margin_bottom = 40.0
 texture = ExtResource( 5 )
 
 [node name="Label" type="Label" parent="MaruPlayer"]
+visible = false
 anchor_right = 0.5
 anchor_bottom = 0.28
 margin_left = 51.0
@@ -207,6 +217,27 @@ margin_right = 220.0
 margin_bottom = 60.0
 color = Color( 1, 1, 0, 1 )
 
+[node name="PopupMenu" type="PopupMenu" parent="MaruPlayer"]
+margin_right = 20.0
+margin_bottom = 20.0
+
+[node name="OptionButton" type="OptionButton" parent="MaruPlayer"]
+anchor_right = 0.367
+anchor_bottom = 0.4
+margin_left = 51.0
+margin_top = 16.0
+margin_right = 135.26
+margin_bottom = 20.0
+custom_colors/font_color_disabled = Color( 0, 0, 0, 1 )
+custom_colors/font_color_focus = Color( 0, 0, 0, 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_color_hover = Color( 0, 0, 0, 1 )
+custom_colors/font_color_pressed = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 8 )
+custom_styles/pressed = SubResource( 9 )
+custom_styles/normal = SubResource( 10 )
+text = "Human"
+
 [node name="BatsuPlayer" type="ColorRect" parent="."]
 margin_left = 260.0
 margin_top = 120.0
@@ -220,6 +251,7 @@ margin_bottom = 40.0
 texture = ExtResource( 4 )
 
 [node name="Label" type="Label" parent="BatsuPlayer"]
+visible = false
 anchor_right = 0.5
 anchor_bottom = 0.28
 margin_left = 51.0
@@ -236,4 +268,33 @@ margin_right = 220.0
 margin_bottom = 60.0
 color = Color( 1, 1, 0, 1 )
 
+[node name="MenuButton" type="MenuButton" parent="BatsuPlayer"]
+anchor_left = 0.773
+anchor_top = 0.5
+anchor_right = 0.773
+anchor_bottom = 0.5
+margin_left = 21.94
+margin_top = -9.0
+margin_right = 33.94
+margin_bottom = 11.0
+text = "Ｖ"
+
+[node name="OptionButton" type="OptionButton" parent="BatsuPlayer"]
+anchor_right = 0.367
+anchor_bottom = 0.4
+margin_left = 51.0
+margin_top = 16.0
+margin_right = 135.26
+margin_bottom = 20.0
+custom_colors/font_color_disabled = Color( 0, 0, 0, 1 )
+custom_colors/font_color_focus = Color( 0, 0, 0, 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_color_hover = Color( 0, 0, 0, 1 )
+custom_colors/font_color_pressed = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 8 )
+custom_styles/pressed = SubResource( 9 )
+custom_styles/normal = SubResource( 10 )
+
 [connection signal="pressed" from="StartStopButton" to="." method="_on_StartStopButton_pressed"]
+[connection signal="item_selected" from="MaruPlayer/OptionButton" to="." method="_on_MaruOptionButton_item_selected"]
+[connection signal="item_selected" from="BatsuPlayer/OptionButton" to="." method="_on_BatsuOptionButton_item_selected"]
