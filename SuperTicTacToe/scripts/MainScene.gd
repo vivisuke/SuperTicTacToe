@@ -215,8 +215,10 @@ func _on_StartStopButton_pressed():
 
 
 func _on_MaruOptionButton_item_selected(index):
+	maru_player = index
 	pass # Replace with function body.
 
 
 func _on_BatsuOptionButton_item_selected(index):
+	batsu_player = index
 	pass # Replace with function body.
