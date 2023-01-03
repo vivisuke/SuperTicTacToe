@@ -45,12 +45,14 @@ func setup_player_option_button(ob):
 	ob.add_item(": Random", 1)	
 func init_board():
 	n_put = 0
+	put_pos = [-1, -1]
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 	three_lined_up = [false, false, false, false, false, false, false, false, false]
 	next_color = MARU
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
 			$Board/TileMapLocal.set_cell(x, y, -1)
+			$Board/TileMapCursor.set_cell(x, y, -1)
 	for y in range(N_VERT/3):
 		for x in range(N_HORZ/3):
 			$Board/TileMapBG.set_cell(x, y, NEXT_LOCAL_BOARD)
@@ -70,7 +72,10 @@ func put(x : int, y : int, col):
 	var gix = x/3 + (y/3)*3
 	n_put_board[gix] += 1
 	print("n = ", n_put_board[gix])
+	if put_pos[0] >= 0 && put_pos[1] >= 0:
+		$Board/TileMapCursor.set_cell(put_pos[0], put_pos[1], -1)
 	put_pos = [x, y]
+	$Board/TileMapCursor.set_cell(put_pos[0], put_pos[1], 0)
 	$Board/TileMapLocal.set_cell(x, y, col)
 	# 次着手可能ローカルボード強調
 	var x3 : int = x % 3
@@ -152,16 +157,9 @@ func _process(delta):
 	elif( game_started && !AI_thinking &&
 			next_color == MARU && maru_player == AI || next_color == BATSU && batsu_player == AI):
 		AI_thinking = true
-		put_pos = AI_think_random()
-		print("AI put ", put_pos)
-		put_and_post_proc(put_pos[0], put_pos[1])
-		#put(put_pos[0], put_pos[1], next_color)
-		#var gx = int(put_pos[0]) / 3
-		#var gy = int(put_pos[1]) / 3
-		#if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(put_pos[0], put_pos[1]):
-		#	$Board/TileMapGlobal.set_cell(gx, gy, next_color)
-		#next_color = (MARU + BATSU) - next_color
-		#update_next_label()
+		var pos = AI_think_random()
+		print("AI put ", pos)
+		put_and_post_proc(pos[0], pos[1])
 		waiting = WAIT*10
 		AI_thinking = false
 	pass
@@ -185,15 +183,6 @@ func _input(event):
 			var gy = int(pos.y) / 3
 			if !can_put_local(gx, gy): return
 			if put_and_post_proc(pos.x, pos.y): return
-			#put(pos.x, pos.y, next_color)
-			#if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(pos.x, pos.y):
-			#	$Board/TileMapGlobal.set_cell(gx, gy, next_color)
-			#	if is_game_over(gx, gy):
-			#		game_started = false
-			#		$MessLabel.text = "Human won."
-			#		return;
-			#next_color = (MARU + BATSU) - next_color
-			#update_next_label()
 			waiting = WAIT
 	pass
 

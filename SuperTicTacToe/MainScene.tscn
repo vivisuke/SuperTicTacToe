@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://scripts/TitleBar.gd" type="Script" id=1]
 [ext_resource path="res://fonts/arialbd.ttf" type="DynamicFontData" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://fonts/FlopDesignFONT.otf" type="DynamicFontData" id=10]
 [ext_resource path="res://scripts/MainScene.gd" type="Script" id=11]
 [ext_resource path="res://fonts/arial.ttf" type="DynamicFontData" id=12]
+[ext_resource path="res://images/pink.png" type="Texture" id=13]
 
 [sub_resource type="DynamicFont" id=1]
 size = 24
@@ -23,6 +24,22 @@ font_data = ExtResource( 2 )
 0/tex_offset = Vector2( 0, 0 )
 0/modulate = Color( 1, 1, 1, 1 )
 0/region = Rect2( 0, 0, 153, 153 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shape_offset = Vector2( 0, 0 )
+0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+0/shape_one_way = false
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
+0/z_index = 0
+
+[sub_resource type="TileSet" id=13]
+0/name = "pink.png 0"
+0/texture = ExtResource( 13 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 0, -1, 51, 52 )
 0/tile_mode = 0
 0/occluder_offset = Vector2( 0, 0 )
 0/navigation_offset = Vector2( 0, 0 )
@@ -155,6 +172,13 @@ tile_set = SubResource( 4 )
 cell_size = Vector2( 153, 153 )
 format = 1
 tile_data = PoolIntArray( 131074, 0, 0 )
+
+[node name="TileMapCursor" type="TileMap" parent="Board"]
+position = Vector2( 20, 20 )
+tile_set = SubResource( 13 )
+cell_size = Vector2( 51, 51 )
+format = 1
+tile_data = PoolIntArray( 0, 0, 0 )
 
 [node name="Grid" type="ColorRect" parent="Board"]
 margin_right = 500.0
