@@ -122,10 +122,15 @@ func is_three_stones(x : int, y : int):		# 三目並んだか？
 func AI_think_random():
 	if n_put == 0:		# 初手
 		return [rng.randi_range(0, N_HORZ-1), rng.randi_range(0, N_VERT-1)]
+	elif next_board < 0:	# 全てのローカルボードに着手可能
+		var lst = []
+		for y in range(N_VERT):
+			for x in range(N_HORZ):
+				if is_empty(x, y): lst.push_back([x, y])
+		return lst[rng.randi_range(0, lst.size() - 1)]
 	else:
 		var x0 = (next_board % 3) * 3
 		var y0 = (next_board / 3) * 3
-		#return [x0 + rng.randi_range(0, 2), y0 + rng.randi_range(0, 2)]
 		var lst = []
 		for v in range(3):
 			for h in range(3):
