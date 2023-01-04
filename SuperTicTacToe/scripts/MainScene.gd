@@ -34,7 +34,8 @@ func _ready():
 	BOARD_ORG = Vector2(BOARD_ORG_X, BOARD_ORG_Y)
 	setup_player_option_button($MaruPlayer/OptionButton)
 	setup_player_option_button($BatsuPlayer/OptionButton)
-	rng.randomize()
+	#rng.randomize()		# Setups a time-based seed
+	rng.seed = 0			# 固定乱数系列
 	init_board()
 	update_next_label()
 	#put(2, 2, MARU)
@@ -77,18 +78,23 @@ func put(x : int, y : int, col):
 	put_pos = [x, y]
 	$Board/TileMapCursor.set_cell(put_pos[0], put_pos[1], 0)
 	$Board/TileMapLocal.set_cell(x, y, col)
-	# 次着手可能ローカルボード強調
-	var x3 : int = x % 3
-	var y3 : int = y % 3
-	for gy in range(N_VERT/3):
-		for gx in range(N_HORZ/3):
-			#var c = NEXT_LOCAL_BOARD if gx == x3 && gy == y3 else -1
-			var c = -1
-			if gx == x3 && gy == y3:
-				c = NEXT_LOCAL_BOARD
-				#next_logical_board = [gx, gy]
-				next_board = gx + gy * 3
-			$Board/TileMapBG.set_cell(gx, gy, c)
+	if n_put == N_HORZ * N_VERT:	# 全て着手済み → 終局
+		#game_started = false
+		do_game_over()
+		$MessLabel.text = "draw."
+	else:
+		# 次着手可能ローカルボード強調
+		var x3 : int = x % 3
+		var y3 : int = y % 3
+		for gy in range(N_VERT/3):
+			for gx in range(N_HORZ/3):
+				#var c = NEXT_LOCAL_BOARD if gx == x3 && gy == y3 else -1
+				var c = -1
+				if gx == x3 && gy == y3:
+					c = NEXT_LOCAL_BOARD
+					#next_logical_board = [gx, gy]
+					next_board = gx + gy * 3
+				$Board/TileMapBG.set_cell(gx, gy, c)
 func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
 	return $Board/TileMapLocal.get_cell(x, y)
 func get_color_g(gx : int, gy : int):		# グローバルボード内のセル状態取得
@@ -191,7 +197,10 @@ func _input(event):
 			waiting = WAIT
 	pass
 
-
+func do_game_over():
+	$MaruPlayer/OptionButton.disabled = false
+	$BatsuPlayer/OptionButton.disabled = false
+	$StartStopButton.text = "Start Game"
 func _on_StartStopButton_pressed():
 	game_started = !game_started
 	if game_started:
@@ -201,10 +210,8 @@ func _on_StartStopButton_pressed():
 		$StartStopButton.text = "Stop Game"
 		$MessLabel.text = "次の手番はＯです。"
 	else:
-		$MaruPlayer/OptionButton.disabled = false
-		$BatsuPlayer/OptionButton.disabled = false
-		$StartStopButton.text = "Start Game"
 		$MessLabel.text = ""
+		do_game_over()
 	pass # Replace with function body.
 
 
