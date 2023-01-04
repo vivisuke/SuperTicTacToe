@@ -3,11 +3,16 @@ extends Node2D
 const N_VERT = 9
 const N_HORZ = 9
 const NEXT_LOCAL_BOARD = 0
-const MARU = 1
-const BATSU = 0
-const WAIT = 6
+#const MARU = 1
+#const BATSU = 0
+const WAIT = 6*3
+const ev_table = [
+	[1, 1, 1],	# ・・・
+]
+const mb_str = ["Ｘ", "Ｏ"]
 enum {
-	HUMAN = 0, AI,
+	BATSU = 0, MARU,
+	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
 }
 
 var BOARD_ORG_X
@@ -34,8 +39,10 @@ func _ready():
 	BOARD_ORG = Vector2(BOARD_ORG_X, BOARD_ORG_Y)
 	setup_player_option_button($MaruPlayer/OptionButton)
 	setup_player_option_button($BatsuPlayer/OptionButton)
-	#rng.randomize()		# Setups a time-based seed
-	rng.seed = 0			# 固定乱数系列
+	$BatsuPlayer/OptionButton.selected = AI_RANDOM
+	batsu_player = AI_RANDOM
+	rng.randomize()		# Setups a time-based seed
+	#rng.seed = 0			# 固定乱数系列
 	init_board()
 	update_next_label()
 	#put(2, 2, MARU)
@@ -43,7 +50,8 @@ func _ready():
 	pass # Replace with function body.
 func setup_player_option_button(ob):
 	ob.add_item(": Human", 0)	
-	ob.add_item(": Random", 1)	
+	ob.add_item(": AI Random", 1)	
+	ob.add_item(": AI Level 1", 2)	# １手先読み
 func init_board():
 	n_put = 0
 	put_pos = [-1, -1]
@@ -152,7 +160,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
 		if is_game_over(gx, gy):
 			game_started = false
-			$MessLabel.text = "Human won."		# undone: AI が勝った場合対応
+			$MessLabel.text = mb_str[next_color] + " won."		# 
 			return true;		# ゲームオーバー
 	if n_put_board[next_board] == 9 || three_lined_up[next_board]:	# 空欄が無い or すでに三目並んでいる
 		next_board = -1
@@ -166,12 +174,12 @@ func _process(delta):
 	if waiting > 0:
 		waiting -= 1
 	elif( game_started && !AI_thinking &&
-			next_color == MARU && maru_player == AI || next_color == BATSU && batsu_player == AI):
+			next_color == MARU && maru_player >= AI_RANDOM || next_color == BATSU && batsu_player >= AI_RANDOM):
 		AI_thinking = true
 		var pos = AI_think_random()
 		print("AI put ", pos)
 		put_and_post_proc(pos[0], pos[1])
-		waiting = WAIT*10
+		waiting = WAIT
 		AI_thinking = false
 	pass
 func _input(event):
