@@ -40,6 +40,15 @@ enum {
 	BATSU = 0, MARU,
 	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
 }
+class Board:
+	var l_board
+	var g_board
+	func _init():
+		l_board = []
+		for ix in range(N_HORZ*N_VERT): l_board.push_back(0)
+		g_board = []
+		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(0)
+		pass
 
 var BOARD_ORG_X
 var BOARD_ORG_Y
@@ -60,6 +69,10 @@ var pressedPos = Vector2(0, 0)
 var rng = RandomNumberGenerator.new()
 
 func _ready():
+	var bd = Board.new()
+	print(bd.l_board)
+	print(bd.g_board)
+	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
 	BOARD_ORG_Y = $Board/TileMapLocal.global_position.y
 	BOARD_ORG = Vector2(BOARD_ORG_X, BOARD_ORG_Y)
@@ -174,7 +187,8 @@ func AI_think_random():
 		var lst = []
 		for v in range(3):
 			for h in range(3):
-				if is_empty(x0+h, y0+v): lst.push_back([x0+h, y0+v])
+				if is_empty(x0+h, y0+v):
+					lst.push_back([x0+h, y0+v])
 		return lst[rng.randi_range(0, lst.size() - 1)]
 func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 	put(x, y, next_color)
