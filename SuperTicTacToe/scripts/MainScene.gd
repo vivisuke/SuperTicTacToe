@@ -37,29 +37,38 @@ const ev_table = [	# 空き箇所に打った場合の利得
 ]
 const mb_str = ["Ｘ", "Ｏ"]
 enum {
+	EMPTY = -1,
 	BATSU = 0, MARU,
 	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
 }
 class Board:
+	#const BD_EMPTY = 0
+	#const BD_BATSU = 1
+	#const BD_MARU = 2
+	#enum {
+	#	BD_EMPTY = 0, BD_BATSU, BD_MARU,
+	#}
 	var l_board
 	var g_board
 	func _init():
 		l_board = []
-		for ix in range(N_HORZ*N_VERT): l_board.push_back(0)
+		for ix in range(N_HORZ*N_VERT): l_board.push_back(EMPTY)
 		g_board = []
-		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(0)
+		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
 		pass
 	func print():
 		var txt = ""
 		for y in range(N_VERT):
 			for x in range(N_HORZ):
-				txt += ".XO"[l_board[x + y*N_HORZ]]
+				txt += ".XO"[l_board[x + y*N_HORZ]+1]
 			txt += "\n"
 		for y in range(N_VERT/3):
 			for x in range(N_HORZ/3):
-				txt += ".XO"[g_board[x + y*(N_HORZ/3)]]
+				txt += ".XO"[g_board[x + y*(N_HORZ/3)]+1]
 			txt += "\n"
 		print(txt)
+	func put(x, y, col):
+		l_board[x + y*N_HORZ] = col
 
 
 var BOARD_ORG_X
@@ -81,9 +90,12 @@ var pressedPos = Vector2(0, 0)
 var rng = RandomNumberGenerator.new()
 
 func _ready():
+	print(Time.get_ticks_usec())
+	#
 	var bd = Board.new()
 	#print(bd.l_board)
 	#print(bd.g_board)
+	bd.put(0, 0, MARU)
 	bd.print()
 	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
@@ -99,6 +111,7 @@ func _ready():
 	update_next_label()
 	#put(2, 2, MARU)
 	$MessLabel.text = "【Start Game】を押してください。"
+	print(Time.get_ticks_usec())
 	pass # Replace with function body.
 func setup_player_option_button(ob):
 	ob.add_item(": Human", 0)	
