@@ -49,6 +49,18 @@ class Board:
 		g_board = []
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(0)
 		pass
+	func print():
+		var txt = ""
+		for y in range(N_VERT):
+			for x in range(N_HORZ):
+				txt += ".XO"[l_board[x + y*N_HORZ]]
+			txt += "\n"
+		for y in range(N_VERT/3):
+			for x in range(N_HORZ/3):
+				txt += ".XO"[g_board[x + y*(N_HORZ/3)]]
+			txt += "\n"
+		print(txt)
+
 
 var BOARD_ORG_X
 var BOARD_ORG_Y
@@ -70,8 +82,9 @@ var rng = RandomNumberGenerator.new()
 
 func _ready():
 	var bd = Board.new()
-	print(bd.l_board)
-	print(bd.g_board)
+	#print(bd.l_board)
+	#print(bd.g_board)
+	bd.print()
 	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
 	BOARD_ORG_Y = $Board/TileMapLocal.global_position.y
