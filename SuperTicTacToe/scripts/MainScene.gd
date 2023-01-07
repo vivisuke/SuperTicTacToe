@@ -42,15 +42,17 @@ enum {
 	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
 }
 class Board:
-	#const BD_EMPTY = 0
-	#const BD_BATSU = 1
-	#const BD_MARU = 2
-	#enum {
-	#	BD_EMPTY = 0, BD_BATSU, BD_MARU,
-	#}
+	var n_put = 0				# 着手数
+	var n_put_board = []		# 各ローカルボードの着手数
+	var three_lined_up = []		# 各ローカルボード：三目並んだか？
+	var next_board = -1			# 着手可能ローカルボード [0, 9)、-1 for 全ローカルボードに着手可能
 	var l_board
 	var g_board
 	func _init():
+		n_put = 0
+		n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		three_lined_up = [false, false, false, false, false, false, false, false, false]
+		next_board = -1
 		l_board = []
 		for ix in range(N_HORZ*N_VERT): l_board.push_back(EMPTY)
 		g_board = []
@@ -67,8 +69,30 @@ class Board:
 				txt += ".XO"[g_board[x + y*(N_HORZ/3)]+1]
 			txt += "\n"
 		print(txt)
-	func put(x, y, col):
+	func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
+		return l_board[x + y*N_HORZ]
+	func put(x : int, y : int, col):
 		l_board[x + y*N_HORZ] = col
+		var gx = x / 3
+		var gy = y / 3
+		if !three_lined_up[gx + gy*3] && is_three_stones(x, y):
+			g_board[gx + gy*3] = col
+			three_lined_up[gx + gy*3] = true
+	func is_three_stones(x : int, y : int):		# 三目並んだか？
+		var x3 : int = x % 3
+		var x0 : int = x - x3		# ローカルボード内左端座標
+		var y3 : int = y % 3
+		var y0 : int = y - y3		# ローカルボード内上端座標
+		if get_color(x0, y) == get_color(x0+1, y) && get_color(x0, y) == get_color(x0+2, y):
+			return true;			# 横方向に三目並んだ
+		if get_color(x, y0) == get_color(x, y0+1) && get_color(x, y0) == get_color(x, y0+2):
+			return true;			# 縦方向に三目並んだ
+		if x3 == y3:		# ＼斜め方向チェック
+			if get_color(x0, y0) == get_color(x0+1, y0+1) && get_color(x0, y0) == get_color(x0+2, y0+2):
+				return true;			# ＼斜め方向に三目並んだ
+		if x3 == 2 - y3:		# ／斜め方向チェック
+			if get_color(x0, y0+2) == get_color(x0+1, y0+1) && get_color(x0, y0+2) == get_color(x0+2, y0):
+				return true;			# ／斜め方向に三目並んだ
 
 
 var BOARD_ORG_X
@@ -96,6 +120,8 @@ func _ready():
 	#print(bd.l_board)
 	#print(bd.g_board)
 	bd.put(0, 0, MARU)
+	bd.put(1, 1, MARU)
+	bd.put(2, 2, MARU)
 	bd.print()
 	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
