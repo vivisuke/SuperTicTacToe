@@ -43,14 +43,14 @@ enum {
 }
 class Board:
 	var n_put = 0				# 着手数
-	var n_put_board = []		# 各ローカルボードの着手数
+	var n_put_local = []		# 各ローカルボードの着手数
 	var three_lined_up = []		# 各ローカルボード：三目並んだか？
 	var next_board = -1			# 着手可能ローカルボード [0, 9)、-1 for 全ローカルボードに着手可能
 	var l_board
 	var g_board
 	func _init():
 		n_put = 0
-		n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		n_put_local = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		three_lined_up = [false, false, false, false, false, false, false, false, false]
 		next_board = -1
 		l_board = []
@@ -74,15 +74,29 @@ class Board:
 				txt += ".XO"[g_board[x + y*(N_HORZ/3)]+1]
 			txt += "\n"
 		print(txt)
+	func is_empty(x : int, y : int):			# ローカルボード内のセル状態取得
+		return l_board[x + y*N_HORZ] == EMPTY
 	func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
 		return l_board[x + y*N_HORZ]
+	func get_color_g(gx : int, gy : int):		# グローバルボード内のセル状態取得
+		return g_board[gx + gy*(N_HORZ/3)]
+	func update_next_board(x : int, y : int):	# 次に着手可能なローカルボード設定
+		var x3 = x % 3
+		var y3 = y % 3
+		next_board = x3 + y3 * 3
+		if three_lined_up[next_board] || n_put_local[next_board] == 9:
+			next_board = -1			# 全ローカルボードに着手可能
 	func put(x : int, y : int, col):
+		n_put += 1					# トータル着手数
 		l_board[x + y*N_HORZ] = col
 		var gx = x / 3
 		var gy = y / 3
-		if !three_lined_up[gx + gy*3] && is_three_stones(x, y):
-			g_board[gx + gy*3] = col
-			three_lined_up[gx + gy*3] = true
+		var ix = gx + gy*3
+		n_put_local[ix] += 1		# 各ローカルボードの着手数
+		if !three_lined_up[ix] && is_three_stones(x, y):	# 三目並んだ→グローバルボード更新
+			g_board[ix] = col
+			three_lined_up[ix] = true
+		update_next_board()					# next_board 設定
 	func is_three_stones(x : int, y : int):		# 三目並んだか？
 		var x3 : int = x % 3
 		var x0 : int = x - x3		# ローカルボード内左端座標
@@ -98,6 +112,35 @@ class Board:
 		if x3 == 2 - y3:		# ／斜め方向チェック
 			if get_color(x0, y0+2) == get_color(x0+1, y0+1) && get_color(x0, y0+2) == get_color(x0+2, y0):
 				return true;			# ／斜め方向に三目並んだ
+	func is_three_stones_global(gx : int, gy : int):		# グローバルボードで三目並んだか？
+		if get_color_g(0, gy) == get_color_g(1, gy) && get_color_g(0, gy) == get_color_g(2, gy):
+			return true;			# 横方向に三目並んだ
+		if get_color_g(gx, 0) == get_color_g(gx, 1) && get_color_g(gx, 0) == get_color_g(gx, 2):
+			return true;			# 縦方向に三目並んだ
+		if gx == gy:		# ＼斜め方向チェック
+			if get_color_g(0, 0) == get_color_g(1, 1) && get_color_g(0, 0) == get_color_g(2, 2):
+				return true;			# ＼斜め方向に三目並んだ
+		if gx == 2 - gy:		# ／斜め方向チェック
+			if get_color_g(0, 2) == get_color_g(1, 1) && get_color_g(0, 2) == get_color_g(2, 0):
+				return true;			# ／斜め方向に三目並んだ
+	func select_random():
+		if n_put == 0:		# 初期状態
+			return [rng.randi_range(0, N_HORZ-1), rng.randi_range(0, N_VERT-1)]
+		elif next_board < 0:	# 全てのローカルボードに着手可能
+			var lst = []
+			for y in range(N_VERT):
+				for x in range(N_HORZ):
+					if is_empty(x, y): lst.push_back([x, y])
+			return lst[rng.randi_range(0, lst.size() - 1)]
+		else:
+			var x0 = (next_board % 3) * 3
+			var y0 = (next_board / 3) * 3
+			var lst = []
+			for v in range(3):
+				for h in range(3):
+					if is_empty(x0+h, y0+v):
+						lst.push_back([x0+h, y0+v])
+			return lst[rng.randi_range(0, lst.size() - 1)]
 
 
 var BOARD_ORG_X
@@ -203,7 +246,7 @@ func get_color(x : int, y : int):			# ローカルボード内のセル状態取
 	return $Board/TileMapLocal.get_cell(x, y)
 func get_color_g(gx : int, gy : int):		# グローバルボード内のセル状態取得
 	return $Board/TileMapGlobal.get_cell(gx, gy)
-func is_game_over(gx : int, gy : int):		# グローバルボードで三目並んだか？
+func is_three_stones_global(gx : int, gy : int):		# グローバルボードで三目並んだか？
 	if get_color_g(0, gy) == get_color_g(1, gy) && get_color_g(0, gy) == get_color_g(2, gy):
 		return true;			# 横方向に三目並んだ
 	if get_color_g(gx, 0) == get_color_g(gx, 1) && get_color_g(gx, 0) == get_color_g(gx, 2):
@@ -255,7 +298,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 		# ローカルボード内で三目並んだ場合
 		three_lined_up[gx + gy*3] = true
 		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
-		if is_game_over(gx, gy):
+		if is_three_stones_global(gx, gy):
 			game_started = false
 			$MessLabel.text = mb_str[next_color] + " won."		# 
 			return true;		# ゲームオーバー
