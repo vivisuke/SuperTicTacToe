@@ -217,6 +217,14 @@ margin_bottom = 86.0
 custom_fonts/font = SubResource( 6 )
 text = "Start Game"
 
+[node name="TestButton" type="Button" parent="."]
+margin_left = 344.0
+margin_top = 852.0
+margin_right = 483.0
+margin_bottom = 886.0
+custom_fonts/font = SubResource( 6 )
+text = "Test"
+
 [node name="MaruPlayer" type="ColorRect" parent="."]
 margin_left = 20.0
 margin_top = 120.0
@@ -328,5 +336,6 @@ custom_styles/disabled = SubResource( 12 )
 custom_styles/normal = SubResource( 10 )
 
 [connection signal="pressed" from="StartStopButton" to="." method="_on_StartStopButton_pressed"]
+[connection signal="pressed" from="TestButton" to="." method="_on_TestButton_pressed"]
 [connection signal="item_selected" from="MaruPlayer/OptionButton" to="." method="_on_MaruOptionButton_item_selected"]
 [connection signal="item_selected" from="BatsuPlayer/OptionButton" to="." method="_on_BatsuOptionButton_item_selected"]

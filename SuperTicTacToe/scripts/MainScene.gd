@@ -43,13 +43,22 @@ enum {
 }
 class Board:
 	var n_put = 0				# 着手数
-	var n_put_local = []		# 各ローカルボードの着手数
-	var three_lined_up = []		# 各ローカルボード：三目並んだか？
+	var is_game_over			# 終局状態か？
+	var winner					# 勝者
 	var next_board = -1			# 着手可能ローカルボード [0, 9)、-1 for 全ローカルボードに着手可能
+	var next_color
 	var l_board
 	var g_board
+	var n_put_local = []		# 各ローカルボードの着手数
+	var three_lined_up = []		# 各ローカルボード：三目並んだか？
+	var rng = RandomNumberGenerator.new()
 	func _init():
+		rng.randomize()		# Setups a time-based seed
+		#rng.seed = 0			# 固定乱数系列
 		n_put = 0
+		is_game_over = false
+		winner = -1
+		next_color = MARU
 		n_put_local = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		three_lined_up = [false, false, false, false, false, false, false, false, false]
 		next_board = -1
@@ -73,6 +82,13 @@ class Board:
 			for x in range(N_HORZ/3):
 				txt += ".XO"[g_board[x + y*(N_HORZ/3)]+1]
 			txt += "\n"
+		txt += "\n"
+		if is_game_over:
+			if winner == MARU: txt += "O won.\n"
+			elif winner == BATSU: txt += "X won.\n"
+			else: txt += "draw.\n"
+		else:
+			txt += "next turn color: %s\n" % ("O" if next_color == MARU else "X")
 		print(txt)
 	func is_empty(x : int, y : int):			# ローカルボード内のセル状態取得
 		return l_board[x + y*N_HORZ] == EMPTY
@@ -96,7 +112,14 @@ class Board:
 		if !three_lined_up[ix] && is_three_stones(x, y):	# 三目並んだ→グローバルボード更新
 			g_board[ix] = col
 			three_lined_up[ix] = true
-		update_next_board()					# next_board 設定
+			if is_three_stones_global(gx, gy):
+				is_game_over = true
+				winner = col
+		if !is_game_over && n_put == N_HORZ*N_VERT:
+			is_game_over = true
+		update_next_board(x, y)					# next_board 設定
+	func change_turn():				# 手番交代
+		next_color = (MARU + BATSU) - next_color
 	func is_three_stones(x : int, y : int):		# 三目並んだか？
 		var x3 : int = x % 3
 		var x0 : int = x - x3		# ローカルボード内左端座標
@@ -159,18 +182,19 @@ var batsu_player = HUMAN
 #var next_logical_board = [-1, -1]	# 着手可能ロジカルボード
 var next_board = -1				# [0, 9): 着手可能ロジカルボード、-1 for すべてのボードに着手可能
 var pressedPos = Vector2(0, 0)
+var g_bd
 var rng = RandomNumberGenerator.new()
 
 func _ready():
 	print(Time.get_ticks_usec())
 	#
-	var bd = Board.new()
+	g_bd = Board.new()
 	#print(bd.l_board)
 	#print(bd.g_board)
-	bd.put(0, 0, MARU)
-	bd.put(1, 1, MARU)
-	bd.put(2, 2, MARU)
-	bd.print()
+	#bd.put(0, 0, MARU)
+	#bd.put(1, 1, MARU)
+	#bd.put(2, 2, MARU)
+	g_bd.print()
 	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
 	BOARD_ORG_Y = $Board/TileMapLocal.global_position.y
@@ -329,10 +353,10 @@ func _input(event):
 		var pos = $Board/TileMapLocal.world_to_map(event.position - BOARD_ORG)
 		#print("mouse button")
 		if event.is_pressed():
-			print("pressed")
+			#print("pressed")
 			pressedPos = pos
 		elif pos == pressedPos:
-			print("released")
+			#print("released")
 			#if n_put == 0:
 			#	game_started = true
 			#	return
@@ -370,4 +394,14 @@ func _on_MaruOptionButton_item_selected(index):
 
 func _on_BatsuOptionButton_item_selected(index):
 	batsu_player = index
+	pass # Replace with function body.
+
+
+func _on_TestButton_pressed():
+	if g_bd.is_game_over: return
+	var p = g_bd.select_random()
+	print(p)
+	g_bd.put(p[0], p[1], g_bd.next_color)
+	g_bd.change_turn()
+	g_bd.print()
 	pass # Replace with function body.

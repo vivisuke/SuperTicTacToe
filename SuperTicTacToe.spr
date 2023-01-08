@@ -53,9 +53,9 @@
 0051 ◎ C 01/05 01/07 0.001│ToDo│Board::put(x, y, col)：３目並んだ場合はグローバルボードの当該セルに石を置く
 0052 ◎ C 01/05 01/07 0.001│ToDo│Board::is_three_stones(x, y) 実装
 0053 ◎ C 01/05 01/08 0.001│ToDo│Board::print()：座標値・ローカルボード区切り線表示
-0054 ● C 01/05            │ToDo│Board：ランダムプレイアウト可能に
+0054 ◎ C 01/05 01/09 0.001│ToDo│Board：ランダムプレイアウト可能に
 0055 ◎ C 01/05 01/09 0.001│ToDo│Board::is_three_stones_global(gx : int, gy : int) 実装
-0056 ● C 01/05            │ToDo│
+0056 ◎ C 01/05 01/09 0.001│ToDo│Board > ランダムプレイアウト：勝敗引き分け判定
 0057 ● C 01/05            │ToDo│
 0058 ● C 01/05            │ToDo│
 0059 ● C 01/05            │ToDo│
