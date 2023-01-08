@@ -59,11 +59,16 @@ class Board:
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
 		pass
 	func print():
-		var txt = ""
+		var txt = "  abc def ghi\n"
+		txt += " +---+---+---+\n"
 		for y in range(N_VERT):
+			txt += "%d|" % (y+1)
 			for x in range(N_HORZ):
 				txt += ".XO"[l_board[x + y*N_HORZ]+1]
+				if x % 3 == 2: txt += "|"
 			txt += "\n"
+			if y % 3 == 2: txt += " +---+---+---+\n"
+		txt += "\n"
 		for y in range(N_VERT/3):
 			for x in range(N_HORZ/3):
 				txt += ".XO"[g_board[x + y*(N_HORZ/3)]+1]
