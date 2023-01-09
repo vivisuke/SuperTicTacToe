@@ -7,34 +7,63 @@ const NEXT_LOCAL_BOARD = 0
 #const BATSU = 0
 const WAIT = 6*3
 const ev_table = [	# 空き箇所に打った場合の利得
-	[ 1,  1,  1],	# ・・・
-	[ 8,  8,  0],	# ・・Ｘ
-	[ 8,  8,  0],	# ・・Ｏ
-	[ 8,  0,  8],	# ・Ｘ・
-	[32,  0,  0],	# ・ＸＸ
-	[ 0,  0,  0],	# ・ＸＯ
-	[ 8,  0,  8],	# ・Ｏ・
-	[ 0,  0,  0],	# ・ＯＸ
-	[32,  0,  0],	# ・ＯＯ
-	[ 0,  8,  8],	# Ｘ・・
-	[ 0, 32,  0],	# Ｘ・Ｘ
-	[ 0,  0,  0],	# Ｘ・Ｏ
-	[ 0,  0, 32],	# ＸＸ・
-	[ 0,  0,  0],	# ＸＸＸ
-	[ 0,  0,  0],	# ＸＸＯ
-	[ 0,  0,  0],	# ＸＯ・
-	[ 0,  0,  0],	# ＸＯＸ
-	[ 0,  0,  0],	# ＸＯＯ
-	[ 0,  8,  8],	# Ｏ・・
-	[ 0,  0,  0],	# Ｏ・Ｘ
-	[ 0, 32,  0],	# Ｏ・Ｏ
-	[ 0,  0,  0],	# ＯＸ・
-	[ 0,  0,  0],	# ＯＸＸ
-	[ 0,  0,  0],	# ＯＸＯ
-	[ 0,  0, 32],	# ＯＯ・
-	[ 0,  0,  0],	# ＯＯＸ
-	[ 0,  0,  0],	# ＯＯＯ
+	1,  	# ・・・
+	8,  	# ・・Ｘ
+	8,  	# ・・Ｏ
+	8,  	# ・Ｘ・
+	32,  	# ・ＸＸ
+	0,  	# ・ＸＯ
+	8,  	# ・Ｏ・
+	0,  	# ・ＯＸ
+	32,  	# ・ＯＯ
+	8,		# Ｘ・・
+	32,  	# Ｘ・Ｘ
+	0,  	# Ｘ・Ｏ
+	32,		# ＸＸ・
+	0,  	# ＸＸＸ
+	0,  	# ＸＸＯ
+	0,  	# ＸＯ・
+	0,  	# ＸＯＸ
+	0,  	# ＸＯＯ
+	8,		# Ｏ・・
+	0,  	# Ｏ・Ｘ
+	32,  	# Ｏ・Ｏ
+	0,  	# ＯＸ・
+	0,  	# ＯＸＸ
+	0,  	# ＯＸＯ
+	32,		# ＯＯ・
+	0,  	# ＯＯＸ
+	0,  	# ＯＯＯ
 ]
+#const ev_table = [	# 空き箇所に打った場合の利得
+#	[ 1,  1,  1],	# ・・・
+#	[ 8,  8,  0],	# ・・Ｘ
+#	[ 8,  8,  0],	# ・・Ｏ
+#	[ 8,  0,  8],	# ・Ｘ・
+#	[32,  0,  0],	# ・ＸＸ
+#	[ 0,  0,  0],	# ・ＸＯ
+#	[ 8,  0,  8],	# ・Ｏ・
+#	[ 0,  0,  0],	# ・ＯＸ
+#	[32,  0,  0],	# ・ＯＯ
+#	[ 0,  8,  8],	# Ｘ・・
+#	[ 0, 32,  0],	# Ｘ・Ｘ
+#	[ 0,  0,  0],	# Ｘ・Ｏ
+#	[ 0,  0, 32],	# ＸＸ・
+#	[ 0,  0,  0],	# ＸＸＸ
+#	[ 0,  0,  0],	# ＸＸＯ
+#	[ 0,  0,  0],	# ＸＯ・
+#	[ 0,  0,  0],	# ＸＯＸ
+#	[ 0,  0,  0],	# ＸＯＯ
+#	[ 0,  8,  8],	# Ｏ・・
+#	[ 0,  0,  0],	# Ｏ・Ｘ
+#	[ 0, 32,  0],	# Ｏ・Ｏ
+#	[ 0,  0,  0],	# ＯＸ・
+#	[ 0,  0,  0],	# ＯＸＸ
+#	[ 0,  0,  0],	# ＯＸＯ
+#	[ 0,  0, 32],	# ＯＯ・
+#	[ 0,  0,  0],	# ＯＯＸ
+#	[ 0,  0,  0],	# ＯＯＯ
+#]
 const mb_str = ["Ｘ", "Ｏ"]
 enum {
 	EMPTY = -1,
@@ -66,6 +95,7 @@ class Board:
 		for ix in range(N_HORZ*N_VERT): l_board.push_back(EMPTY)
 		g_board = []
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
+		#print(ev_table)
 		pass
 	func print():
 		var txt = "  abc def ghi\n"
@@ -164,7 +194,29 @@ class Board:
 					if is_empty(x0+h, y0+v):
 						lst.push_back([x0+h, y0+v])
 			return lst[rng.randi_range(0, lst.size() - 1)]
-
+	func eval_put(x: int, y: int):		# (x, y) への着手を評価
+		if !is_empty(x, y): return -1
+		var x0 = x - x % 3
+		var y0 = y - y % 3
+		var ix = 0
+		for h in range(N_HORZ/3):			# 横方向
+			ix = ix * 3 + get_color(x0 + h, y) + 1
+		var ev = ev_table[ix]
+		ix = 0
+		for v in range(N_HORZ/3):			# 縦方向
+			ix = ix * 3 + get_color(x, y0 + v) + 1
+		ev += ev_table[ix]
+		if x%3 == y%3:					
+			ix = 0
+			for h in range(N_HORZ/3):		# ＼方向
+				ix = ix * 3 + get_color(x0 + h, y0 + h) + 1
+			ev += ev_table[ix]
+		if x%3 == (2 - y%3):					
+			ix = 0
+			for h in range(N_HORZ/3):		# ／方向
+				ix = ix * 3 + get_color(x0 + h, y0 + 2 - h) + 1
+			ev += ev_table[ix]
+		return ev
 
 var BOARD_ORG_X
 var BOARD_ORG_Y
@@ -404,4 +456,15 @@ func _on_TestButton_pressed():
 	g_bd.put(p[0], p[1], g_bd.next_color)
 	g_bd.change_turn()
 	g_bd.print()
+	if g_bd.next_board >= 0:
+		#print(g_bd.next_board)
+		print("(%d, %d)" % [g_bd.next_board%3, g_bd.next_board/3])
+		var x0 = (g_bd.next_board % 3) * 3
+		var y0 = (g_bd.next_board / 3) * 3
+		var txt = ""
+		for v in range(3):
+			for h in range(3):
+				txt += "%d, " % g_bd.eval_put(x0+h, y0+v)
+			txt += "\n"
+		print(txt)
 	pass # Replace with function body.
