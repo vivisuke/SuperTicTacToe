@@ -72,6 +72,7 @@ enum {
 }
 class Board:
 	var n_put = 0				# 着手数
+	var last_put_pos = [-1, -1]	# 直前着手箇所
 	var is_game_over			# 終局状態か？
 	var winner					# 勝者
 	var next_board = -1			# 着手可能ローカルボード [0, 9)、-1 for 全ローカルボードに着手可能
@@ -103,7 +104,10 @@ class Board:
 		for y in range(N_VERT):
 			txt += "%d|" % (y+1)
 			for x in range(N_HORZ):
-				txt += ".XO"[l_board[x + y*N_HORZ]+1]
+				if last_put_pos != [x, y]:
+					txt += ".XO"[l_board[x + y*N_HORZ]+1]
+				else:
+					txt += ".#C"[l_board[x + y*N_HORZ]+1]
 				if x % 3 == 2: txt += "|"
 			txt += "\n"
 			if y % 3 == 2: txt += " +---+---+---+\n"
@@ -119,6 +123,7 @@ class Board:
 			else: txt += "draw.\n"
 		else:
 			txt += "next turn color: %s\n" % ("O" if next_color == MARU else "X")
+			txt += "next board = %d\n" % next_board
 		print(txt)
 	func is_empty(x : int, y : int):			# ローカルボード内のセル状態取得
 		return l_board[x + y*N_HORZ] == EMPTY
@@ -133,6 +138,7 @@ class Board:
 		if three_lined_up[next_board] || n_put_local[next_board] == 9:
 			next_board = -1			# 全ローカルボードに着手可能
 	func put(x : int, y : int, col):
+		last_put_pos = [x, y]
 		n_put += 1					# トータル着手数
 		l_board[x + y*N_HORZ] = col
 		var gx = x / 3
@@ -195,12 +201,16 @@ class Board:
 						lst.push_back([x0+h, y0+v])
 			return lst[rng.randi_range(0, lst.size() - 1)]
 	func select_depth_1():		# １手先読み（着手評価のみ）で着手決定
+		var p = [-1, -1]
+		var mx = -9999
 		if next_board < 0:	# 全てのローカルボードに着手可能
-			# undone: 未実装
-			return select_random()
+			for x in range(N_HORZ):
+				for y in range(N_VERT):
+					var ev = eval_put(x, y)
+					if ev > mx:
+						mx = ev
+						p = [x, y]
 		else:
-			var p = [-1, -1]
-			var mx = -9999
 			var x0 = (next_board % 3) * 3
 			var y0 = (next_board / 3) * 3
 			var txt = ""
@@ -210,9 +220,12 @@ class Board:
 					if ev > mx:
 						mx = ev
 						p = [x0+h, y0+v]
-			return p
+		return p
 	func eval_put(x: int, y: int):		# (x, y) への着手を評価
 		if !is_empty(x, y): return -1
+		var gx = x / 3
+		var gy = y / 3
+		if three_lined_up[gx + gy*3]: return 0
 		var x0 = x - x % 3
 		var y0 = y - y % 3
 		var ix = 0
