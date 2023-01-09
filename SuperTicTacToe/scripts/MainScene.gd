@@ -194,6 +194,23 @@ class Board:
 					if is_empty(x0+h, y0+v):
 						lst.push_back([x0+h, y0+v])
 			return lst[rng.randi_range(0, lst.size() - 1)]
+	func select_depth_1():		# １手先読み（着手評価のみ）で着手決定
+		if next_board < 0:	# 全てのローカルボードに着手可能
+			# undone: 未実装
+			return select_random()
+		else:
+			var p = [-1, -1]
+			var mx = -9999
+			var x0 = (next_board % 3) * 3
+			var y0 = (next_board / 3) * 3
+			var txt = ""
+			for v in range(3):
+				for h in range(3):
+					var ev = eval_put(x0+h, y0+v)
+					if ev > mx:
+						mx = ev
+						p = [x0+h, y0+v]
+			return p
 	func eval_put(x: int, y: int):		# (x, y) への着手を評価
 		if !is_empty(x, y): return -1
 		var x0 = x - x % 3
@@ -451,7 +468,8 @@ func _on_BatsuOptionButton_item_selected(index):
 
 func _on_TestButton_pressed():
 	if g_bd.is_game_over: return
-	var p = g_bd.select_random()
+	#var p = g_bd.select_random()
+	var p = g_bd.select_depth_1()
 	print(p)
 	g_bd.put(p[0], p[1], g_bd.next_color)
 	g_bd.change_turn()
