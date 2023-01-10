@@ -85,6 +85,10 @@ class Board:
 	func _init():
 		rng.randomize()		# Setups a time-based seed
 		#rng.seed = 0			# 固定乱数系列
+		init()
+		#print(ev_table)
+		pass
+	func init():
 		n_put = 0
 		is_game_over = false
 		winner = -1
@@ -96,8 +100,6 @@ class Board:
 		for ix in range(N_HORZ*N_VERT): l_board.push_back(EMPTY)
 		g_board = []
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
-		#print(ev_table)
-		pass
 	func print():
 		var txt = "  abc def ghi\n"
 		txt += " +---+---+---+\n"
@@ -283,8 +285,8 @@ func _ready():
 	BOARD_ORG = Vector2(BOARD_ORG_X, BOARD_ORG_Y)
 	setup_player_option_button($MaruPlayer/OptionButton)
 	setup_player_option_button($BatsuPlayer/OptionButton)
-	$BatsuPlayer/OptionButton.selected = AI_RANDOM
-	batsu_player = AI_RANDOM
+	$MaruPlayer/OptionButton.selected = maru_player
+	$BatsuPlayer/OptionButton.selected = batsu_player
 	rng.randomize()		# Setups a time-based seed
 	#rng.seed = 0			# 固定乱数系列
 	init_board()
@@ -297,7 +299,20 @@ func setup_player_option_button(ob):
 	ob.add_item(": Human", 0)	
 	ob.add_item(": AI Random", 1)	
 	ob.add_item(": AI Level 1", 2)	# １手先読み
+func update_board_tilemaps():		# g_bd の状態から TileMap たちを設定
+	for y in range(N_VERT):
+		for x in range(N_HORZ):
+			$Board/TileMapLocal.set_cell(x, y, g_bd.get_color(x, y))
+	var ix = 0
+	for y in range(N_VERT/3):
+		for x in range(N_HORZ/3):
+			var c = -1 if g_bd.next_board >= 0 && ix != g_bd.next_board else NEXT_LOCAL_BOARD
+			$Board/TileMapBG.set_cell(x, y, c)
+			$Board/TileMapGlobal.set_cell(x, y, g_bd.get_color_g(x, y))
+			ix += 1
+	pass
 func init_board():
+	g_bd.init()
 	n_put = 0
 	put_pos = [-1, -1]
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -311,6 +326,7 @@ func init_board():
 		for x in range(N_HORZ/3):
 			$Board/TileMapBG.set_cell(x, y, NEXT_LOCAL_BOARD)
 			$Board/TileMapGlobal.set_cell(x, y, -1)
+	update_board_tilemaps()		# g_bd の状態から TileMap たちを設定
 	pass
 func update_next_label():
 	$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
@@ -397,6 +413,7 @@ func AI_think_random():
 					lst.push_back([x0+h, y0+v])
 		return lst[rng.randi_range(0, lst.size() - 1)]
 func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
+	g_bd.put(x, y, next_color)
 	put(x, y, next_color)
 	var gx = int(x) / 3
 	var gy = int(y) / 3
@@ -415,6 +432,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 				$Board/TileMapBG.set_cell(gx2, gy2, NEXT_LOCAL_BOARD)
 	next_color = (MARU + BATSU) - next_color
 	update_next_label()
+	update_board_tilemaps()
 	return false
 func _process(delta):
 	if waiting > 0:
@@ -429,6 +447,7 @@ func _process(delta):
 		AI_thinking = false
 	pass
 func _input(event):
+	if !game_started: return
 	if event is InputEventMouseButton:
 		#print(event.position)
 		#print($Board/TileMapLocal.world_to_map(event.position - BOARD_ORG))
