@@ -303,6 +303,7 @@ func update_board_tilemaps():		# g_bd の状態から TileMap たちを設定
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
 			$Board/TileMapLocal.set_cell(x, y, g_bd.get_color(x, y))
+			$Board/TileMapCursor.set_cell(x, y, 0 if g_bd.last_put_pos == [x, y] else -1)
 	var ix = 0
 	for y in range(N_VERT/3):
 		for x in range(N_HORZ/3):
