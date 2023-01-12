@@ -445,6 +445,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 				$Board/TileMapBG.set_cell(gx2, gy2, NEXT_LOCAL_BOARD)
 	next_color = (MARU + BATSU) - next_color
 	update_next_label()
+	update_next_underline()
 	update_board_tilemaps()
 	return false
 func _process(delta):
