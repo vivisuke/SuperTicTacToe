@@ -435,8 +435,9 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 		three_lined_up[gx + gy*3] = true
 		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
 		if is_three_stones_global(gx, gy):
-			game_started = false
+			#game_started = false
 			$MessLabel.text = mb_str[next_color] + " won."		# 
+			do_game_over()
 			return true;		# ゲームオーバー
 	if n_put_board[next_board] == 9 || three_lined_up[next_board]:	# 空欄が無い or すでに三目並んでいる
 		next_board = -1
@@ -487,6 +488,7 @@ func _input(event):
 	pass
 
 func do_game_over():
+	game_started = false
 	$MaruPlayer/OptionButton.disabled = false
 	$BatsuPlayer/OptionButton.disabled = false
 	$StartStopButton.text = "Start Game"
