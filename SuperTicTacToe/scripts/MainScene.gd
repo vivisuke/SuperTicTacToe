@@ -216,17 +216,19 @@ class Board:
 		else:
 			var x0 = (next_board % 3) * 3
 			var y0 = (next_board / 3) * 3
-			var txt = ""
+			#var txt = ""
 			for v in range(3):
 				for h in range(3):
 					var ev = eval_put(x0+h, y0+v)
-					txt += "%d, " % ev
+					#txt += "%d, " % ev
 					if ev > mx:
 						mx = ev
 						p = [x0+h, y0+v]
-				txt += "\n"
-			print(txt)
+				#txt += "\n"
+			#print(txt)
 		return p
+	func select_pure_MC():		# 純粋モンテカルロ法による着手決定
+		pass
 	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
 		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする
 		#print("can_lined_up(%d, %d)" % [gx, gy])
@@ -458,6 +460,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 		three_lined_up[gx + gy*3] = true
 		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
 		if is_three_stones_global(gx, gy):
+			print("*** Game Over")
 			#game_started = false
 			$MessLabel.text = mb_str[next_color] + " won."		# 
 			do_game_over()
@@ -476,11 +479,14 @@ func _process(delta):
 	if waiting > 0:
 		waiting -= 1
 	elif( game_started && !AI_thinking &&
-			next_color == MARU && maru_player >= AI_RANDOM || next_color == BATSU && batsu_player >= AI_RANDOM):
+			(next_color == MARU && maru_player >= AI_RANDOM || next_color == BATSU && batsu_player >= AI_RANDOM) ):
+		#if !game_started:
+		#	print("??? game_started = ", game_started)
 		AI_thinking = true
 		#var pos = AI_think_random()
 		var typ = maru_player if next_color == MARU else batsu_player
 		var pos = g_bd.select_random() if typ == AI_RANDOM else g_bd.select_depth_1()
+		#print("game_started = ", game_started)
 		print("AI put ", pos)
 		put_and_post_proc(pos[0], pos[1])
 		waiting = WAIT
@@ -515,6 +521,7 @@ func do_game_over():
 	$MaruPlayer/OptionButton.disabled = false
 	$BatsuPlayer/OptionButton.disabled = false
 	$StartStopButton.text = "Start Game"
+	update_board_tilemaps()
 func _on_StartStopButton_pressed():
 	game_started = !game_started
 	if game_started:
