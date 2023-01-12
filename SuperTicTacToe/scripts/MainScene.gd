@@ -208,10 +208,11 @@ class Board:
 		if next_board < 0:	# 全てのローカルボードに着手可能
 			for x in range(N_HORZ):
 				for y in range(N_VERT):
-					var ev = eval_put(x, y)
-					if ev > mx:
-						mx = ev
-						p = [x, y]
+					if is_empty(x, y):
+						var ev = eval_put(x, y)
+						if ev > mx:
+							mx = ev
+							p = [x, y]
 		else:
 			var x0 = (next_board % 3) * 3
 			var y0 = (next_board / 3) * 3
@@ -226,6 +227,23 @@ class Board:
 				txt += "\n"
 			print(txt)
 		return p
+	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
+		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする
+		#print("can_lined_up(%d, %d)" % [gx, gy])
+		var x0 = gx * 3
+		var y0 = gy * 3
+		var i3 = 0		# ＼対角線
+		var i4 = 0		# ／対角線
+		for h in range(N_HORZ/3):
+			var ix = 0
+			var i2 = 0
+			for v in range(N_HORZ/3):
+				ix = ix * 3 + get_color(x0 + h, y0 + v) + 1
+				i2 = i2 * 3 + get_color(x0 + v, y0 + h) + 1
+			if ev_table[ix] == 32 || ev_table[i2] == 32: return true
+			i3 = i3 * 3 + get_color(x0 + h, y0 + h) + 1
+			i4 = i4 * 3 + get_color(x0 + 2 - h, y0 + h) + 1
+		return ev_table[i3] == 32 || ev_table[i4] == 32
 	func eval_put(x: int, y: int):		# (x, y) への着手を評価
 		if !is_empty(x, y): return -1
 		var ev = 0
@@ -233,6 +251,9 @@ class Board:
 		var y3 = y % 3
 		if three_lined_up[x3 + y3*3] || n_put_local[x3 + y3*3] == 9:
 			ev = -32		# 転送先がすでに三目並んでいる or 空きが無い
+		elif can_lined_up(x3, y3):
+			#print("*** can line up!")
+			ev = -24		# 転送先で三目ができる場合
 		var gx = x / 3
 		var gy = y / 3
 		if three_lined_up[gx + gy*3]: return 0
@@ -297,11 +318,11 @@ func _ready():
 	$BatsuPlayer/OptionButton.selected = batsu_player
 	#$MaruPlayer/Underline.visible = false
 	#$BatsuPlayer/Underline.visible = false
-	rng.randomize()		# Setups a time-based seed
-	#rng.seed = 0			# 固定乱数系列
+	#rng.randomize()		# Setups a time-based seed
+	rng.seed = 0			# 固定乱数系列
 	init_board()
 	update_next_label()
-	update_next_underline()
+	#update_next_underline()
 	#put(2, 2, MARU)
 	$MessLabel.text = "【Start Game】を押してください。"
 	print(Time.get_ticks_usec())
@@ -341,7 +362,9 @@ func init_board():
 	update_board_tilemaps()		# g_bd の状態から TileMap たちを設定
 	pass
 func update_next_label():
-	$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
+	if game_started:
+		$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
+	update_next_underline()
 func update_next_underline():
 	$MaruPlayer/Underline.visible = game_started && next_color == MARU
 	$BatsuPlayer/Underline.visible = game_started && next_color == BATSU
@@ -446,7 +469,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 				$Board/TileMapBG.set_cell(gx2, gy2, NEXT_LOCAL_BOARD)
 	next_color = (MARU + BATSU) - next_color
 	update_next_label()
-	update_next_underline()
+	#update_next_underline()
 	update_board_tilemaps()
 	return false
 func _process(delta):
