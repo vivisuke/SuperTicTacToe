@@ -219,12 +219,20 @@ class Board:
 			for v in range(3):
 				for h in range(3):
 					var ev = eval_put(x0+h, y0+v)
+					txt += "%d, " % ev
 					if ev > mx:
 						mx = ev
 						p = [x0+h, y0+v]
+				txt += "\n"
+			print(txt)
 		return p
 	func eval_put(x: int, y: int):		# (x, y) への着手を評価
 		if !is_empty(x, y): return -1
+		var ev = 0
+		var x3 = x % 3
+		var y3 = y % 3
+		if three_lined_up[x3 + y3*3] || n_put_local[x3 + y3*3] == 9:
+			ev = -32		# 転送先がすでに三目並んでいる or 空きが無い
 		var gx = x / 3
 		var gy = y / 3
 		if three_lined_up[gx + gy*3]: return 0
@@ -233,17 +241,17 @@ class Board:
 		var ix = 0
 		for h in range(N_HORZ/3):			# 横方向
 			ix = ix * 3 + get_color(x0 + h, y) + 1
-		var ev = ev_table[ix]
+		ev += ev_table[ix]
 		ix = 0
 		for v in range(N_HORZ/3):			# 縦方向
 			ix = ix * 3 + get_color(x, y0 + v) + 1
 		ev += ev_table[ix]
-		if x%3 == y%3:					
+		if x3 == y3:					
 			ix = 0
 			for h in range(N_HORZ/3):		# ＼方向
 				ix = ix * 3 + get_color(x0 + h, y0 + h) + 1
 			ev += ev_table[ix]
-		if x%3 == (2 - y%3):					
+		if x3 == (2 - y3):					
 			ix = 0
 			for h in range(N_HORZ/3):		# ／方向
 				ix = ix * 3 + get_color(x0 + h, y0 + 2 - h) + 1
@@ -287,6 +295,8 @@ func _ready():
 	setup_player_option_button($BatsuPlayer/OptionButton)
 	$MaruPlayer/OptionButton.selected = maru_player
 	$BatsuPlayer/OptionButton.selected = batsu_player
+	#$MaruPlayer/Underline.visible = false
+	#$BatsuPlayer/Underline.visible = false
 	rng.randomize()		# Setups a time-based seed
 	#rng.seed = 0			# 固定乱数系列
 	init_board()
@@ -331,8 +341,8 @@ func init_board():
 	pass
 func update_next_label():
 	$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
-	$MaruPlayer/Underline.visible = next_color == MARU
-	$BatsuPlayer/Underline.visible = next_color == BATSU
+	$MaruPlayer/Underline.visible = game_started && next_color == MARU
+	$BatsuPlayer/Underline.visible = game_started && next_color == BATSU
 func can_put_local(x : int, y : int):
 	return $Board/TileMapBG.get_cell(x, y) == NEXT_LOCAL_BOARD
 func is_empty(x : int, y : int):
