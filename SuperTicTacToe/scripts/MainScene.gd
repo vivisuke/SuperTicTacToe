@@ -319,14 +319,14 @@ func init_board():
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 	three_lined_up = [false, false, false, false, false, false, false, false, false]
 	next_color = MARU
-	for y in range(N_VERT):
-		for x in range(N_HORZ):
-			$Board/TileMapLocal.set_cell(x, y, -1)
-			$Board/TileMapCursor.set_cell(x, y, -1)
-	for y in range(N_VERT/3):
-		for x in range(N_HORZ/3):
-			$Board/TileMapBG.set_cell(x, y, NEXT_LOCAL_BOARD)
-			$Board/TileMapGlobal.set_cell(x, y, -1)
+	#for y in range(N_VERT):
+	#	for x in range(N_HORZ):
+	#		$Board/TileMapLocal.set_cell(x, y, -1)
+	#		$Board/TileMapCursor.set_cell(x, y, -1)
+	#for y in range(N_VERT/3):
+	#	for x in range(N_HORZ/3):
+	#		$Board/TileMapBG.set_cell(x, y, NEXT_LOCAL_BOARD)
+	#		$Board/TileMapGlobal.set_cell(x, y, -1)
 	update_board_tilemaps()		# g_bd の状態から TileMap たちを設定
 	pass
 func update_next_label():
@@ -441,7 +441,9 @@ func _process(delta):
 	elif( game_started && !AI_thinking &&
 			next_color == MARU && maru_player >= AI_RANDOM || next_color == BATSU && batsu_player >= AI_RANDOM):
 		AI_thinking = true
-		var pos = AI_think_random()
+		#var pos = AI_think_random()
+		var typ = maru_player if next_color == MARU else batsu_player
+		var pos = g_bd.select_random() if typ == AI_RANDOM else g_bd.select_depth_1()
 		print("AI put ", pos)
 		put_and_post_proc(pos[0], pos[1])
 		waiting = WAIT
