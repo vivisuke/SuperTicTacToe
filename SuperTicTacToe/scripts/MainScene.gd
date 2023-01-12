@@ -301,6 +301,7 @@ func _ready():
 	#rng.seed = 0			# 固定乱数系列
 	init_board()
 	update_next_label()
+	update_next_underline()
 	#put(2, 2, MARU)
 	$MessLabel.text = "【Start Game】を押してください。"
 	print(Time.get_ticks_usec())
@@ -341,6 +342,7 @@ func init_board():
 	pass
 func update_next_label():
 	$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
+func update_next_underline():
 	$MaruPlayer/Underline.visible = game_started && next_color == MARU
 	$BatsuPlayer/Underline.visible = game_started && next_color == BATSU
 func can_put_local(x : int, y : int):
@@ -498,6 +500,7 @@ func _on_StartStopButton_pressed():
 	else:
 		$MessLabel.text = ""
 		do_game_over()
+	update_next_underline()
 	pass # Replace with function body.
 
 
