@@ -82,7 +82,7 @@ class HistItem:
 		next_board = nb
 class Board:
 	var n_put = 0				# 着手数
-	var last_put_pos = [-1, -1]	# 直前着手箇所
+	#var last_put_pos = [-1, -1]	# 直前着手箇所
 	var is_game_over			# 終局状態か？
 	var winner					# 勝者
 	var next_board = -1			# 着手可能ローカルボード [0, 9)、-1 for 全ローカルボードに着手可能
@@ -112,13 +112,16 @@ class Board:
 		g_board = []
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
 		stack = []
+	func last_put_pos():
+		if stack.empty(): return [-1, -1]
+		else: return [stack.back().x, stack.back().y]
 	func print():
 		var txt = "  abc def ghi\n"
 		txt += " +---+---+---+\n"
 		for y in range(N_VERT):
 			txt += "%d|" % (y+1)
 			for x in range(N_HORZ):
-				if last_put_pos != [x, y]:
+				if last_put_pos() != [x, y]:
 					txt += ".XO"[l_board[x + y*N_HORZ]+1]
 				else:
 					txt += ".#C"[l_board[x + y*N_HORZ]+1]
@@ -152,7 +155,7 @@ class Board:
 		if three_lined_up[next_board] || n_put_local[next_board] == 9:
 			next_board = -1			# 全ローカルボードに着手可能
 	func put(x : int, y : int, col):
-		last_put_pos = [x, y]
+		#last_put_pos = [x, y]
 		n_put += 1					# トータル着手数
 		l_board[x + y*N_HORZ] = col
 		var gx = x / 3
@@ -357,7 +360,7 @@ func update_board_tilemaps():		# g_bd の状態から TileMap たちを設定
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
 			$Board/TileMapLocal.set_cell(x, y, g_bd.get_color(x, y))
-			$Board/TileMapCursor.set_cell(x, y, 0 if g_bd.last_put_pos == [x, y] else -1)
+			$Board/TileMapCursor.set_cell(x, y, 0 if g_bd.last_put_pos() == [x, y] else -1)
 	var ix = 0
 	for y in range(N_VERT/3):
 		for x in range(N_HORZ/3):
