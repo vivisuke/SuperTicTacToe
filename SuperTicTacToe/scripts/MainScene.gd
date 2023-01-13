@@ -70,6 +70,16 @@ enum {
 	BATSU = 0, MARU,
 	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
 }
+class HistItem:
+	var x				# 着手位置
+	var y
+	var linedup			# 着手により、ローカルボード内で三目並んだ
+	var next_board		# （着手前）着手可能ローカルボード [0, 9)
+	func _init(px, py, lu, nb):
+		x = px
+		y = py
+		linedup = lu
+		next_board = nb
 class Board:
 	var n_put = 0				# 着手数
 	var last_put_pos = [-1, -1]	# 直前着手箇所
@@ -81,6 +91,7 @@ class Board:
 	var g_board
 	var n_put_local = []		# 各ローカルボードの着手数
 	var three_lined_up = []		# 各ローカルボード：三目並んだか？
+	var stack = []				# 要素：HistItem
 	var rng = RandomNumberGenerator.new()
 	func _init():
 		rng.randomize()		# Setups a time-based seed
@@ -100,6 +111,7 @@ class Board:
 		for ix in range(N_HORZ*N_VERT): l_board.push_back(EMPTY)
 		g_board = []
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
+		stack = []
 	func print():
 		var txt = "  abc def ghi\n"
 		txt += " +---+---+---+\n"
@@ -147,7 +159,9 @@ class Board:
 		var gy = y / 3
 		var ix = gx + gy*3
 		n_put_local[ix] += 1		# 各ローカルボードの着手数
+		var linedup = false			# ローカルボード内で三目ならんだか？
 		if !three_lined_up[ix] && is_three_stones(x, y):	# 三目並んだ→グローバルボード更新
+			linedup = true
 			g_board[ix] = col
 			three_lined_up[ix] = true
 			if is_three_stones_global(gx, gy):
@@ -155,7 +169,13 @@ class Board:
 				winner = col
 		if !is_game_over && n_put == N_HORZ*N_VERT:
 			is_game_over = true
+		stack.push_back(HistItem.new(x, y, linedup, next_board))
 		update_next_board(x, y)					# next_board 設定
+	func unput():
+		if stack.empty(): return
+		var itm = stack.pop_back()
+		l_board[itm.x + itm.y*N_HORZ] = EMPTY
+		pass
 	func change_turn():				# 手番交代
 		next_color = (MARU + BATSU) - next_color
 	func is_three_stones(x : int, y : int):		# 三目並んだか？
