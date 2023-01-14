@@ -71,10 +71,10 @@ enum {
 	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
 }
 class HistItem:
-	var x				# 着手位置
-	var y
-	var linedup			# 着手により、ローカルボード内で三目並んだ
-	var next_board		# （着手前）着手可能ローカルボード [0, 9)
+	var x:int				# 着手位置
+	var y:int
+	var linedup:bool		# 着手により、ローカルボード内で三目並んだ
+	var next_board:int		# （着手前）着手可能ローカルボード [0, 9)
 	func _init(px, py, lu, nb):
 		x = px
 		y = py
@@ -141,7 +141,9 @@ class Board:
 		else:
 			txt += "next turn color: %s\n" % ("O" if next_color == MARU else "X")
 			txt += "next board = %d\n" % next_board
+		txt += "last_put_pos = [%d, %d]\n" % last_put_pos()
 		print(txt)
+		#print("last_put_pos = ", last_put_pos())
 	func is_empty(x : int, y : int):			# ローカルボード内のセル状態取得
 		return l_board[x + y*N_HORZ] == EMPTY
 	func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
@@ -173,11 +175,18 @@ class Board:
 		if !is_game_over && n_put == N_HORZ*N_VERT:
 			is_game_over = true
 		stack.push_back(HistItem.new(x, y, linedup, next_board))
+		next_color = (MARU + BATSU) - next_color	# 手番交代
 		update_next_board(x, y)					# next_board 設定
 	func unput():
 		if stack.empty(): return
+		next_color = (MARU + BATSU) - next_color	# 手番交代
 		var itm = stack.pop_back()
 		l_board[itm.x + itm.y*N_HORZ] = EMPTY
+		if itm.linedup:				# 着手で三目並んだ場合
+			var gx = itm.x / 3
+			var gy = itm.y / 3
+			g_board[gx + gy*3] = EMPTY
+		next_board = itm.next_board
 		pass
 	func change_turn():				# 手番交代
 		next_color = (MARU + BATSU) - next_color
@@ -327,11 +336,14 @@ func _ready():
 	print(Time.get_ticks_usec())
 	#
 	g_bd = Board.new()
-	#print(bd.l_board)
-	#print(bd.g_board)
-	#bd.put(0, 0, MARU)
-	#bd.put(1, 1, MARU)
-	#bd.put(2, 2, MARU)
+	g_bd.print()
+	g_bd.put(0, 0, MARU)
+	g_bd.print()
+	g_bd.put(1, 1, BATSU)
+	g_bd.print()
+	g_bd.unput()
+	g_bd.print()
+	g_bd.unput()
 	g_bd.print()
 	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
@@ -576,7 +588,7 @@ func _on_TestButton_pressed():
 	var p = g_bd.select_depth_1()
 	print(p)
 	g_bd.put(p[0], p[1], g_bd.next_color)
-	g_bd.change_turn()
+	#g_bd.change_turn()
 	g_bd.print()
 	if g_bd.next_board >= 0:
 		#print(g_bd.next_board)
