@@ -82,7 +82,7 @@
 0080 ● C 01/13            │ToDo│Board::playout() 実装
 0081 ◎ C 01/14 01/14 0.001│ToDo│直前着手位置は stack.back() の x, y を参照し、last_put_pos は削除
 0082 ◎ C 01/14 01/14 0.001│ToDo│stack に積むアイテムを class 化
-0083 ● C 01/14            │ToDo│
+0083 ◎ C 01/14 01/14 0.001│ToDo│Board::eval() 実装
 0084 ● C 01/14            │ToDo│
 0085 ● C 01/14            │ToDo│
 0086 ● C 01/14            │ToDo│

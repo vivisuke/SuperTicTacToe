@@ -6,7 +6,7 @@ const NEXT_LOCAL_BOARD = 0
 #const MARU = 1
 #const BATSU = 0
 const WAIT = 6*3
-const ev_table = [	# 空き箇所に打った場合の利得
+const ev_put_table = [	# 空き箇所に打った場合の利得
 	1,  	# ・・・
 	8,  	# ・・Ｘ
 	8,  	# ・・Ｏ
@@ -35,35 +35,35 @@ const ev_table = [	# 空き箇所に打った場合の利得
 	0,  	# ＯＯＸ
 	0,  	# ＯＯＯ
 ]
-#const ev_table = [	# 空き箇所に打った場合の利得
-#	[ 1,  1,  1],	# ・・・
-#	[ 8,  8,  0],	# ・・Ｘ
-#	[ 8,  8,  0],	# ・・Ｏ
-#	[ 8,  0,  8],	# ・Ｘ・
-#	[32,  0,  0],	# ・ＸＸ
-#	[ 0,  0,  0],	# ・ＸＯ
-#	[ 8,  0,  8],	# ・Ｏ・
-#	[ 0,  0,  0],	# ・ＯＸ
-#	[32,  0,  0],	# ・ＯＯ
-#	[ 0,  8,  8],	# Ｘ・・
-#	[ 0, 32,  0],	# Ｘ・Ｘ
-#	[ 0,  0,  0],	# Ｘ・Ｏ
-#	[ 0,  0, 32],	# ＸＸ・
-#	[ 0,  0,  0],	# ＸＸＸ
-#	[ 0,  0,  0],	# ＸＸＯ
-#	[ 0,  0,  0],	# ＸＯ・
-#	[ 0,  0,  0],	# ＸＯＸ
-#	[ 0,  0,  0],	# ＸＯＯ
-#	[ 0,  8,  8],	# Ｏ・・
-#	[ 0,  0,  0],	# Ｏ・Ｘ
-#	[ 0, 32,  0],	# Ｏ・Ｏ
-#	[ 0,  0,  0],	# ＯＸ・
-#	[ 0,  0,  0],	# ＯＸＸ
-#	[ 0,  0,  0],	# ＯＸＯ
-#	[ 0,  0, 32],	# ＯＯ・
-#	[ 0,  0,  0],	# ＯＯＸ
-#	[ 0,  0,  0],	# ＯＯＯ
-#]
+const ev_pat_table = [	# ○から見たパターン評価値
+	0,  	# ・・・
+	-1,  	# ・・Ｘ
+	1,  	# ・・Ｏ
+	-1,  	# ・Ｘ・
+	-8,  	# ・ＸＸ
+	0,  	# ・ＸＯ
+	1,  	# ・Ｏ・
+	0,  	# ・ＯＸ
+	8,  	# ・ＯＯ
+	-1,		# Ｘ・・
+	-8,  	# Ｘ・Ｘ
+	0,  	# Ｘ・Ｏ
+	-8,		# ＸＸ・
+	-32,  	# ＸＸＸ
+	0,  	# ＸＸＯ
+	0,  	# ＸＯ・
+	0,  	# ＸＯＸ
+	0,  	# ＸＯＯ
+	1,		# Ｏ・・
+	0,  	# Ｏ・Ｘ
+	8,  	# Ｏ・Ｏ
+	0,  	# ＯＸ・
+	0,  	# ＯＸＸ
+	0,  	# ＯＸＯ
+	8,		# ＯＯ・
+	0,  	# ＯＯＸ
+	32,  	# ＯＯＯ
+]
 const mb_str = ["Ｘ", "Ｏ"]
 enum {
 	EMPTY = -1,
@@ -97,7 +97,7 @@ class Board:
 		rng.randomize()		# Setups a time-based seed
 		#rng.seed = 0			# 固定乱数系列
 		init()
-		#print(ev_table)
+		#print(ev_put_table)
 		pass
 	func init():
 		n_put = 0
@@ -261,6 +261,30 @@ class Board:
 		return p
 	func select_pure_MC():		# 純粋モンテカルロ法による着手決定
 		pass
+	func eval():	# 現局面を（○から見た）評価
+		var ev = 0
+		for gy in range(3):
+			var y0 = gy * 3
+			for gx in range(3):
+				var x0 = gx * 3
+				var i3 = 0		# ＼対角線
+				var i4 = 0		# ／対角線
+				for h in range(N_HORZ/3):
+					var ix = 0
+					var i2 = 0
+					for v in range(N_HORZ/3):
+						ix = ix * 3 + get_color(x0 + h, y0 + v) + 1
+						i2 = i2 * 3 + get_color(x0 + v, y0 + h) + 1
+					ev += ev_pat_table[ix] + ev_pat_table[i2]
+					i3 = i3 * 3 + get_color(x0 + h, y0 + h) + 1
+					i4 = i4 * 3 + get_color(x0 + 2 - h, y0 + h) + 1
+				ev += ev_pat_table[i3] + ev_pat_table[i4]
+		if next_board < 0:		# 全ボードに着手可能
+			if next_color == MARU:
+				ev += 16
+			else:
+				ev -= 16
+		return ev
 	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
 		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする
 		#print("can_lined_up(%d, %d)" % [gx, gy])
@@ -274,10 +298,10 @@ class Board:
 			for v in range(N_HORZ/3):
 				ix = ix * 3 + get_color(x0 + h, y0 + v) + 1
 				i2 = i2 * 3 + get_color(x0 + v, y0 + h) + 1
-			if ev_table[ix] == 32 || ev_table[i2] == 32: return true
+			if ev_put_table[ix] == 32 || ev_put_table[i2] == 32: return true
 			i3 = i3 * 3 + get_color(x0 + h, y0 + h) + 1
 			i4 = i4 * 3 + get_color(x0 + 2 - h, y0 + h) + 1
-		return ev_table[i3] == 32 || ev_table[i4] == 32
+		return ev_put_table[i3] == 32 || ev_put_table[i4] == 32
 	func eval_put(x: int, y: int):		# (x, y) への着手を評価
 		if !is_empty(x, y): return -1
 		var ev = 0
@@ -296,21 +320,21 @@ class Board:
 		var ix = 0
 		for h in range(N_HORZ/3):			# 横方向
 			ix = ix * 3 + get_color(x0 + h, y) + 1
-		ev += ev_table[ix]
+		ev += ev_put_table[ix]
 		ix = 0
 		for v in range(N_HORZ/3):			# 縦方向
 			ix = ix * 3 + get_color(x, y0 + v) + 1
-		ev += ev_table[ix]
+		ev += ev_put_table[ix]
 		if x3 == y3:					
 			ix = 0
 			for h in range(N_HORZ/3):		# ＼方向
 				ix = ix * 3 + get_color(x0 + h, y0 + h) + 1
-			ev += ev_table[ix]
+			ev += ev_put_table[ix]
 		if x3 == (2 - y3):					
 			ix = 0
 			for h in range(N_HORZ/3):		# ／方向
 				ix = ix * 3 + get_color(x0 + h, y0 + 2 - h) + 1
-			ev += ev_table[ix]
+			ev += ev_put_table[ix]
 		return ev
 
 var BOARD_ORG_X
@@ -337,10 +361,13 @@ func _ready():
 	#
 	g_bd = Board.new()
 	g_bd.print()
+	print("eval = ", g_bd.eval())
 	g_bd.put(0, 0, MARU)
 	g_bd.print()
+	print("eval = ", g_bd.eval())
 	g_bd.put(1, 1, BATSU)
 	g_bd.print()
+	print("eval = %d\n" % g_bd.eval())
 	g_bd.unput()
 	g_bd.print()
 	g_bd.unput()
