@@ -68,7 +68,7 @@ const mb_str = ["Ｘ", "Ｏ"]
 enum {
 	EMPTY = -1,
 	BATSU = 0, MARU,
-	HUMAN = 0, AI_RANDOM, AI_LEVEL_1,
+	HUMAN = 0, AI_RANDOM, AI_DEPTH_1, AI_DEPTH_3,
 }
 class HistItem:
 	var x:int				# 着手位置
@@ -112,6 +112,17 @@ class Board:
 		g_board = []
 		for ix in range(N_HORZ*N_VERT/9): g_board.push_back(EMPTY)
 		stack = []
+	func copy(s : Board):
+		is_game_over = s.is_game_over
+		winner = s.winner
+		next_board = s.next_board
+		next_color = s.next_color
+		l_board = s.l_board.duplicate()
+		g_board = s.g_board.duplicate()
+		n_put_local = s.n_put_local.duplicate()
+		three_lined_up = s.three_lined_up.duplicate()
+		stack = s.stack.duplicate()
+		pass
 	func last_put_pos():
 		if stack.empty(): return [-1, -1]
 		else: return [stack.back().x, stack.back().y]
@@ -238,8 +249,8 @@ class Board:
 		var p = [-1, -1]
 		var mx = -9999
 		if next_board < 0:	# 全てのローカルボードに着手可能
-			for x in range(N_HORZ):
-				for y in range(N_VERT):
+			for y in range(N_VERT):
+				for x in range(N_HORZ):
 					if is_empty(x, y):
 						var ev = eval_put(x, y)
 						if ev > mx:
@@ -259,9 +270,45 @@ class Board:
 				#txt += "\n"
 			#print(txt)
 		return p
+	func alpha_bata(alpha, beta, depth):
+		if depth == 0: return eval_board()
+		if next_color == MARU:
+			pass
+		return eval_board()
+	func select_depth_3():		# ３手先読み（着手評価のみ）で着手決定
+		var bd = Board.new()
+		bd.copy(self)
+		# ○の手番：
+		var DEPTH = 3
+		var ps;
+		var alpha = -9999
+		var beta = 9999
+		if next_board < 0:		# 全ローカルボードに着手可能
+			for y in range(N_VERT):
+				for x in range(N_HORZ):
+					if is_empty(x, y):
+						put(x, y, next_color)
+						var ev = alpha_bata(alpha, beta, DEPTH-1)
+						unput()
+						if ev > alpha:
+							alpha = ev
+							ps = [x, y]
+		else:
+			var x0 = (next_board % 3) * 3
+			var y0 = (next_board / 3) * 3
+			for y in range(3):
+				for x in range(3):
+					if is_empty(x+x0, y+y0):
+						put(x+x0, y+y0, next_color)
+						var ev = alpha_bata(alpha, beta, DEPTH)
+						unput()
+						if ev > alpha:
+							alpha = ev
+							ps = [x+x0, y+y0]
+		return ps
 	func select_pure_MC():		# 純粋モンテカルロ法による着手決定
 		pass
-	func eval():	# 現局面を（○から見た）評価
+	func eval_board():	# 現局面を（○から見た）評価
 		var ev = 0
 		for gy in range(3):
 			var y0 = gy * 3
@@ -373,13 +420,13 @@ func _ready():
 	#
 	g_bd = Board.new()
 	g_bd.print()
-	print("eval = ", g_bd.eval())
+	print("eval_board = ", g_bd.eval_board())
 	g_bd.put(0, 0, MARU)
 	g_bd.print()
-	print("eval = ", g_bd.eval())
+	print("eval_board = ", g_bd.eval_board())
 	g_bd.put(1, 1, BATSU)
 	g_bd.print()
-	print("eval = %d\n" % g_bd.eval())
+	print("eval_board = %d\n" % g_bd.eval_board())
 	g_bd.unput()
 	g_bd.print()
 	g_bd.unput()
@@ -406,7 +453,8 @@ func _ready():
 func setup_player_option_button(ob):
 	ob.add_item(": Human", 0)	
 	ob.add_item(": AI Random", 1)	
-	ob.add_item(": AI Level 1", 2)	# １手先読み
+	ob.add_item(": AI Depth 1", 2)	# １手先読み
+	ob.add_item(": AI Depth 3", 3)	# ３手先読み
 func update_board_tilemaps():		# g_bd の状態から TileMap たちを設定
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
@@ -559,7 +607,9 @@ func _process(delta):
 		AI_thinking = true
 		#var pos = AI_think_random()
 		var typ = maru_player if next_color == MARU else batsu_player
-		var pos = g_bd.select_random() if typ == AI_RANDOM else g_bd.select_depth_1()
+		var pos = (g_bd.select_random() if typ == AI_RANDOM else
+					g_bd.select_depth_1() if typ == AI_DEPTH_1 else
+					g_bd.select_depth_3())
 		#print("game_started = ", game_started)
 		print("AI put ", pos)
 		put_and_post_proc(pos[0], pos[1])
