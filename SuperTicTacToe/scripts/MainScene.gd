@@ -279,6 +279,18 @@ class Board:
 					i3 = i3 * 3 + get_color(x0 + h, y0 + h) + 1
 					i4 = i4 * 3 + get_color(x0 + 2 - h, y0 + h) + 1
 				ev += ev_pat_table[i3] + ev_pat_table[i4]
+		var i3 = 0		# ＼対角線
+		var i4 = 0		# ／対角線
+		for g in range(3):
+			var ix = 0
+			var i2 = 0
+			for h in range(3):
+				ix = ix * 3 + get_color_g(g, h) + 1
+				i2 = i2 * 3 + get_color_g(h, g) + 1
+			ev += (ev_pat_table[ix] + ev_pat_table[i2]) * 32
+			i3 = i3 * 3 + get_color_g(g, g) + 1
+			i4 = i4 * 3 + get_color_g(2 - g, g) + 1
+		ev += (ev_pat_table[i3] + ev_pat_table[i4]) * 32
 		if next_board < 0:		# 全ボードに着手可能
 			if next_color == MARU:
 				ev += 16

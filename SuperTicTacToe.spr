@@ -83,8 +83,8 @@
 0081 ◎ C 01/14 01/14 0.001│ToDo│直前着手位置は stack.back() の x, y を参照し、last_put_pos は削除
 0082 ◎ C 01/14 01/14 0.001│ToDo│stack に積むアイテムを class 化
 0083 ◎ C 01/14 01/14 0.001│ToDo│Board::eval() 実装
-0084 ● C 01/14            │ToDo│
-0085 ● C 01/14            │ToDo│
+0084 ● C 01/14            │ToDo│AI Depth_3 追加
+0085 ◎ C 01/14 01/14 0.001│ToDo│Board::eval()：グローバルボード状態評価
 0086 ● C 01/14            │ToDo│
 0087 ● C 01/14            │ToDo│
 0088 ● C 01/14            │ToDo│
