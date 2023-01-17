@@ -272,39 +272,67 @@ class Board:
 		return p
 	func alpha_bata(alpha, beta, depth):
 		if depth == 0: return eval_board()
+		var x0
+		var y0
+		var NH = 3
+		var NV = 3
+		if next_board < 0:		# 全ローカルボードに着手可能
+			x0 = 0
+			y0 = 0
+			NH = N_HORZ
+			NV = N_VERT
+		else:
+			x0 = (next_board % 3) * 3
+			y0 = (next_board / 3) * 3
+		for v in range(NV):
+			for h in range(NH):
+				if is_empty(x0+h, y0+v):
+					put(x0+h, y0+v, next_color)
+					var ev = alpha_bata(alpha, beta, depth-1)
+					unput()
+					if next_color == MARU:
+						alpha = max(ev, alpha)
+						if alpha >= beta: return alpha
+					else:
+						beta = min(ev, beta)
+						if alpha >= beta: return beta
 		if next_color == MARU:
-			pass
-		return eval_board()
+			return alpha
+		else:
+			return beta
 	func select_depth_3():		# ３手先読み（着手評価のみ）で着手決定
 		var bd = Board.new()
 		bd.copy(self)
-		# ○の手番：
 		var DEPTH = 3
 		var ps;
 		var alpha = -9999
 		var beta = 9999
+		var x0
+		var y0
+		var NH = 3
+		var NV = 3
 		if next_board < 0:		# 全ローカルボードに着手可能
-			for y in range(N_VERT):
-				for x in range(N_HORZ):
-					if is_empty(x, y):
-						put(x, y, next_color)
-						var ev = alpha_bata(alpha, beta, DEPTH-1)
-						unput()
-						if ev > alpha:
-							alpha = ev
-							ps = [x, y]
+			x0 = 0
+			y0 = 0
+			NH = N_HORZ
+			NV = N_VERT
 		else:
-			var x0 = (next_board % 3) * 3
-			var y0 = (next_board / 3) * 3
-			for y in range(3):
-				for x in range(3):
-					if is_empty(x+x0, y+y0):
-						put(x+x0, y+y0, next_color)
-						var ev = alpha_bata(alpha, beta, DEPTH)
-						unput()
+			x0 = (next_board % 3) * 3
+			y0 = (next_board / 3) * 3
+		for v in range(NV):
+			for h in range(NH):
+				if bd.is_empty(x0+h, y0+v):
+					bd.put(x0+h, y0+v, next_color)
+					var ev = bd.alpha_bata(alpha, beta, DEPTH)
+					bd.unput()
+					if next_color == MARU:
 						if ev > alpha:
 							alpha = ev
-							ps = [x+x0, y+y0]
+							ps = [x0+h, y0+v]
+					else:
+						if ev < beta:
+							beta = ev
+							ps = [x0+h, y0+v]
 		return ps
 	func select_pure_MC():		# 純粋モンテカルロ法による着手決定
 		pass
