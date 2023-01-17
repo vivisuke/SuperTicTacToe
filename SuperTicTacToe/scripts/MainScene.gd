@@ -74,6 +74,7 @@ class HistItem:
 	var x:int				# 着手位置
 	var y:int
 	var linedup:bool		# 着手により、ローカルボード内で三目並んだ
+	#var is_game_over		# 着手により、グローバルボード内で三目並んだ
 	var next_board:int		# （着手前）着手可能ローカルボード [0, 9)
 	func _init(px, py, lu, nb):
 		x = px
@@ -176,6 +177,7 @@ class Board:
 		var ix = gx + gy*3
 		n_put_local[ix] += 1		# 各ローカルボードの着手数
 		var linedup = false			# ローカルボード内で三目ならんだか？
+		#var igo = is_game_over		# グローバルボード内で三目ならんだか？
 		if !three_lined_up[ix] && is_three_stones(x, y):	# 三目並んだ→グローバルボード更新
 			linedup = true
 			g_board[ix] = col
@@ -197,6 +199,7 @@ class Board:
 			var gx = itm.x / 3
 			var gy = itm.y / 3
 			g_board[gx + gy*3] = EMPTY
+			is_game_over = false
 		next_board = itm.next_board
 		pass
 	func change_turn():				# 手番交代
@@ -262,11 +265,12 @@ class Board:
 			#var txt = ""
 			for v in range(3):
 				for h in range(3):
-					var ev = eval_put(x0+h, y0+v)
-					#txt += "%d, " % ev
-					if ev > mx:
-						mx = ev
-						p = [x0+h, y0+v]
+					if is_empty(x0+h, y0+v):
+						var ev = eval_put(x0+h, y0+v)
+						#txt += "%d, " % ev
+						if ev > mx:
+							mx = ev
+							p = [x0+h, y0+v]
 				#txt += "\n"
 			#print(txt)
 		return p
@@ -288,6 +292,12 @@ class Board:
 			for h in range(NH):
 				if is_empty(x0+h, y0+v):
 					put(x0+h, y0+v, next_color)
+					if is_game_over:
+						unput()
+						if next_color == MARU:
+							return 9000
+						else:
+							return -9000
 					var ev = alpha_bata(alpha, beta, depth-1)
 					unput()
 					if next_color == MARU:
@@ -640,6 +650,11 @@ func _process(delta):
 					g_bd.select_depth_3())
 		#print("game_started = ", game_started)
 		print("AI put ", pos)
+		if !is_empty(pos[0], pos[1]):
+			pos = (g_bd.select_random() if typ == AI_RANDOM else
+					g_bd.select_depth_1() if typ == AI_DEPTH_1 else
+					g_bd.select_depth_3())
+		assert(is_empty(pos[0], pos[1]))
 		put_and_post_proc(pos[0], pos[1])
 		waiting = WAIT
 		AI_thinking = false
