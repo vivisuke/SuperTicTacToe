@@ -1,6 +1,11 @@
 ﻿#include <iostream>
+#include "Board.h"
+
+using namespace std;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    Board bd;
+    //
+    std::cout << "\nOK.\n";
 }
