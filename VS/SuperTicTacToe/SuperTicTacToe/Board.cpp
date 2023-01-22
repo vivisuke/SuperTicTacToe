@@ -16,6 +16,7 @@ Board::Board() {
 	init();
 }
 void Board::init() {
+	m_stack.clear();
 	for(int i = 0; i != BD_SIZE; ++i)
 		m_board[i] = EMPTY;
 	for(int i = 0; i != GBD_SIZE; ++i)
@@ -71,4 +72,13 @@ void Board::print() const {
 	}
 	cout << "\n";
 #endif
+}
+void Board::put(int x, int y, char col) {
+	m_stack.push_back(HistItem(x, y, col));
+	m_board[x + y*N_HORZ] = col;
+	int gx = x / 3;
+	int gy = y / 3;
+	int ix = gx + gy*3;
+	m_nput[ix] += 1;		// 各ローカルボードの着手数
+	bool linedup = false;	// ローカルボード内で三目ならんだか？
 }
