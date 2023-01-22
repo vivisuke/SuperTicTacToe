@@ -16,6 +16,7 @@ Board::Board() {
 	init();
 }
 void Board::init() {
+	m_next_board = -1;
 	m_stack.clear();
 	for(int i = 0; i != BD_SIZE; ++i)
 		m_board[i] = EMPTY;
@@ -59,6 +60,7 @@ void Board::print() const {
 			else
 				cout << "@{|||{|||{|||{\n";
 	}
+	cout << "next_board = " << (int)m_next_board << "\n";
 	cout << "\n";
 #if 0
 	//	ƒOƒ[ƒoƒ‹ƒ{[ƒh•\Ž¦
@@ -95,6 +97,13 @@ bool Board::is_linedup(int x, int y) const {
 			return true;		// ^ŽÎ‚ß•ûŒü‚ÉŽO–Ú•À‚ñ‚¾
 	return false;
 }
+void Board::update_next_board(int x, int y) {
+	int x3 = x % 3;
+	int y3 = y % 3;
+	m_next_board = x3 + y3 * 3;
+	if( m_linedup[m_next_board] || m_nput[m_next_board] == 9 )	//	‚·‚Å‚ÉŽO–Ú•À‚ñ‚Å‚¢‚é or ‹ó‚«‚ª–³‚¢
+		m_next_board = -1;			// ‘Sƒ[ƒJƒ‹ƒ{[ƒh‚É’…Žè‰Â”\
+}
 void Board::put(int x, int y, char col) {
 	m_board[x + y*N_HORZ] = col;
 	//int gx = x / 3;
@@ -108,6 +117,7 @@ void Board::put(int x, int y, char col) {
 		m_linedup[gix] = true;
 		m_gboard[gix] = col;
 	}
+	update_next_board(x, y);
 	m_stack.push_back(HistItem(x, y, col, linedup));
 }
 void Board::undo_put() {

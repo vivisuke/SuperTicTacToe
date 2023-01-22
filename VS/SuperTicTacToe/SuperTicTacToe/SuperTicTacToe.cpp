@@ -14,8 +14,9 @@ int main()
     bd.put(2, 2, MARU);
     bd.print();
     bd.put(3, 3, BATSU);
-    bd.put(4, 4, BATSU);
-    bd.put(5, 5, BATSU);
+    bd.print();
+    bd.put(4, 3, BATSU);
+    bd.put(5, 3, BATSU);
     bd.print();
     bd.undo_put();
     bd.print();

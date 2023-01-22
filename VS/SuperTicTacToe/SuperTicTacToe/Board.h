@@ -45,10 +45,12 @@ public:
 	char	get_color(int x, int y) const {
 		return m_board[x + y*N_HORZ];
 	}
+	void	update_next_board(int x, int y);
 	bool	is_linedup(int x, int y) const;
 	void	put(int x, int y, char col);
 	void	undo_put();
 private:
+	char	m_next_board;				//	次に着手可能なローカルボード、-1 for 全ボードに着手可能
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];
 	char	m_nput[GBD_SIZE];				//	各ローカルボード着手数
