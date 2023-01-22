@@ -21,6 +21,17 @@
 #define		MARU		1
 #define		BATSU		(-1)
 
+struct Move {
+public:
+	Move(char x = 0, char y = 0)
+		: m_x(x), m_y(y)
+	{
+	}
+public:
+	char	m_x;
+	char	m_y;
+};
+
 struct HistItem {
 public:
 	HistItem(char x = 0, char y = 0, char col = 0, bool linedup = false)
@@ -39,17 +50,23 @@ public:
 	Board();
 public:
 	void	init();
+	char	next_color() const { return m_next_color; }
 	void	print() const;
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 	static int xyToGix(int x, int y) { return (x/3) + (y/3)*(N_HORZ/3); }
 	char	get_color(int x, int y) const {
 		return m_board[x + y*N_HORZ];
 	}
+	bool	is_empty(int x, int y) const {
+		return get_color(x, y) == EMPTY;
+	}
 	void	update_next_board(int x, int y);
 	bool	is_linedup(int x, int y) const;
 	void	put(int x, int y, char col);
 	void	undo_put();
+	Move	sel_move_random();
 private:
+	char	m_next_color;				//	次の手番
 	char	m_next_board;				//	次に着手可能なローカルボード、-1 for 全ボードに着手可能
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];

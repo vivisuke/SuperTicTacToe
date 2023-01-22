@@ -7,15 +7,20 @@
 //
 //----------------------------------------------------------------------
 
+#include <random>
 #include <iostream>
 #include "Board.h"
 
 using namespace std;
 
+std::random_device g_rnd;         // 非決定的な乱数生成器
+std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+
 Board::Board() {
 	init();
 }
 void Board::init() {
+	m_next_color = MARU;
 	m_next_board = -1;
 	m_stack.clear();
 	for(int i = 0; i != BD_SIZE; ++i)
@@ -61,6 +66,10 @@ void Board::print() const {
 				cout << "　＋－－－＋－－－＋－－－＋\n";
 	}
 	cout << "next_board = " << (int)m_next_board << "\n";
+	if( !m_stack.empty() ) {
+		const auto &item = m_stack.back();
+		cout << "did put(" << (int)item.m_x << ", " << (int)item.m_y << ")\n";
+	}
 	cout << "\n";
 #if 0
 	//	グローバルボード表示
@@ -119,6 +128,7 @@ void Board::put(int x, int y, char col) {
 	}
 	update_next_board(x, y);
 	m_stack.push_back(HistItem(x, y, col, linedup));
+	m_next_color = (MARU + BATSU) - m_next_color;		//	手番交代
 }
 void Board::undo_put() {
 	const auto &item = m_stack.back();
@@ -130,4 +140,31 @@ void Board::undo_put() {
 		m_gboard[gix] = EMPTY;
 	}
 	m_stack.pop_back();
+	m_next_color = (MARU + BATSU) - m_next_color;		//	手番交代
+}
+Move Board::sel_move_random() {
+	if( m_stack.empty() ) {		//	履歴が無い＝初手の場合
+		return Move(g_mt() % N_HORZ, g_mt() % N_VERT);
+	}
+	vector<Move> lst;
+	if( m_next_board < 0 ) {	//	全ローカルボードに着手可能な場合
+		for(int y = 0; y != N_VERT; ++y) {
+			for(int x = 0; x != N_HORZ; ++x) {
+				if( is_empty(x, y) )
+					lst.push_back(Move(x, y));
+			}
+		}
+	} else {		//	next_board ローカルボードにのみ着手可能な場合
+		//int gx = m_next_board % 3;
+		//int gy = m_next_board / 3;
+		int x0 = (m_next_board % 3) * 3;
+		int y0 = (m_next_board / 3) * 3;
+		for(int v = 0; v != 3; ++v) {
+			for(int h = 0; h != 3; ++h) {
+				if( is_empty(x0 + h, y0 + v) )
+					lst.push_back(Move(x0 + h, y0 + v));
+			}
+		}
+	}
+	return lst[g_mt() % lst.size()];
 }

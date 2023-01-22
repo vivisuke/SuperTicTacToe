@@ -101,12 +101,12 @@
 0099 ◎ C 01/22 01/22 0.001│ToDo│Board::undo_put() 実装
 0100 ● C 01/22            │ToDo│Board::put(x, y, col)：終局チェック
 0101 ◎ C 01/22 01/22 0.001│ToDo│Board::put(x, y, col)：next_board 更新
-0102 ● C 01/22            │ToDo│
-0103 ● C 01/22            │ToDo│
-0104 ● C 01/22            │ToDo│
-0105 ● C 01/22            │ToDo│
-0106 ● C 01/22            │ToDo│
-0107 ● C 01/22            │ToDo│
-0108 ● C 01/22            │ToDo│
-0109 ● C 01/22            │ToDo│
-0110 ● C 01/22            │ToDo│
+0102 ◎ C 01/22 01/23 0.001│ToDo│Board::print()：最後に着手した箇所を表示
+0103 ◎ C 01/23 01/23 0.001│ToDo│Board::sel_move_random() 実装
+0104 ● C 01/23            │ToDo│
+0105 ● C 01/23            │ToDo│
+0106 ● C 01/23            │ToDo│
+0107 ● C 01/23            │ToDo│
+0108 ● C 01/23            │ToDo│
+0109 ● C 01/23            │ToDo│
+0110 ● C 01/23            │ToDo│

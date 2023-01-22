@@ -7,6 +7,7 @@ int main()
 {
     Board bd;
     bd.print();
+#if 0
     bd.put(0, 0, MARU);
     //bd.print();
     bd.put(1, 1, MARU);
@@ -20,6 +21,12 @@ int main()
     bd.print();
     bd.undo_put();
     bd.print();
+#endif
+    for(int i = 0; i != 40; ++i) {
+	    auto mv = bd.sel_move_random();
+	    bd.put(mv.m_x, mv.m_y, bd.next_color());
+	    bd.print();
+    }
     //
     std::cout << "\nOK.\n";
 }
