@@ -23,14 +23,15 @@
 
 struct HistItem {
 public:
-	HistItem(char x = 0, char y = 0, char col = 0)
-		: m_x(x), m_y(y), m_col(col)
+	HistItem(char x = 0, char y = 0, char col = 0, bool linedup = false)
+		: m_x(x), m_y(y), m_col(col), m_linedup(linedup)
 	{
 	}
 public:
 	char	m_x;
 	char	m_y;
 	char	m_col;
+	bool	m_linedup;
 };
 
 class Board {
@@ -39,10 +40,18 @@ public:
 public:
 	void	init();
 	void	print() const;
+	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
+	static int xyToGix(int x, int y) { return (x/3) + (y/3)*(N_HORZ/3); }
+	char	get_color(int x, int y) const {
+		return m_board[x + y*N_HORZ];
+	}
+	bool	is_linedup(int x, int y) const;
 	void	put(int x, int y, char col);
+	void	undo_put();
 private:
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];
 	char	m_nput[GBD_SIZE];				//	各ローカルボード着手数
+	bool	m_linedup[GBD_SIZE];			//	各ローカルボード：三目並んでいる
 	std::vector<HistItem>		m_stack;
 };

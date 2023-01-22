@@ -577,6 +577,7 @@ func is_three_stones_global(gx : int, gy : int):		# グローバルボードで�
 	if gx == 2 - gy:		# ／斜め方向チェック
 		if get_color_g(0, 2) == get_color_g(1, 1) && get_color_g(0, 2) == get_color_g(2, 0):
 			return true;			# ／斜め方向に三目並んだ
+	return false
 func is_three_stones(x : int, y : int):		# 三目並んだか？
 	var x3 : int = x % 3
 	var x0 : int = x - x3		# ローカルボード内左端座標
@@ -592,6 +593,7 @@ func is_three_stones(x : int, y : int):		# 三目並んだか？
 	if x3 == 2 - y3:		# ／斜め方向チェック
 		if get_color(x0, y0+2) == get_color(x0+1, y0+1) && get_color(x0, y0+2) == get_color(x0+2, y0):
 			return true;			# ／斜め方向に三目並んだ
+	return false
 func AI_think_random():
 	if n_put == 0:		# 初手
 		return [rng.randi_range(0, N_HORZ-1), rng.randi_range(0, N_VERT-1)]
