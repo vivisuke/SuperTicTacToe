@@ -24,6 +24,7 @@ public:
 	Board();
 public:
 	void	init();
+	void	print() const;
 private:
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];
