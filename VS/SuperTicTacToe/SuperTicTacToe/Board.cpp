@@ -21,12 +21,14 @@ void Board::init() {
 	for(int i = 0; i != GBD_SIZE; ++i)
 		m_gboard[i] = EMPTY;
 }
+const char* digstr[] = { "ÇP", "ÇQ", "ÇR", "ÇS", "ÇT", "ÇU", "ÇV", "ÇW", "ÇX", };
 void Board::print() const {
 	//	ëSÉçÅ[ÉJÉãÉ{Å[Éhï\é¶
 	int ix = 0, gx = 0;
-	cout << "Å{Å|Å|Å|Å{Å|Å|Å|Å{Å|Å|Å|Å{Å@Å{Å|Å|Å|Å{\n";
+	cout << "Å@Å@ÇÅÇÇÇÉÅ@ÇÑÇÖÇÜÅ@ÇáÇàÇâ\n";
+	cout << "Å@Å{Å|Å|Å|Å{Å|Å|Å|Å{Å|Å|Å|Å{Å@Å{Å|Å|Å|Å{\n";
 	for(int y = 0; y != N_VERT; ++y) {
-		cout << "Åb";
+		cout << digstr[y] << "Åb";
 		for(int x = 0; x != N_HORZ; ++x) {
 			switch( m_board[ix++] ) {
 			case EMPTY:	cout << "ÅE"; break;
@@ -49,9 +51,9 @@ void Board::print() const {
 		cout << "\n";
 		if( y%3 == 2 )
 			if( y == 2 )
-				cout << "Å{Å|Å|Å|Å{Å|Å|Å|Å{Å|Å|Å|Å{Å@Å{Å|Å|Å|Å{\n";
+				cout << "Å@Å{Å|Å|Å|Å{Å|Å|Å|Å{Å|Å|Å|Å{Å@Å{Å|Å|Å|Å{\n";
 			else
-				cout << "Å{Å|Å|Å|Å{Å|Å|Å|Å{Å|Å|Å|Å{\n";
+				cout << "Å@Å{Å|Å|Å|Å{Å|Å|Å|Å{Å|Å|Å|Å{\n";
 	}
 	cout << "\n";
 #if 0
