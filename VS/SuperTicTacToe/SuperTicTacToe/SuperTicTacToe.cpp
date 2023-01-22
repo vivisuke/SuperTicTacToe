@@ -22,10 +22,12 @@ int main()
     bd.undo_put();
     bd.print();
 #endif
-    for(int i = 0; i != 40; ++i) {
+    for(int i = 0; i != 100; ++i) {
 	    auto mv = bd.sel_move_random();
 	    bd.put(mv.m_x, mv.m_y, bd.next_color());
 	    bd.print();
+	    if( bd.is_game_over() )
+            break;
     }
     //
     std::cout << "\nOK.\n";

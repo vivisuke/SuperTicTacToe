@@ -14,12 +14,14 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 Board::Board() {
 	init();
 }
 void Board::init() {
+	m_game_over = false;
 	m_next_color = MARU;
 	m_next_board = -1;
 	m_stack.clear();
@@ -106,6 +108,23 @@ bool Board::is_linedup(int x, int y) const {
 			return true;		// ／斜め方向に三目並んだ
 	return false;
 }
+bool Board::is_game_over(int x, int y) const {		//	終局（空欄無し or 三目並んだatグローバルボード）か？
+	//if( m_stack.size() == BD_SIZE ) return true;
+	int gx = x / 3;
+	int gy = y / 3;
+	if( get_gcolor(gx, gy) == EMPTY ) return false;		//	念のため、ほんとは必要ないはず
+	if( get_gcolor(0, gy) == get_gcolor(1, gy) && get_gcolor(0, gy) == get_gcolor(+2, gy) )
+		return true;			// 横方向に三目並んだ
+	if( get_gcolor(x, 0) == get_gcolor(x, 1) && get_gcolor(x, 0) == get_gcolor(x, 2) )
+		return true;			// 縦方向に三目並んだ
+	if( gx == gy )		// ＼斜め方向チェック
+		if( get_gcolor(0, 0) == get_gcolor(1, 1) && get_gcolor(0, 0) == get_gcolor(2, 2) )
+			return true;		// ＼斜め方向に三目並んだ
+	if( gx == 2 - gy )		// ／斜め方向チェック
+		if( get_gcolor(0, 2) == get_gcolor(1, 1) && get_gcolor(0, 2) == get_gcolor(2, 0) )
+			return true;		// ／斜め方向に三目並んだ
+	return false;
+}
 void Board::update_next_board(int x, int y) {
 	int x3 = x % 3;
 	int y3 = y % 3;
@@ -128,6 +147,10 @@ void Board::put(int x, int y, char col) {
 	}
 	update_next_board(x, y);
 	m_stack.push_back(HistItem(x, y, col, linedup));
+	if (m_stack.size() == BD_SIZE || (linedup && is_game_over(x, y))) {		//	終局チェック
+		is_game_over(x, y);
+		m_game_over = true;
+	}
 	m_next_color = (MARU + BATSU) - m_next_color;		//	手番交代
 }
 void Board::undo_put() {
