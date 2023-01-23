@@ -104,8 +104,8 @@
 0102 ◎ C 01/22 01/23 0.001│ToDo│Board::print()：最後に着手した箇所を表示
 0103 ◎ C 01/23 01/23 0.001│ToDo│Board::sel_move_random() 実装
 0104 ◎ C 01/23 01/23 0.001│ToDo│Board::is_game_over() 実装
-0105 ● C 01/23            │ToDo│
-0106 ● C 01/23            │ToDo│
+0105 ◎ C 01/23 01/23 0.001│ToDo│Board::playout() 実装
+0106 ● C 01/23            │ToDo│Board::playout(N) 実装
 0107 ● C 01/23            │ToDo│
 0108 ● C 01/23            │ToDo│
 0109 ● C 01/23            │ToDo│

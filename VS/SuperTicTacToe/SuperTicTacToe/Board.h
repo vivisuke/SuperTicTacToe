@@ -48,6 +48,7 @@ public:
 class Board {
 public:
 	Board();
+	Board(const Board&);
 public:
 	void	init();
 	bool	is_game_over() const { return m_game_over; }		//	終局状態か？
@@ -70,10 +71,13 @@ public:
 	void	put(int x, int y, char col);
 	void	undo_put();
 	Move	sel_move_random();
+	int		playout_random();			//	現状態から終局までランダム対局、return MARU | EMPTY | BATSU
+	int		playout_random(int N);		//	
 private:
 	bool	m_game_over;				//	終局状態か？
 	char	m_next_color;				//	次の手番
 	char	m_next_board;				//	次に着手可能なローカルボード、-1 for 全ボードに着手可能
+	char	m_winner;					//	勝者：MARU | BATSU | EMPTY
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];
 	char	m_nput[GBD_SIZE];				//	各ローカルボード着手数

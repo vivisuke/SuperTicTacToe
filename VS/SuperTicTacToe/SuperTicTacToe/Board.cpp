@@ -14,11 +14,26 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(2);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 Board::Board() {
 	init();
+}
+Board::Board(const Board& x)
+	: m_game_over(x.m_game_over)
+	, m_next_color(x.m_next_color)
+	, m_next_board(x.m_next_board)
+{
+	for(int i = 0; i != BD_SIZE; ++i) {
+		m_board[i] = x.m_board[i];
+	}
+	for(int i = 0; i != GBD_SIZE; ++i) {
+		m_gboard[i] = x.m_gboard[i];
+		m_nput[i] = x.m_nput[i];
+		m_linedup[i] = x.m_linedup[i];
+	}
+	m_stack = x.m_stack;
 }
 void Board::init() {
 	m_game_over = false;
@@ -115,7 +130,7 @@ bool Board::is_game_over(int x, int y) const {		//	終局（空欄無し or 三目並んだa
 	if( get_gcolor(gx, gy) == EMPTY ) return false;		//	念のため、ほんとは必要ないはず
 	if( get_gcolor(0, gy) == get_gcolor(1, gy) && get_gcolor(0, gy) == get_gcolor(+2, gy) )
 		return true;			// 横方向に三目並んだ
-	if( get_gcolor(x, 0) == get_gcolor(x, 1) && get_gcolor(x, 0) == get_gcolor(x, 2) )
+	if( get_gcolor(gx, 0) == get_gcolor(gx, 1) && get_gcolor(gx, 0) == get_gcolor(gx, 2) )
 		return true;			// 縦方向に三目並んだ
 	if( gx == gy )		// ＼斜め方向チェック
 		if( get_gcolor(0, 0) == get_gcolor(1, 1) && get_gcolor(0, 0) == get_gcolor(2, 2) )
@@ -147,9 +162,13 @@ void Board::put(int x, int y, char col) {
 	}
 	update_next_board(x, y);
 	m_stack.push_back(HistItem(x, y, col, linedup));
-	if (m_stack.size() == BD_SIZE || (linedup && is_game_over(x, y))) {		//	終局チェック
-		is_game_over(x, y);
+	if (m_stack.size() == BD_SIZE ) {		//	空欄無し
 		m_game_over = true;
+		m_winner = EMPTY;
+	} else if( linedup && is_game_over(x, y) ) {		//	終局チェック
+		//is_game_over(x, y);
+		m_game_over = true;
+		m_winner = m_next_color;
 	}
 	m_next_color = (MARU + BATSU) - m_next_color;		//	手番交代
 }
@@ -190,4 +209,17 @@ Move Board::sel_move_random() {
 		}
 	}
 	return lst[g_mt() % lst.size()];
+}
+int Board::playout_random() {
+	for(;;) {
+	    auto mv = sel_move_random();
+	    put(mv.m_x, mv.m_y, next_color());
+	    //print();
+	    if( is_game_over() )
+            break;
+	}
+	return m_winner;
+}
+int Board::playout_random(int N) {
+	return 0;
 }
