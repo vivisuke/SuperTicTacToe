@@ -13,9 +13,16 @@
 #define		N_VERT		3
 #define		BD_SIZE		(N_HORZ*N_VERT)
 
+#define		EMPTY		0
+#define		WHITE		1
+#define		BLACK		(-1)
+
 class Board {
 public:
 	Board();
 public:
 	void	init();
+	void	print() const;
+private:
+	char	m_board[BD_SIZE];
 };

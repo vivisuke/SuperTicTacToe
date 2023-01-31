@@ -6,6 +6,7 @@ using namespace std;
 int main()
 {
 	Board bd;
+	bd.print();
 	//
     std::cout << "\nOK.\n";
 }
