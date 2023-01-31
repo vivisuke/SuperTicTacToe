@@ -36,3 +36,6 @@ void Board::print() const {
 	cout << " +------+\n";
 	cout << "\n";
 }
+void Board::put(int x, int y, char col) {
+	m_board[x + y*N_HORZ] = col;
+}

@@ -23,6 +23,7 @@ public:
 public:
 	void	init();
 	void	print() const;
+	void	put(int x, int y, char col);
 private:
 	char	m_board[BD_SIZE];
 };

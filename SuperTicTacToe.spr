@@ -110,7 +110,7 @@
 0108 ◎ C 01/31 01/31 0.001│ToDo│TicTacToe：Board クラス追加
 0109 ◎ C 01/31 01/31 0.001│ToDo│Board::print() 実装
 0110 ◎ C 01/31 01/31 0.001│ToDo│Board::print()：上辺に「abc」、左辺に「123」表示
-0111 ● C 01/31            │ToDo│
+0111 ◎ C 01/31 01/31 0.001│ToDo│Board::put(x, y, col) 実装
 0112 ● C 01/31            │ToDo│
 0113 ● C 01/31            │ToDo│
 0114 ● C 01/31            │ToDo│
