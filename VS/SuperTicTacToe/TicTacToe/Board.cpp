@@ -20,7 +20,10 @@ void Board::init() {
 }
 void Board::print() const {
 	int ix = 0;
+	cout << "  ‚‚‚‚ƒ\n";
+	cout << " +------+\n";
 	for(int y = 0; y != N_VERT; ++y) {
+		cout << (y+1) << "|";
 		for(int x = 0; x != N_HORZ; ++x) {
 			switch( m_board[ix++] ) {
 			case EMPTY:	cout << "E"; break;
@@ -28,7 +31,8 @@ void Board::print() const {
 			case BLACK:	cout << "‚w"; break;
 			}
 		}
-		cout << "\n";
+		cout << "|\n";
 	}
+	cout << " +------+\n";
 	cout << "\n";
 }
