@@ -31,10 +31,24 @@ int main()
             break;
     }
 #endif
+#if	0
 	auto w = bd.playout_random();
     bd.print();
     //cout << "winner = " << (int)w << "\n";
     cout << "winner = " << (w==MARU?"O":w==BATSU?"X":"none") << "\n";
+#endif
+    const int N = 10000;
+    for(int y = 0; y != N_VERT; ++y) {
+	    for(int x = 0; x != N_HORZ; ++x) {
+		    bd.put(x, y, MARU);
+		    auto sum = bd.playout_random(N);
+		    //cout << "sum = " << sum << "\n";
+		    //cout << sum << " ";
+		    cout << (double)sum/N << " ";
+		    bd.undo_put();
+	    }
+	    cout << "\n";
+    }
     //
     std::cout << "\nOK.\n";
 }

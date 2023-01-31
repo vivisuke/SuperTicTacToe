@@ -221,5 +221,11 @@ int Board::playout_random() {
 	return m_winner;
 }
 int Board::playout_random(int N) {
-	return 0;
+	int sum = 0;
+	for(int i = 0; i != N; ++i) {
+		Board bd(*this);
+		sum += bd.playout_random();
+		//bd.print();
+	}
+	return sum;
 }
