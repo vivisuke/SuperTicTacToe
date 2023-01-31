@@ -16,6 +16,7 @@ Board::Board() {
 	init();
 }
 void Board::init() {
+	m_game_over = false;
 	for(int i = 0; i != BD_SIZE; ++i) m_board[i] = EMPTY;
 }
 void Board::print() const {
@@ -37,5 +38,14 @@ void Board::print() const {
 	cout << "\n";
 }
 void Board::put(int x, int y, char col) {
-	m_board[x + y*N_HORZ] = col;
+	m_board[xyToIndex(x, y)] = col;
+	//	終局チェック
+	if( m_board[xyToIndex(0, y)] + m_board[xyToIndex(1, y)] + m_board[xyToIndex(2, y)] == col * 3 )
+		m_game_over = true;
+	else if( m_board[xyToIndex(y, 0)] + m_board[xyToIndex(x, 1)] + m_board[xyToIndex(x, 2)] == col * 3 )
+		m_game_over = true;
+	else if( x == y && m_board[xyToIndex(0, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(2, 2)] == col * 3 )
+		m_game_over = true;
+	else if( x == 2 - y && m_board[xyToIndex(2, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(0, 2)] == col * 3 )
+		m_game_over = true;
 }
