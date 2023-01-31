@@ -107,6 +107,6 @@
 0105 ◎ C 01/23 01/23 0.001│ToDo│Board::playout() 実装
 0106 ● C 01/23            │ToDo│Board::playout(N) 実装
 0107 ◎ C 01/29 01/31 0.001│ToDo│単なる三目並べもプロジェクトに追加
-0108 ● C 01/31            │ToDo│
+0108 ◎ C 01/31 01/31 0.001│ToDo│TicTacToe：Board クラス追加
 0109 ● C 01/31            │ToDo│
 0110 ● C 01/31            │ToDo│
