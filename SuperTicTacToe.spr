@@ -113,10 +113,10 @@
 0111 ◎ C 01/31 01/31 0.001│ToDo│Board::put(x, y, col) 実装
 0112 ◎ C 01/31 02/01 0.001│ToDo│Board::put(x, y, col)：終局チェック
 0113 ● C 01/31            │ToDo│Board::Board(const Board&) 実装
-0114 ● C 01/31            │ToDo│
-0115 ● C 01/31            │ToDo│
-0116 ● C 01/31            │ToDo│
-0117 ● C 01/31            │ToDo│
-0118 ● C 01/31            │ToDo│
-0119 ● C 01/31            │ToDo│
-0120 ● C 01/31            │ToDo│
+0114 ◎ C 02/01 02/01 0.001│ToDo│Board::sel_move_random() 実装
+0115 ● C 02/01            │ToDo│
+0116 ● C 02/01            │ToDo│
+0117 ● C 02/01            │ToDo│
+0118 ● C 02/01            │ToDo│
+0119 ● C 02/01            │ToDo│
+0120 ● C 02/01            │ToDo│
