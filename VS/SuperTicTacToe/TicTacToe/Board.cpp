@@ -15,7 +15,7 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-//std::mt19937 g_mt(2);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(3);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 Board::Board() {
@@ -24,6 +24,7 @@ Board::Board() {
 Board::Board(const Board& x)
 	: m_game_over(x.m_game_over)
 	, m_next_color(x.m_next_color)
+	, m_winner(x.m_winner)
 {
 	for(int i = 0; i != BD_SIZE; ++i) {
 		m_board[i] = x.m_board[i];
@@ -58,14 +59,19 @@ void Board::print() const {
 void Board::put(int x, int y, char col) {
 	m_board[xyToIndex(x, y)] = col;
 	//	終局チェック
-	if( m_board[xyToIndex(0, y)] + m_board[xyToIndex(1, y)] + m_board[xyToIndex(2, y)] == col * 3 )
+	if( m_board[xyToIndex(0, y)] + m_board[xyToIndex(1, y)] + m_board[xyToIndex(2, y)] == col * 3 ) {
 		m_game_over = true;
-	else if( m_board[xyToIndex(y, 0)] + m_board[xyToIndex(x, 1)] + m_board[xyToIndex(x, 2)] == col * 3 )
+		m_winner = col;
+	} else if( m_board[xyToIndex(x, 0)] + m_board[xyToIndex(x, 1)] + m_board[xyToIndex(x, 2)] == col * 3 ) {
 		m_game_over = true;
-	else if( x == y && m_board[xyToIndex(0, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(2, 2)] == col * 3 )
+		m_winner = col;
+	} else if( x == y && m_board[xyToIndex(0, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(2, 2)] == col * 3 ) {
 		m_game_over = true;
-	else if( x == 2 - y && m_board[xyToIndex(2, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(0, 2)] == col * 3 )
+		m_winner = col;
+	} else if( x == 2 - y && m_board[xyToIndex(2, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(0, 2)] == col * 3 ) {
 		m_game_over = true;
+		m_winner = col;
+	}
 	//
 	m_stack.push_back(HistItem(x, y, col));
 	if( m_stack.size() == BD_SIZE )
