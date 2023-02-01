@@ -30,6 +30,7 @@ int main()
 		bd.print();
 	}
 #endif
+#if 1
 	const int N = 1000;
 	for(int y = 0; y != N_VERT; ++y) {
 		for(int x = 0; x != N_HORZ; ++x) {
@@ -42,6 +43,10 @@ int main()
 		}
 		cout << "\n";
 	}
+	cout << "\n";
+#endif
+	auto mv = bd.sel_move_PMC();
+	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n";
 	//
     std::cout << "\nOK.\n";
 }

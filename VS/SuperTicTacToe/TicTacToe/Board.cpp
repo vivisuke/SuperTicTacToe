@@ -107,3 +107,26 @@ int Board::playout_random(int N) {
 	}
 	return sum;
 }
+//	純粋モンテカルロ法による着手決定
+Move Board::sel_move_PMC() {
+	const int N = 1000;
+	int mx = -N;
+	Move mv;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			if( is_empty(x, y) ) {
+				//Board bd(*this);
+				Board bd;
+				auto r = bd.playout_random(N);
+				cout << (double)r/N << "\t";
+				r *= m_next_color;		//	前提：WHITE:1, BLACK:-1
+				if( r > mx ) {
+					mx = r;
+					mv = Move(x, y);
+				}
+			}
+		}
+		cout << "\n";
+	}
+	return mv;
+}
