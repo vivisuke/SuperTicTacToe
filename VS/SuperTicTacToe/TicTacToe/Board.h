@@ -67,6 +67,7 @@ public:
 	void	undo_put();
 	Move	sel_move_random();
 	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
+	int		playout_random(int N);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
 private:
 	bool	m_game_over;				//	終局状態か？
 	char	m_winner;					//	勝者：WHITE | EMPTY | BLACK
