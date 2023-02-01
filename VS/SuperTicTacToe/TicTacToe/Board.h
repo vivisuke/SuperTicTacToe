@@ -9,13 +9,15 @@
 
 #pragma once
 
+#include <vector>
+
 #define		N_HORZ		3
 #define		N_VERT		3
 #define		BD_SIZE		(N_HORZ*N_VERT)
 
 #define		EMPTY		0
-#define		WHITE		1
-#define		BLACK		(-1)
+#define		WHITE		1			//	Ｏ、先手番
+#define		BLACK		(-1)		//	Ｘ、後手番
 
 struct Move {
 public:
@@ -45,10 +47,13 @@ public:
 class Board {
 public:
 	Board();
+	Board(const Board&);
 public:
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 
 	bool	is_game_over() const { return m_game_over; }		//	終局状態か？
+	char	next_color() const { return m_next_color; }			//	次の手番
+	void	change_color() { m_next_color = (WHITE + BLACK) - m_next_color; }
 	char	get_color(int x, int y) const {
 		return m_board[xyToIndex(x, y)];
 	}
@@ -61,7 +66,11 @@ public:
 	void	put(Move& mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	undo_put();
 	Move	sel_move_random();
+	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 private:
 	bool	m_game_over;				//	終局状態か？
+	char	m_winner;					//	勝者：WHITE | EMPTY | BLACK
+	char	m_next_color;				//	次の手番
 	char	m_board[BD_SIZE];
+	std::vector<HistItem>	m_stack;
 };

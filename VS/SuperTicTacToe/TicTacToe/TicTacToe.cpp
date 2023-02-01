@@ -18,9 +18,16 @@ int main()
 	bd.print();
 	cout << (bd.is_game_over() ? "Game Over.\n" : "Not Game Over.\n");
 #endif
+#if 0
 	auto mv = bd.sel_move_random();
 	bd.put(mv, WHITE);
 	bd.print();
+#endif
+	while( !bd.is_game_over() ) {
+		auto mv = bd.sel_move_random();
+		bd.put(mv, bd.next_color());
+		bd.print();
+	}
 	//
     std::cout << "\nOK.\n";
 }

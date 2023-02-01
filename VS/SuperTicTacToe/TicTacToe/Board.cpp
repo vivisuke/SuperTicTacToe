@@ -21,8 +21,20 @@ std::mt19937 g_mt(g_rnd());       // ƒƒ‹ƒZƒ“ƒkEƒcƒCƒXƒ^‚Ì32ƒrƒbƒg”ÅAˆø”‚Í‰Š
 Board::Board() {
 	init();
 }
+Board::Board(const Board& x)
+	: m_game_over(x.m_game_over)
+	, m_next_color(x.m_next_color)
+{
+	for(int i = 0; i != BD_SIZE; ++i) {
+		m_board[i] = x.m_board[i];
+	}
+	m_stack = x.m_stack;
+}
 void Board::init() {
 	m_game_over = false;
+	m_winner = EMPTY;
+	m_next_color = WHITE;
+	m_stack.clear();
 	for(int i = 0; i != BD_SIZE; ++i) m_board[i] = EMPTY;
 }
 void Board::print() const {
@@ -54,6 +66,11 @@ void Board::put(int x, int y, char col) {
 		m_game_over = true;
 	else if( x == 2 - y && m_board[xyToIndex(2, 0)] + m_board[xyToIndex(1, 1)] + m_board[xyToIndex(0, 2)] == col * 3 )
 		m_game_over = true;
+	//
+	m_stack.push_back(HistItem(x, y, col));
+	if( m_stack.size() == BD_SIZE )
+		m_game_over = true;
+	change_color();		//	è”ÔŒğ‘ã
 }
 Move Board::sel_move_random() {
 	vector<Move> lst;
@@ -64,4 +81,14 @@ Move Board::sel_move_random() {
 		}
 	}
 	return lst[g_mt() % lst.size()];
+}
+int Board::playout_random() {
+	for(;;) {
+	    auto mv = sel_move_random();
+	    put(mv.m_x, mv.m_y, next_color());
+	    //print();
+	    if( is_game_over() )
+            break;
+	}
+	return m_winner;
 }
