@@ -45,8 +45,24 @@ int main()
 	}
 	cout << "\n";
 #endif
+	cout << "bd.sel_move_PMC():\n";
 	auto mv = bd.sel_move_PMC();
-	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n";
+	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
+#if 1
+	//const int N = 1000;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			//if( is_empty(x, y) ) {
+			//}
+			Board bd;
+			bd.put(x, y, WHITE);
+			auto r = bd.playout_random(N);
+			cout << (double)r/N << "\t";
+		}
+		cout << "\n";
+	}
+	cout << "\n";
+#endif
 	//
     std::cout << "\nOK.\n";
 }

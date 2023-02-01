@@ -115,15 +115,18 @@ Move Board::sel_move_PMC() {
 	for(int y = 0; y != N_VERT; ++y) {
 		for(int x = 0; x != N_HORZ; ++x) {
 			if( is_empty(x, y) ) {
-				//Board bd(*this);
-				Board bd;
+				Board bd(*this);
+				//Board bd;
+				bd.put(x, y, m_next_color);
 				auto r = bd.playout_random(N);
-				cout << (double)r/N << "\t";
+				cout << (double)r/N << "\t";	//	for Debug
 				r *= m_next_color;		//	‘O’ñFWHITE:1, BLACK:-1
 				if( r > mx ) {
 					mx = r;
 					mv = Move(x, y);
 				}
+			} else {
+				cout << ".\t";			//	for Debug
 			}
 		}
 		cout << "\n";
