@@ -84,6 +84,51 @@ void Board::undo_put() {
 	m_stack.pop_back();
 	change_color();		//	手番交代
 }
+//	col の手番で、三目並べることが出来る着手を探す
+//	return: 着手を発見できたか？
+bool Board::find_make_three(Move& mv, char col) {
+	for(int y = 0; y != N_VERT; ++y) {
+		if( m_board[0, y] + m_board[1, y] + m_board[2, y] == col * 2 ) {
+			if( m_board[0, y] == EMPTY )
+				mv = Move(0, y);
+			else if( m_board[1, y] == EMPTY )
+				mv = Move(1, y);
+			else
+				mv = Move(2, y);
+			return true;
+		}
+	}
+	for(int x = 0; x != N_HORZ; ++x) {
+		if( m_board[x, 0] + m_board[x, 1] + m_board[x, 2] == col * 2 ) {
+			if( m_board[x, 0] == EMPTY )
+				mv = Move(x, 0);
+			else if( m_board[x, 1] == EMPTY )
+				mv = Move(x, 1);
+			else
+				mv = Move(x, 2);
+			return true;
+		}
+	}
+	if( m_board[0, 0] + m_board[1, 1] + m_board[2, 2] == col * 2 ) {
+		if( m_board[0, 0] == EMPTY )
+			mv = Move(0, 0);
+		else if( m_board[1, 1] == EMPTY )
+			mv = Move(1, 1);
+		else
+			mv = Move(2, 2);
+		return true;
+	}
+	if( m_board[2, 0] + m_board[1, 1] + m_board[0, 2] == col * 2 ) {
+		if( m_board[2, 0] == EMPTY )
+			mv = Move(2, 0);
+		else if( m_board[1, 1] == EMPTY )
+			mv = Move(1, 1);
+		else
+			mv = Move(0, 2);
+		return true;
+	}
+	return false;
+}
 Move Board::sel_move_random() {
 	vector<Move> lst;
 	for(int y = 0; y != N_VERT; ++y) {

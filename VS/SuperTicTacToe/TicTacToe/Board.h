@@ -65,6 +65,7 @@ public:
 	void	put(int x, int y, char col);
 	void	put(Move& mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	undo_put();
+	bool	find_make_three(Move&, char col);		//	col の手番で、三目並べることが出来る着手を探す
 	Move	sel_move_random();
 	Move	sel_move_PMC();				//	純粋モンテカルロ法による着手決定
 	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
