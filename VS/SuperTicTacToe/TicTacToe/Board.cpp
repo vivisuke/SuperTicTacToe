@@ -78,6 +78,12 @@ void Board::put(int x, int y, char col) {
 		m_game_over = true;
 	change_color();		//	Žè”ÔŒð‘ã
 }
+void Board::undo_put() {
+	const auto &item = m_stack.back();
+	m_board[xyToIndex(item.m_x, item.m_y)] = EMPTY;
+	m_stack.pop_back();
+	change_color();		//	Žè”ÔŒð‘ã
+}
 Move Board::sel_move_random() {
 	vector<Move> lst;
 	for(int y = 0; y != N_VERT; ++y) {
@@ -136,4 +142,15 @@ Move Board::sel_move_PMC() {
 		cout << "\n";
 	}
 	return mv;
+}
+int Board::Q_table_inedx() const {
+	int qix = 0;
+	for(int i = 0; i != BD_SIZE; ++i) {
+		qix *= 3;
+		switch( m_board[i] ) {
+		case WHITE: qix += 1;	break;
+		case BLACK: qix += 2;	break;
+		}
+	}
+	return qix;
 }

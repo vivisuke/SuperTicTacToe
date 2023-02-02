@@ -54,12 +54,24 @@ int main()
 	mv = bd.sel_move_PMC();
 	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
 #endif
+#if 0
 	while( !bd.is_game_over() ) {
 		auto mv = bd.sel_move_PMC();
 		cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
 		bd.put(mv, bd.next_color());
 		bd.print();
 	}
+#endif
+	auto mv = bd.sel_move_random();
+	bd.put(mv, bd.next_color());
+	bd.print();
+	mv = bd.sel_move_random();
+	bd.put(mv, bd.next_color());
+	bd.print();
+	bd.undo_put();
+	bd.print();
+	bd.undo_put();
+	bd.print();
 	//
     std::cout << "\nOK.\n";
 }

@@ -69,6 +69,7 @@ public:
 	Move	sel_move_PMC();				//	純粋モンテカルロ法による着手決定
 	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	int		playout_random(int N);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
+	int		Q_table_inedx() const;
 private:
 	bool	m_game_over;				//	終局状態か？
 	char	m_winner;					//	勝者：WHITE | EMPTY | BLACK
