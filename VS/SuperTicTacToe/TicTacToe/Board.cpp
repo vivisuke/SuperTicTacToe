@@ -15,8 +15,8 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-std::mt19937 g_mt(1);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(1);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 Board::Board() {
 	init();
@@ -101,6 +101,8 @@ int Board::playout_random() {
 	return m_winner;
 }
 int Board::playout_random(int N) {
+	if( is_game_over() )
+		return N * m_winner;
 	int sum = 0;
 	for(int i = 0; i != N; ++i) {
 		Board bd(*this);
