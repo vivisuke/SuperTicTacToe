@@ -15,8 +15,8 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-//std::mt19937 g_mt(3);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(1);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 Board::Board() {
 	init();
@@ -89,12 +89,14 @@ Move Board::sel_move_random() {
 	return lst[g_mt() % lst.size()];
 }
 int Board::playout_random() {
-	for(;;) {
-	    auto mv = sel_move_random();
-	    put(mv.m_x, mv.m_y, next_color());
-	    //print();
-	    if( is_game_over() )
-            break;
+	if( !is_game_over() ) {
+		for(;;) {
+		    auto mv = sel_move_random();
+		    put(mv.m_x, mv.m_y, next_color());
+		    //print();
+		    if( is_game_over() )
+	            break;
+		}
 	}
 	return m_winner;
 }

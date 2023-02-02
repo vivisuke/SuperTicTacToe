@@ -30,7 +30,7 @@ int main()
 		bd.print();
 	}
 #endif
-#if 1
+#if 0
 	const int N = 1000;
 	for(int y = 0; y != N_VERT; ++y) {
 		for(int x = 0; x != N_HORZ; ++x) {
@@ -45,24 +45,21 @@ int main()
 	}
 	cout << "\n";
 #endif
+#if 0
 	cout << "bd.sel_move_PMC():\n";
 	auto mv = bd.sel_move_PMC();
 	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
-#if 1
-	//const int N = 1000;
-	for(int y = 0; y != N_VERT; ++y) {
-		for(int x = 0; x != N_HORZ; ++x) {
-			//if( is_empty(x, y) ) {
-			//}
-			Board bd;
-			bd.put(x, y, WHITE);
-			auto r = bd.playout_random(N);
-			cout << (double)r/N << "\t";
-		}
-		cout << "\n";
-	}
-	cout << "\n";
+	bd.put(mv, bd.next_color());
+	bd.print();
+	mv = bd.sel_move_PMC();
+	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
 #endif
+	while( !bd.is_game_over() ) {
+		auto mv = bd.sel_move_PMC();
+		cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
+		bd.put(mv, bd.next_color());
+		bd.print();
+	}
 	//
     std::cout << "\nOK.\n";
 }
