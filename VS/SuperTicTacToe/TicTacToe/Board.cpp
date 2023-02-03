@@ -15,8 +15,8 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-//std::mt19937 g_mt(1);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(2);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 Board::Board() {
 	init();
@@ -139,11 +139,19 @@ Move Board::sel_move_random() {
 	}
 	return lst[g_mt() % lst.size()];
 }
-int Board::playout_random() {
+int Board::playout_random(bool prioThree) {
 	if( !is_game_over() ) {
 		for(;;) {
-		    auto mv = sel_move_random();
-		    put(mv.m_x, mv.m_y, next_color());
+			Move mv(-1, -1);
+			if( prioThree ) {
+				if( find_make_three(mv, next_color()) )	//	三目作れる場合
+					return next_color();
+				if( find_make_three(mv, op_color()) )		//	相手が三目作れる場合
+				    put(mv, next_color());
+			}
+			if( mv.m_x < 0 )
+			    mv = sel_move_random();
+		    put(mv, next_color());
 		    //print();
 		    if( is_game_over() )
 	            break;
@@ -151,13 +159,13 @@ int Board::playout_random() {
 	}
 	return m_winner;
 }
-int Board::playout_random(int N) {
+int Board::playout_random(int N, bool prioThree) {
 	if( is_game_over() )
 		return N * m_winner;
 	int sum = 0;
 	for(int i = 0; i != N; ++i) {
 		Board bd(*this);
-		sum += bd.playout_random();
+		sum += bd.playout_random(prioThree);
 		//bd.print();
 	}
 	return sum;
@@ -174,6 +182,32 @@ Move Board::sel_move_PMC() {
 				//Board bd;
 				bd.put(x, y, m_next_color);
 				auto r = bd.playout_random(N);
+				cout << (double)r/N << "\t";	//	for Debug
+				r *= m_next_color;		//	前提：WHITE:1, BLACK:-1
+				if( r > mx ) {
+					mx = r;
+					mv = Move(x, y);
+				}
+			} else {
+				cout << ".\t";			//	for Debug
+			}
+		}
+		cout << "\n";
+	}
+	return mv;
+}
+//	三目並ぶ手を優先するモンテカルロ法による着手決定
+Move Board::sel_move_MC(bool prioThree) {
+	const int N = 1000;
+	int mx = -N;
+	Move mv;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			if( is_empty(x, y) ) {
+				Board bd(*this);
+				//Board bd;
+				bd.put(x, y, m_next_color);
+				auto r = bd.playout_random(N, prioThree);
 				cout << (double)r/N << "\t";	//	for Debug
 				r *= m_next_color;		//	前提：WHITE:1, BLACK:-1
 				if( r > mx ) {

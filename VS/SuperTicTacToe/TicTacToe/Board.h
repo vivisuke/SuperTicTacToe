@@ -53,7 +53,8 @@ public:
 
 	bool	is_game_over() const { return m_game_over; }		//	終局状態か？
 	char	next_color() const { return m_next_color; }			//	次の手番
-	void	change_color() { m_next_color = (WHITE + BLACK) - m_next_color; }
+	char	op_color() const { return (WHITE + BLACK) - m_next_color; }			//	相手の手番
+	void	change_color() { m_next_color = op_color(); }
 	char	get_color(int x, int y) const {
 		return m_board[xyToIndex(x, y)];
 	}
@@ -68,8 +69,11 @@ public:
 	bool	find_make_three(Move&, char col);		//	col の手番で、三目並べることが出来る着手を探す
 	Move	sel_move_random();
 	Move	sel_move_PMC();				//	純粋モンテカルロ法による着手決定
-	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
-	int		playout_random(int N);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
+	Move	sel_move_MC(bool=false);				//	三目並ぶ手を優先するモンテカルロ法による着手決定
+	int		playout_random(bool=false);			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
+	int		playout_random(int N, bool=false);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
+	//int		playout_three_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
+	//int		playout_three_random(int N);	//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
 	int		Q_table_inedx() const;
 private:
 	bool	m_game_over;				//	終局状態か？
