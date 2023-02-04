@@ -3,22 +3,24 @@
 
 using namespace std;
 
-unordered_map<int, int> g_map;
+unordered_map<int, float> g_map;
 
-int gen_all_position(Board &bd) {
+const float GAMMA = 0.95;
+
+float gen_all_position(Board &bd) {
 	auto hv = bd.hash();
 	if( g_map.find(hv) == g_map.end() ) {		//	未登録の場合
 		if( bd.is_game_over() ) {
-			return g_map[hv] = bd.winner();
+			return g_map[hv] = bd.winner() * 1;
 		} else {
-			int v = bd.next_color() == WHITE ? -2 : 2;
+			float v = bd.next_color() == WHITE ? -2 : 2;
 			for(int y = 0; y != N_VERT; ++y) {
 				for(int x = 0; x != N_HORZ; ++x) {
 					if( bd.is_empty(x, y) ) {
 						bd.put(x, y, bd.next_color());
 						auto r = gen_all_position(bd);
 						bd.undo_put();
-						v = bd.next_color() == WHITE ? std::max(v, r) : std::min(v, r);
+						v = bd.next_color() == WHITE ? std::max(v, r*GAMMA) : std::min(v, r*GAMMA);
 					}
 				}
 			}
@@ -48,10 +50,13 @@ int main()
 	Board bd;
 	gen_all_position(bd);
 	cout << "g_map.size() = " << g_map.size() << "\n";
-	bd.put(1, 1, WHITE);
-	bd.put(0, 0, BLACK);
-	bd.put(1, 0, WHITE);
-	bd.put(1, 2, BLACK);
+	bd.put(0, 0, WHITE);
+	bd.put(2, 0, BLACK);
+	//bd.put(0, 0, WHITE);
+	//bd.put(1, 1, BLACK);
+	//bd.put(2, 2, WHITE);
+	//bd.put(0, 1, BLACK);
+	//bd.put(1, 2, BLACK);
 	print_next(bd);
 #if 0
 	bd.print();
