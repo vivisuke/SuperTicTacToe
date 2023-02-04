@@ -10,6 +10,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 
 #define		N_HORZ		3
 #define		N_VERT		3
@@ -56,12 +57,9 @@ public:
 	char	next_color() const { return m_next_color; }			//	ŽŸ‚ÌŽè”Ô
 	char	op_color() const { return (WHITE + BLACK) - m_next_color; }			//	‘ŠŽè‚ÌŽè”Ô
 	void	change_color() { m_next_color = op_color(); }
-	char	get_color(int x, int y) const {
-		return m_board[xyToIndex(x, y)];
-	}
-	bool	is_empty(int x, int y) const {
-		return get_color(x, y) == EMPTY;
-	}
+	char	get_color(int x, int y) const { return m_board[xyToIndex(x, y)]; }
+	bool	is_empty(int x, int y) const { return get_color(x, y) == EMPTY; }
+	bool	is_empty(int ix) const { return m_board[ix] == EMPTY; }
 	void	init();
 	void	print() const;
 	void	put(int x, int y, char col);

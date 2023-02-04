@@ -82,7 +82,8 @@ void Board::undo_put() {
 	const auto &item = m_stack.back();
 	m_board[xyToIndex(item.m_x, item.m_y)] = EMPTY;
 	m_stack.pop_back();
-	change_color();		//	手番交代
+	m_game_over = false;	//	ゲームオーバーから着手することは無い
+	change_color();			//	手番交代
 }
 //	col の手番で、三目並べることが出来る着手を探す
 //	return: 着手を発見できたか？
@@ -240,6 +241,61 @@ int Board::Q_table_inedx() const {
 	return qix;
 }
 int Board::hash() const {
+	int v1 = 0, v2 = 0;
+	int v3 = 0, v4 = 0;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			v1 *= 3;
+			switch( get_color(x, y) ) {
+			case WHITE:	v1 += 1; break;
+			case BLACK:	v1 += 2; break;
+			}
+			v2 *= 3;
+			switch( get_color(2-x, y) ) {
+			case WHITE:	v2 += 1; break;
+			case BLACK:	v2 += 2; break;
+			}
+			v3 *= 3;
+			switch( get_color(x, 2-y) ) {
+			case WHITE:	v3 += 1; break;
+			case BLACK:	v3 += 2; break;
+			}
+			v4 *= 3;
+			switch( get_color(2-x, 2-y) ) {
+			case WHITE:	v4 += 1; break;
+			case BLACK:	v4 += 2; break;
+			}
+		}
+	}
+	int v5 = 0, v6 = 0;
+	int v7 = 0, v8 = 0;
+	for(int x = 0; x != N_HORZ; ++x) {
+		for(int y = 0; y != N_VERT; ++y) {
+			v5 *= 3;
+			switch( get_color(x, y) ) {
+			case WHITE:	v5 += 1; break;
+			case BLACK:	v5 += 2; break;
+			}
+			v6 *= 3;
+			switch( get_color(2-x, y) ) {
+			case WHITE:	v6 += 1; break;
+			case BLACK:	v6 += 2; break;
+			}
+			v7 *= 3;
+			switch( get_color(x, 2-y) ) {
+			case WHITE:	v7 += 1; break;
+			case BLACK:	v7 += 2; break;
+			}
+			v8 *= 3;
+			switch( get_color(2-x, 2-y) ) {
+			case WHITE:	v8 += 1; break;
+			case BLACK:	v8 += 2; break;
+			}
+		}
+	}
+	return std::min(std::min(std::min(v1, v2), std::min(v3, v4)),
+					std::min(std::min(v5, v6), std::min(v7, v8)));
+#if 0
 	int hv = 0;
 	for(int i = 0; i != BD_SIZE; ++i) {
 		hv *= 3;
@@ -249,4 +305,5 @@ int Board::hash() const {
 		}
 	}
 	return hv;
+#endif
 }
