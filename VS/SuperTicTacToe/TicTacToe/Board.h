@@ -52,6 +52,7 @@ public:
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 
 	bool	is_game_over() const { return m_game_over; }		//	I‹Çó‘Ô‚©H
+	char	winner() const { return m_winner; }
 	char	next_color() const { return m_next_color; }			//	Ÿ‚Ìè”Ô
 	char	op_color() const { return (WHITE + BLACK) - m_next_color; }			//	‘Šè‚Ìè”Ô
 	void	change_color() { m_next_color = op_color(); }

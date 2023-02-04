@@ -54,7 +54,7 @@ int main()
 	mv = bd.sel_move_PMC();
 	cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
 #endif
-#if 1
+#if 0
 	while( !bd.is_game_over() ) {
 		auto mv = bd.sel_move_MC(true);
 		cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
@@ -63,6 +63,36 @@ int main()
 		cout << "\n";
 	}
 #endif
+	const int N_GAME = 1000;
+	int ww = 0, bw = 0;
+	Move mv;
+	for(int i = 0; i != N_GAME; ++i) {
+		if( (i % 100) == 0 ) cout << ".";
+		Board bd;
+		while( !bd.is_game_over() ) {
+			//mv = bd.sel_move_random();
+			//mv = bd.sel_move_MC(false);
+			//mv = bd.sel_move_MC(true);
+			if( bd.next_color() == WHITE ) {
+				//mv = bd.sel_move_random();
+				//mv = bd.sel_move_MC(false);
+				mv = bd.sel_move_MC(true);
+			} else {
+				//mv = bd.sel_move_random();
+				mv = bd.sel_move_MC(false);
+				//mv = bd.sel_move_MC(true);
+			}
+			//cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
+			bd.put(mv, bd.next_color());
+		}
+		if( bd.winner() == WHITE ) ++ww;
+		else if( bd.winner() == BLACK ) ++bw;
+	}
+	cout << "\n";
+	cout << "white won: " << ww*100.0/N_GAME << "%\n";
+	cout << "black won: " << bw*100.0/N_GAME << "%\n";
+	cout << "draw: " << (N_GAME-ww-bw)*100.0/N_GAME << "%\n";
+
 #if		0
 	auto mv = bd.sel_move_random();
 	bd.put(mv, bd.next_color());
