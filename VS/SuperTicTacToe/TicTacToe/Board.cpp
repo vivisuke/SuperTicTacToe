@@ -239,3 +239,14 @@ int Board::Q_table_inedx() const {
 	}
 	return qix;
 }
+int Board::hash() const {
+	int hv = 0;
+	for(int i = 0; i != BD_SIZE; ++i) {
+		hv *= 3;
+		switch( m_board[i] ) {
+		case WHITE:	hv += 1; break;
+		case BLACK:	hv += 2; break;
+		}
+	}
+	return hv;
+}

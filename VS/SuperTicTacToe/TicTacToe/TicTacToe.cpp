@@ -63,6 +63,7 @@ int main()
 		cout << "\n";
 	}
 #endif
+#if 0
 	const int N_GAME = 1000;
 	int ww = 0, bw = 0;
 	Move mv;
@@ -92,6 +93,7 @@ int main()
 	cout << "white won: " << ww*100.0/N_GAME << "%\n";
 	cout << "black won: " << bw*100.0/N_GAME << "%\n";
 	cout << "draw: " << (N_GAME-ww-bw)*100.0/N_GAME << "%\n";
+#endif
 
 #if		0
 	auto mv = bd.sel_move_random();
@@ -105,6 +107,14 @@ int main()
 	bd.undo_put();
 	bd.print();
 #endif
+	cout << "hash = " << bd.hash() << "\n";
+	bd.put(0, 0, WHITE);
+	bd.print();
+	cout << "hash = " << bd.hash() << "\n";
+	bd.undo_put();
+	bd.put(2, 0, WHITE);
+	bd.print();
+	cout << "hash = " << bd.hash() << "\n";
 	//
     std::cout << "\nOK.\n";
 }
