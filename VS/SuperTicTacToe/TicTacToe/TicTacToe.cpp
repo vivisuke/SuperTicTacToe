@@ -28,11 +28,32 @@ int gen_all_position(Board &bd) {
 		return g_map[hv];
 }
 
+void print_next(Board &bd) {
+	bd.print();
+	cout << "v = " << g_map[bd.hash()] << "\n\n";
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			if( bd.is_empty(x, y) ) {
+				bd.put(x, y, bd.next_color());
+				bd.print();
+				cout << "v = " << g_map[bd.hash()] << "\n\n";
+				bd.undo_put();
+			}
+		}
+	}
+}
+
 int main()
 {
 	Board bd;
 	gen_all_position(bd);
 	cout << "g_map.size() = " << g_map.size() << "\n";
+	bd.put(1, 1, WHITE);
+	bd.put(0, 0, BLACK);
+	bd.put(1, 0, WHITE);
+	bd.put(1, 2, BLACK);
+	print_next(bd);
+#if 0
 	bd.print();
 	cout << "v = " << g_map[bd.hash()] << "\n\n";
 	bd.put(0, 0, WHITE);
@@ -56,6 +77,7 @@ int main()
 	bd.put(1, 2, WHITE);
 	bd.print();
 	cout << "v = " << g_map[bd.hash()] << "\n\n";
+#endif
 #if 0
 	bd.put(1, 2, WHITE);
 	bd.put(2, 1, BLACK);

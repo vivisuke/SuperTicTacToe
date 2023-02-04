@@ -83,6 +83,7 @@ void Board::undo_put() {
 	m_board[xyToIndex(item.m_x, item.m_y)] = EMPTY;
 	m_stack.pop_back();
 	m_game_over = false;	//	ゲームオーバーから着手することは無い
+	m_winner = EMPTY;
 	change_color();			//	手番交代
 }
 //	col の手番で、三目並べることが出来る着手を探す
