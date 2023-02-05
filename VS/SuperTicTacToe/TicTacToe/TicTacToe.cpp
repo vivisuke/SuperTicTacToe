@@ -111,9 +111,9 @@ int main()
 			//mv = bd.sel_move_MC(false);
 			//mv = bd.sel_move_MC(true);
 			if( bd.next_color() == WHITE ) {
-				//mv = bd.sel_move_random();
+				mv = bd.sel_move_random();
 				//mv = bd.sel_move_MC(false);
-				mv = bd.sel_move_MC(true);
+				//mv = bd.sel_move_MC(true);
 				//mv = bd.sel_move_perfect();
 			} else {
 				//mv = bd.sel_move_random();

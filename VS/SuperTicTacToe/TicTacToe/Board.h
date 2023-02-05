@@ -73,12 +73,14 @@ public:
 	Move	sel_move_PMC();				//	純粋モンテカルロ法による着手決定
 	Move	sel_move_MC(bool=false);				//	三目並ぶ手を優先するモンテカルロ法による着手決定
 	Move	sel_move_perfect();			//	完全読み結果を参照するAI
+	Move	sel_move_CFR();						//	CFRアルゴリズム AI
 	int		playout_random(bool=false);			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	int		playout_random(int N, bool=false);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
 	//int		playout_three_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	//int		playout_three_random(int N);	//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
 	int		Q_table_inedx() const;
-	int		hash() const;				//	ハッシュ値計算
+	int		hash() const;				//	ハッシュ値計算、対称形考慮
+	int		hash_asym() const;			//	ハッシュ値計算、対称形非考慮
 private:
 	bool	m_game_over;				//	終局状態か？
 	char	m_winner;					//	勝者：WHITE | EMPTY | BLACK

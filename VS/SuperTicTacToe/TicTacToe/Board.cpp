@@ -18,7 +18,16 @@ std::random_device g_rnd;         // 非決定的な乱数生成器
 //std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
+//typedef int[8] Int8;
+struct RTable {
+	RTable() {
+		for(int i = 0; i != BD_SIZE; ++i) m_rv[i] = 0;
+	}
+	int	m_rv[BD_SIZE];		//	後悔値テーブル
+};
+
 unordered_map<int, float> g_vtable;		//	局面ハッシュキー→局面評価値
+unordered_map<int, RTable> g_rtable;	//	局面ハッシュキー→後悔値テーブル
 
 const float GAMMA = 0.95;
 
@@ -341,6 +350,7 @@ int Board::hash() const {
 			}
 		}
 	}
+	//return v1;
 	return std::min(std::min(std::min(v1, v2), std::min(v3, v4)),
 					std::min(std::min(v5, v6), std::min(v7, v8)));
 #if 0
@@ -354,6 +364,19 @@ int Board::hash() const {
 	}
 	return hv;
 #endif
+}
+int Board::hash_asym() const {
+	int v1 = 0;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			v1 *= 3;
+			switch( get_color(x, y) ) {
+			case WHITE:	v1 += 1; break;
+			case BLACK:	v1 += 2; break;
+			}
+		}
+	}
+	return v1;
 }
 //	完全読み結果を参照するAI
 Move Board::sel_move_perfect() {
@@ -380,5 +403,9 @@ Move Board::sel_move_perfect() {
 			}
 		}
 	}
+	return mv;
+}
+Move Board::sel_move_CFR() {
+	Move mv;
 	return mv;
 }
