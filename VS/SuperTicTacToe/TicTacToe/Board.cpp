@@ -18,6 +18,53 @@ std::random_device g_rnd;         // 非決定的な乱数生成器
 //std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
+unordered_map<int, float> g_vtable;		//	局面ハッシュキー→局面評価値
+
+const float GAMMA = 0.95;
+
+float gen_all_position(Board &bd) {
+	auto hv = bd.hash();
+	if( g_vtable.find(hv) == g_vtable.end() ) {		//	未登録の場合
+		if( bd.is_game_over() ) {
+			return g_vtable[hv] = bd.winner() * 1;
+		} else {
+			float v = bd.next_color() * -2.0;
+			for(int y = 0; y != N_VERT; ++y) {
+				for(int x = 0; x != N_HORZ; ++x) {
+					if( bd.is_empty(x, y) ) {
+						bd.put(x, y, bd.next_color());
+						auto r = gen_all_position(bd) * GAMMA;
+						bd.undo_put();
+						v = bd.next_color() == WHITE ? std::max(v, r) : std::min(v, r);
+					}
+				}
+			}
+			return g_vtable[hv] = v;
+		}
+	} else
+		return g_vtable[hv];
+}
+void init_vtable() {
+	Board bd;
+	gen_all_position(bd);
+	cout << "g_vtable.size() = " << g_vtable.size() << "\n";
+}
+void print_next(Board &bd) {
+	bd.print();
+	cout << "v = " << g_vtable[bd.hash()] << "\n\n";
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			if( bd.is_empty(x, y) ) {
+				bd.put(x, y, bd.next_color());
+				bd.print();
+				cout << "v = " << g_vtable[bd.hash()] << "\n\n";
+				bd.undo_put();
+			}
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------
 Board::Board() {
 	init();
 }
@@ -307,4 +354,31 @@ int Board::hash() const {
 	}
 	return hv;
 #endif
+}
+//	完全読み結果を参照するAI
+Move Board::sel_move_perfect() {
+	if( g_vtable.empty() ) init_vtable();
+	Move mv;
+	float v = next_color() * -2.0;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x) {
+			if( is_empty(x, y) ) {
+				put(x, y, next_color());
+				auto r = g_vtable[hash()] * GAMMA;
+				undo_put();
+				if( next_color() == WHITE ) {
+					if( r > v ) {
+						v = r;
+						mv = Move(x, y);
+					}
+				} else {
+					if( r < v ) {
+						v = r;
+						mv = Move(x, y);
+					}
+				}
+			}
+		}
+	}
+	return mv;
 }

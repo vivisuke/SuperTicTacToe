@@ -3,53 +3,12 @@
 
 using namespace std;
 
-unordered_map<int, float> g_map;
-
-const float GAMMA = 0.95;
-
-float gen_all_position(Board &bd) {
-	auto hv = bd.hash();
-	if( g_map.find(hv) == g_map.end() ) {		//	未登録の場合
-		if( bd.is_game_over() ) {
-			return g_map[hv] = bd.winner() * 1;
-		} else {
-			float v = bd.next_color() == WHITE ? -2 : 2;
-			for(int y = 0; y != N_VERT; ++y) {
-				for(int x = 0; x != N_HORZ; ++x) {
-					if( bd.is_empty(x, y) ) {
-						bd.put(x, y, bd.next_color());
-						auto r = gen_all_position(bd);
-						bd.undo_put();
-						v = bd.next_color() == WHITE ? std::max(v, r*GAMMA) : std::min(v, r*GAMMA);
-					}
-				}
-			}
-			return g_map[hv] = v;
-		}
-	} else
-		return g_map[hv];
-}
-
-void print_next(Board &bd) {
-	bd.print();
-	cout << "v = " << g_map[bd.hash()] << "\n\n";
-	for(int y = 0; y != N_VERT; ++y) {
-		for(int x = 0; x != N_HORZ; ++x) {
-			if( bd.is_empty(x, y) ) {
-				bd.put(x, y, bd.next_color());
-				bd.print();
-				cout << "v = " << g_map[bd.hash()] << "\n\n";
-				bd.undo_put();
-			}
-		}
-	}
-}
-
 int main()
 {
+	init_vtable();
 	Board bd;
-	gen_all_position(bd);
-	cout << "g_map.size() = " << g_map.size() << "\n";
+#if 0
+	//gen_all_position(bd);
 	bd.put(0, 0, WHITE);
 	bd.put(2, 0, BLACK);
 	//bd.put(0, 0, WHITE);
@@ -58,6 +17,7 @@ int main()
 	//bd.put(0, 1, BLACK);
 	//bd.put(1, 2, BLACK);
 	print_next(bd);
+#endif
 #if 0
 	bd.print();
 	cout << "v = " << g_map[bd.hash()] << "\n\n";
@@ -139,7 +99,7 @@ int main()
 		cout << "\n";
 	}
 #endif
-#if 0
+#if 1
 	const int N_GAME = 1000;
 	int ww = 0, bw = 0;
 	Move mv;
@@ -154,10 +114,12 @@ int main()
 				//mv = bd.sel_move_random();
 				//mv = bd.sel_move_MC(false);
 				mv = bd.sel_move_MC(true);
+				//mv = bd.sel_move_perfect();
 			} else {
 				//mv = bd.sel_move_random();
-				mv = bd.sel_move_MC(false);
+				//mv = bd.sel_move_MC(false);
 				//mv = bd.sel_move_MC(true);
+				mv = bd.sel_move_perfect();
 			}
 			//cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
 			bd.put(mv, bd.next_color());

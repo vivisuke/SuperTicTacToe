@@ -20,6 +20,9 @@
 #define		WHITE		1			//	Ｏ、先手番
 #define		BLACK		(-1)		//	Ｘ、後手番
 
+void init_vtable();
+void print_next(class Board &bd);
+
 struct Move {
 public:
 	Move(char x = 0, char y = 0)
@@ -69,6 +72,7 @@ public:
 	Move	sel_move_random();
 	Move	sel_move_PMC();				//	純粋モンテカルロ法による着手決定
 	Move	sel_move_MC(bool=false);				//	三目並ぶ手を優先するモンテカルロ法による着手決定
+	Move	sel_move_perfect();			//	完全読み結果を参照するAI
 	int		playout_random(bool=false);			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	int		playout_random(int N, bool=false);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
 	//int		playout_three_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
