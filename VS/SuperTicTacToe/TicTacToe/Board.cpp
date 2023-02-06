@@ -113,6 +113,28 @@ void Board::print() const {
 	cout << " +------+\n";
 	cout << "\n";
 }
+void Board::print_vtable() const {
+	const auto& elm = g_rtable[hash_asym()];
+	int ix = 0;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x, ++ix) {
+			if( is_empty(x, y) ) {
+				if( elm.m_rv[ix] > 0 )
+					cout << elm.m_rv[ix] << "  ";
+				else
+					cout << "-  ";
+			} else {
+				switch( m_board[ix] ) {
+				//case EMPTY:	cout << "・\t"; break;
+				case WHITE:	cout << "Ｏ "; break;
+				case BLACK:	cout << "Ｘ "; break;
+				}
+			}
+		}
+		cout << "\n";
+	}
+	cout << "\n";
+}
 void Board::put(int x, int y, char col) {
 	m_board[xyToIndex(x, y)] = col;
 	//	終局チェック
@@ -422,7 +444,7 @@ int learn_CFR(Board& bd, bool learning) {
 		}
 		rix = lst[g_mt() % lst.size()];		//	着手箇所をランダムに選択
 	} else {		//	後悔値の大きい箇所に高確率で着手
-		int t = g_mt() & sum + 1;		//	[1, sum]
+		int t = g_mt() % sum + 1;		//	[1, sum]
 		for(;;) {
 			if( (t -= elm.m_rv[rix]) <= 0 )
 				break;
@@ -439,19 +461,27 @@ int learn_CFR(Board& bd, bool learning) {
 				bd.put(rx, bd.next_color());
 				auto r2 = learn_CFR(bd, false);
 				bd.undo_put();
-				elm.m_rv[rx] = std::max(0, elm.m_rv[rx] + (r2 - r));
+				if( bd.next_color() == WHITE )
+					elm.m_rv[rx] = std::max(0, elm.m_rv[rx] + (r2 - r));
+				else
+					elm.m_rv[rx] = std::max(0, elm.m_rv[rx] + (r - r2));
 			}
 		}
-		bd.print();
-		for (int i = 0; i != BD_SIZE; ++i) cout << elm.m_rv[i] << " ";
-		cout << "\n";
+		bd.print_vtable();
+		//for (int i = 0; i != BD_SIZE; ++i) cout << elm.m_rv[i] << " ";
+		//cout << "\n";
 	}
 	return r;
 }
 void learn_CFR() {
 	g_rtable.clear();
 	Board bd;
-	learn_CFR(bd, true);
+	//bd.put(0, 0, WHITE);
+	//bd.put(1, 0, BLACK);
+	//bd.put(0, 1, WHITE);
+	//bd.put(1, 2, BLACK);
+	for(int i = 0; i != 10; ++i)
+		learn_CFR(bd, true);
 }
 Move Board::sel_move_CFR() {
 	//auto hv = hash_asym();
