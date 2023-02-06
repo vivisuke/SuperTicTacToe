@@ -10,13 +10,14 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <numeric>
 #include "Board.h"
 
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-//std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 //typedef int[8] Int8;
 struct RTable {
@@ -26,18 +27,18 @@ struct RTable {
 	int	m_rv[BD_SIZE];		//	後悔値テーブル
 };
 
-unordered_map<int, float> g_vtable;		//	局面ハッシュキー→局面評価値
+unordered_map<int, double> g_vtable;		//	局面ハッシュキー→局面評価値
 unordered_map<int, RTable> g_rtable;	//	局面ハッシュキー→後悔値テーブル
 
-const float GAMMA = 0.95;
+const double GAMMA = 0.95;
 
-float gen_all_position(Board &bd) {
+double gen_all_position(Board &bd) {
 	auto hv = bd.hash();
 	if( g_vtable.find(hv) == g_vtable.end() ) {		//	未登録の場合
 		if( bd.is_game_over() ) {
 			return g_vtable[hv] = bd.winner() * 1;
 		} else {
-			float v = bd.next_color() * -2.0;
+			double v = bd.next_color() * -2.0;
 			for(int y = 0; y != N_VERT; ++y) {
 				for(int x = 0; x != N_HORZ; ++x) {
 					if( bd.is_empty(x, y) ) {
@@ -382,7 +383,7 @@ int Board::hash_asym() const {
 Move Board::sel_move_perfect() {
 	if( g_vtable.empty() ) init_vtable();
 	Move mv;
-	float v = next_color() * -2.0;
+	double v = next_color() * -2.0;
 	for(int y = 0; y != N_VERT; ++y) {
 		for(int x = 0; x != N_HORZ; ++x) {
 			if( is_empty(x, y) ) {
@@ -405,7 +406,60 @@ Move Board::sel_move_perfect() {
 	}
 	return mv;
 }
+int learn_CFR(Board& bd, bool learning) {
+	if( bd.is_game_over() ) {
+		//bd.print();
+		return bd.winner();
+	}
+	auto& elm = g_rtable[bd.hash_asym()];
+	auto sum = std::accumulate(begin(elm.m_rv), end(elm.m_rv), 0);
+	int rix = 0;
+	if( sum == 0 ) {		//	後悔値テーブルが全て0の場合：
+		vector<int> lst;
+		for(int i = 0; i != BD_SIZE; ++i) {
+			if( bd.is_empty(i) )
+				lst.push_back(i);
+		}
+		rix = lst[g_mt() % lst.size()];		//	着手箇所をランダムに選択
+	} else {		//	後悔値の大きい箇所に高確率で着手
+		int t = g_mt() & sum + 1;		//	[1, sum]
+		for(;;) {
+			if( (t -= elm.m_rv[rix]) <= 0 )
+				break;
+			++rix;
+		}
+	}
+	bd.put(rix, bd.next_color());
+	auto r = learn_CFR(bd, learning);
+	bd.undo_put();
+	if( learning ) {	//	学習フラグON → 後悔値テーブル更新
+		//bd.print();
+		for(int rx = 0; rx != BD_SIZE; ++rx) {
+			if( rx != rix && bd.is_empty(rx) ) {	//	反事実箇所に着手可能な場合
+				bd.put(rx, bd.next_color());
+				auto r2 = learn_CFR(bd, false);
+				bd.undo_put();
+				elm.m_rv[rx] = std::max(0, elm.m_rv[rx] + (r2 - r));
+			}
+		}
+		bd.print();
+		for (int i = 0; i != BD_SIZE; ++i) cout << elm.m_rv[i] << " ";
+		cout << "\n";
+	}
+	return r;
+}
+void learn_CFR() {
+	g_rtable.clear();
+	Board bd;
+	learn_CFR(bd, true);
+}
 Move Board::sel_move_CFR() {
+	//auto hv = hash_asym();
+	auto& ri = g_rtable[hash_asym()];
+	auto sum = std::accumulate(begin(ri.m_rv), end(ri.m_rv), 0);
+	if( sum == 0 ) {
+
+	}
 	Move mv;
 	return mv;
 }

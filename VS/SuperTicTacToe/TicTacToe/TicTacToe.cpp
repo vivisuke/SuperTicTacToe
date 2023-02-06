@@ -6,6 +6,7 @@ using namespace std;
 int main()
 {
 	init_vtable();
+	learn_CFR();
 	Board bd;
 #if 0
 	//gen_all_position(bd);
@@ -99,7 +100,7 @@ int main()
 		cout << "\n";
 	}
 #endif
-#if 1
+#if 0
 	const int N_GAME = 1000;
 	int ww = 0, bw = 0;
 	Move mv;

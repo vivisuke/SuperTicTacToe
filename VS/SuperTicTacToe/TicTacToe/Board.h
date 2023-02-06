@@ -22,6 +22,7 @@
 
 void init_vtable();
 void print_next(class Board &bd);
+void learn_CFR();
 
 struct Move {
 public:
@@ -61,10 +62,12 @@ public:
 	char	op_color() const { return (WHITE + BLACK) - m_next_color; }			//	‘ŠŽè‚ÌŽè”Ô
 	void	change_color() { m_next_color = op_color(); }
 	char	get_color(int x, int y) const { return m_board[xyToIndex(x, y)]; }
+	char	get_color(int ix) const { return m_board[ix]; }
 	bool	is_empty(int x, int y) const { return get_color(x, y) == EMPTY; }
 	bool	is_empty(int ix) const { return m_board[ix] == EMPTY; }
 	void	init();
 	void	print() const;
+	void	put(int ix, char col) { put(ix%N_HORZ, ix/N_HORZ, col); }
 	void	put(int x, int y, char col);
 	void	put(Move& mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	undo_put();
