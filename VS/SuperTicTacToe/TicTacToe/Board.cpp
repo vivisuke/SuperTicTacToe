@@ -10,6 +10,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <string>
 #include <numeric>
 #include "Board.h"
 
@@ -73,7 +74,12 @@ void print_next(Board &bd) {
 		}
 	}
 }
-
+string dig_str(int x, int nc) {
+	auto txt = to_string(x);
+	if (txt.size() < nc)
+		txt = string(nc - txt.size(), ' ') + txt;
+	return txt;
+}
 //--------------------------------------------------------------------------------
 Board::Board() {
 	init();
@@ -113,16 +119,16 @@ void Board::print() const {
 	cout << " +------+\n";
 	cout << "\n";
 }
-void Board::print_vtable() const {
+void Board::print_rtable() const {
 	const auto& elm = g_rtable[hash_asym()];
 	int ix = 0;
 	for(int y = 0; y != N_VERT; ++y) {
 		for(int x = 0; x != N_HORZ; ++x, ++ix) {
 			if( is_empty(x, y) ) {
 				if( elm.m_rv[ix] > 0 )
-					cout << elm.m_rv[ix] << "  ";
+					cout << dig_str(elm.m_rv[ix], 2) << " ";
 				else
-					cout << "-  ";
+					cout << "-- ";
 			} else {
 				switch( m_board[ix] ) {
 				//case EMPTY:	cout << "・\t"; break;
@@ -428,7 +434,7 @@ Move Board::sel_move_perfect() {
 	}
 	return mv;
 }
-int learn_CFR(Board& bd, bool learning) {
+int learn_CFR(Board& bd, bool learning, bool verbose) {
 	if( bd.is_game_over() ) {
 		//bd.print();
 		return bd.winner();
@@ -452,14 +458,14 @@ int learn_CFR(Board& bd, bool learning) {
 		}
 	}
 	bd.put(rix, bd.next_color());
-	auto r = learn_CFR(bd, learning);
+	auto r = learn_CFR(bd, learning, verbose);
 	bd.undo_put();
 	if( learning ) {	//	学習フラグON → 後悔値テーブル更新
 		//bd.print();
 		for(int rx = 0; rx != BD_SIZE; ++rx) {
 			if( rx != rix && bd.is_empty(rx) ) {	//	反事実箇所に着手可能な場合
 				bd.put(rx, bd.next_color());
-				auto r2 = learn_CFR(bd, false);
+				auto r2 = learn_CFR(bd, false, verbose);
 				bd.undo_put();
 				if( bd.next_color() == WHITE )
 					elm.m_rv[rx] = std::max(0, elm.m_rv[rx] + (r2 - r));
@@ -467,7 +473,8 @@ int learn_CFR(Board& bd, bool learning) {
 					elm.m_rv[rx] = std::max(0, elm.m_rv[rx] + (r - r2));
 			}
 		}
-		bd.print_vtable();
+		if( verbose )
+			bd.print_rtable();
 		//for (int i = 0; i != BD_SIZE; ++i) cout << elm.m_rv[i] << " ";
 		//cout << "\n";
 	}
@@ -476,12 +483,21 @@ int learn_CFR(Board& bd, bool learning) {
 void learn_CFR() {
 	g_rtable.clear();
 	Board bd;
-	//bd.put(0, 0, WHITE);
+	Board bd2;
+	bd2.put(0, 0, WHITE);
 	//bd.put(1, 0, BLACK);
 	//bd.put(0, 1, WHITE);
 	//bd.put(1, 2, BLACK);
-	for(int i = 0; i != 10; ++i)
-		learn_CFR(bd, true);
+	for(int i = 0; i != 10000; ++i) {
+		learn_CFR(bd, true, false);
+		if( (i + 1) % 1000 == 0 )
+			bd2.print_rtable();
+	}
+	//learn_CFR(bd, true, true);
+	//learn_CFR(bd, true, true);
+	//learn_CFR(bd, true, true);
+	//learn_CFR(bd, true, true);
+	//learn_CFR(bd, true, true);
 }
 Move Board::sel_move_CFR() {
 	//auto hv = hash_asym();

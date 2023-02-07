@@ -67,7 +67,7 @@ public:
 	bool	is_empty(int ix) const { return m_board[ix] == EMPTY; }
 	void	init();
 	void	print() const;
-	void	print_vtable() const;
+	void	print_rtable() const;
 	void	put(int ix, char col) { put(ix%N_HORZ, ix/N_HORZ, col); }
 	void	put(int x, int y, char col);
 	void	put(Move& mv, char col) { put(mv.m_x, mv.m_y, col); }
