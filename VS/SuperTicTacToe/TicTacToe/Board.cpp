@@ -52,7 +52,7 @@ double gen_all_position(Board &bd) {
 		if( bd.is_game_over() ) {
 			return g_vtable[hv] = bd.winner() * 1;
 		} else {
-			double v = bd.next_color() * -2.0;
+			double v = bd.next_color() * -DBL_MAX;
 			for(int y = 0; y != N_VERT; ++y) {
 				for(int x = 0; x != N_HORZ; ++x) {
 					if( bd.is_empty(x, y) ) {
@@ -454,7 +454,7 @@ int Board::hash_asym() const {
 Move Board::sel_move_perfect() {
 	if( g_vtable.empty() ) init_vtable();
 	Move mv;
-	double v = next_color() * -2.0;
+	double v = next_color() * -DBL_MAX;
 	for(int y = 0; y != N_VERT; ++y) {
 		for(int x = 0; x != N_HORZ; ++x) {
 			if( is_empty(x, y) ) {
@@ -500,7 +500,7 @@ double MinMaxQ(Board& bd, bool verbose) {
 		rix = lst[g_mt() % lst.size()];		//	着手箇所をランダムに選択
 	} else {
 		//	最大/最小Ｑ値のアクションを選択
-		double m = bd.next_color() == WHITE ? -2.0 : 2.0;
+		double m = bd.next_color() == WHITE ? -DBL_MAX : DBL_MAX;
 		for(int i = 0; i != BD_SIZE; ++i) {
 			if( bd.is_empty(i) ) {
 				if( bd.next_color() == WHITE && elm.m_q[i] > m ||
@@ -538,7 +538,7 @@ void learn_MinMaxQ_untilEnd(const Board& bd0, bool verbose) {
 		if( verbose ) bd.print_qtable();
 		auto key = bd.hash_asym();
 		auto& elm = g_qtable[key];
-		double m = bd.next_color() == WHITE ? -2.0 : 2.0;
+		double m = bd.next_color() == WHITE ? -DBL_MAX : DBL_MAX;
 		int ix = -1;
 		for(int i = 0; i != BD_SIZE; ++i) {
 			if( bd.is_empty(i) ) {
@@ -571,7 +571,7 @@ double learn_QPlus(Board& bd, bool learning, bool verbose) {
 		rix = lst[g_mt() % lst.size()];		//	着手箇所をランダムに選択
 	} else {
 		//	最大Ｑ値のアクションを選択
-		double m = -2.0;
+		double m = -DBL_MAX;
 		for(int i = 0; i != BD_SIZE; ++i)
 			if( elm.m_q[i] > m ) {
 				m = elm.m_q[i];

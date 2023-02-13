@@ -8,8 +8,8 @@ int main()
 	//init_vtable();
 	//learn_CFR();
 	Board bd;
-	for(int i = 0; i != 10; ++i) {
-		learn_MinMaxQ_untilEnd(bd, true);
+	for(int i = 0; i != 100*1000; ++i) {
+		learn_MinMaxQ_untilEnd(bd, false);
 	//	learn_MinMaxQ(bd);
 	//	bd.print_qtable();
 	}
