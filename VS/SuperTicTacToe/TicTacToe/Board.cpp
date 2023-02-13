@@ -14,11 +14,17 @@
 #include <numeric>
 #include "Board.h"
 
+const double GAMMA = 0.99;		//	評価値割引率
+const double BETA = 0.95;		//	Q値積和時割引率
+
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
 std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 //std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+
+int g_count = 0;			//	for Debug
+Board g_bd;				//	for Debug
 
 //typedef int[8] Int8;
 struct RTable {
@@ -27,11 +33,18 @@ struct RTable {
 	}
 	int	m_rv[BD_SIZE];		//	後悔値テーブル
 };
+struct QTable {
+	QTable() {
+		for(int i = 0; i != BD_SIZE; ++i) m_q[i] = 0.0;
+	}
+	double	m_q[BD_SIZE];		//	Ｑ値テーブル
+};
 
 unordered_map<int, double> g_vtable;		//	局面ハッシュキー→局面評価値
 unordered_map<int, RTable> g_rtable;	//	局面ハッシュキー→後悔値テーブル
+unordered_map<int, QTable> g_qtable;	//	局面ハッシュキー→Ｑ値テーブル
 
-const double GAMMA = 0.95;
+//const double GAMMA = 0.95;
 
 double gen_all_position(Board &bd) {
 	auto hv = bd.hash();
@@ -58,7 +71,7 @@ double gen_all_position(Board &bd) {
 void init_vtable() {
 	Board bd;
 	gen_all_position(bd);
-	cout << "g_vtable.size() = " << g_vtable.size() << "\n";
+	cout << "g_vtable.size() = " << g_vtable.size() << "\n\n";
 }
 void print_next(Board &bd) {
 	bd.print();
@@ -93,6 +106,14 @@ Board::Board(const Board& x)
 		m_board[i] = x.m_board[i];
 	}
 	m_stack = x.m_stack;
+}
+bool Board::operator==(const Board& x) const {
+	//if( m_stack.size() != x.m_stack.size() )
+	//	return false;
+	for(int i = 0; i != BD_SIZE; ++i)
+		if( m_board[i] != x.m_board[i] )
+			return false;
+	return true;
 }
 void Board::init() {
 	m_game_over = false;
@@ -134,6 +155,28 @@ void Board::print_rtable() const {
 				//case EMPTY:	cout << "・\t"; break;
 				case WHITE:	cout << "Ｏ "; break;
 				case BLACK:	cout << "Ｘ "; break;
+				}
+			}
+		}
+		cout << "\n";
+	}
+	cout << "\n";
+}
+void Board::print_qtable() const {
+	const auto& elm = g_qtable[hash_asym()];
+	int ix = 0;
+	for(int y = 0; y != N_VERT; ++y) {
+		for(int x = 0; x != N_HORZ; ++x, ++ix) {
+			if( is_empty(x, y) ) {
+				//if( elm.m_q[ix] != 0.0 )
+					cout << dig_str((int)(elm.m_q[ix]*100), 3) << " ";
+				//else
+				//	cout << "-- ";
+			} else {
+				switch( m_board[ix] ) {
+				//case EMPTY:	cout << "・\t"; break;
+				case WHITE:	cout << "Ｏ  "; break;
+				case BLACK:	cout << "Ｘ  "; break;
 				}
 			}
 		}
@@ -434,11 +477,135 @@ Move Board::sel_move_perfect() {
 	}
 	return mv;
 }
+//	状態 bd からQ値がmax/minの行動を選択し、各行動のQ値を更新
+//	Q(s) = βQ(s) + MinMaxQ(s')
+//		※ 正規化？されたQ値は Q(s)*(1-β)、β：[0, 1)
+double MinMaxQ(Board& bd, bool verbose) {
+	if( bd.is_game_over() ) {
+		//bd.print();
+		return bd.winner();
+	}
+	auto key = bd.hash_asym();
+	if( g_qtable.find(key) == g_qtable.end() )
+		g_qtable[key] = QTable();
+	auto& elm = g_qtable[key];
+	auto sum = std::accumulate(begin(elm.m_q), end(elm.m_q), 0);
+	int rix = 0;
+	if( sum == 0 ) {		//	Ｑ値が全て0の場合：
+		vector<int> lst;
+		for(int i = 0; i != BD_SIZE; ++i) {
+			if( bd.is_empty(i) )
+				lst.push_back(i);
+		}
+		rix = lst[g_mt() % lst.size()];		//	着手箇所をランダムに選択
+	} else {
+		//	最大/最小Ｑ値のアクションを選択
+		double m = bd.next_color() == WHITE ? -2.0 : 2.0;
+		for(int i = 0; i != BD_SIZE; ++i) {
+			if( bd.is_empty(i) ) {
+				if( bd.next_color() == WHITE && elm.m_q[i] > m ||
+					bd.next_color() != WHITE && elm.m_q[i] < m )
+				{
+					m = elm.m_q[i];
+					rix = i;
+				}
+			}
+		}
+	}
+	bd.put(rix, bd.next_color());
+	auto r = MinMaxQ(bd, verbose) * GAMMA;
+	bd.undo_put();
+	return r;
+}
+void learn_MinMaxQ(Board& bd, bool verbose) {
+	auto key = bd.hash_asym();
+	if( g_qtable.find(key) == g_qtable.end() )
+		g_qtable[key] = QTable();
+	auto& elm = g_qtable[key];
+	for(int i = 0; i != BD_SIZE; ++i) {
+		if( bd.is_empty(i) ) {
+			bd.put(i, bd.next_color());
+			auto r = MinMaxQ(bd, verbose) * GAMMA;
+			bd.undo_put();
+			elm.m_q[i] = elm.m_q[i] * BETA + r;
+		}
+	}
+}
+void learn_MinMaxQ_untilEnd(const Board& bd0, bool verbose) {
+	Board bd(bd0);
+	while( !bd.is_game_over() ) {
+		learn_MinMaxQ(bd, verbose);
+		if( verbose ) bd.print_qtable();
+		auto key = bd.hash_asym();
+		auto& elm = g_qtable[key];
+		double m = bd.next_color() == WHITE ? -2.0 : 2.0;
+		int ix = -1;
+		for(int i = 0; i != BD_SIZE; ++i) {
+			if( bd.is_empty(i) ) {
+				if( bd.next_color() == WHITE && elm.m_q[i] > m ||
+					bd.next_color() == BLACK && elm.m_q[i] < m )
+				{
+					m = elm.m_q[i];
+					ix = i;
+				}
+			}
+		}
+		bd.put(ix, bd.next_color());
+	}
+}
+
+double learn_QPlus(Board& bd, bool learning, bool verbose) {
+	if( bd.is_game_over() ) {
+		//bd.print();
+		return bd.winner();
+	}
+	auto& elm = g_qtable[bd.hash_asym()];
+	auto sum = std::accumulate(begin(elm.m_q), end(elm.m_q), 0);
+	int rix = 0;
+	if( sum == 0 ) {		//	Ｑ値が全て0の場合：
+		vector<int> lst;
+		for(int i = 0; i != BD_SIZE; ++i) {
+			if( bd.is_empty(i) )
+				lst.push_back(i);
+		}
+		rix = lst[g_mt() % lst.size()];		//	着手箇所をランダムに選択
+	} else {
+		//	最大Ｑ値のアクションを選択
+		double m = -2.0;
+		for(int i = 0; i != BD_SIZE; ++i)
+			if( elm.m_q[i] > m ) {
+				m = elm.m_q[i];
+				rix = i;
+			}
+	}
+	bd.put(rix, bd.next_color());
+	auto r = learn_QPlus(bd, learning, verbose);
+	bd.undo_put();
+	if( learning ) {	//	学習フラグON → 後悔値テーブル更新
+		for(int rx = 0; rx != BD_SIZE; ++rx) {
+			if( rx != rix && bd.is_empty(rx) ) {	//	反事実箇所に着手可能な場合
+				bd.put(rx, bd.next_color());
+				auto r2 = learn_QPlus(bd, false, verbose);
+				bd.undo_put();
+				if( bd.next_color() == WHITE )
+					elm.m_q[rx] = std::max(0.0, elm.m_q[rx] + (r2 - r));
+				else
+					elm.m_q[rx] = std::max(0.0, elm.m_q[rx] + (r - r2));
+			}
+		}
+		if( verbose )
+			bd.print_qtable();
+	}
+	return r;
+}
 int learn_CFR(Board& bd, bool learning, bool verbose) {
 	if( bd.is_game_over() ) {
 		//bd.print();
 		return bd.winner();
 	}
+	//if(learning && g_count >= 1600 && bd == g_bd ) {
+	//	g_bd.print_rtable();
+	//}
 	auto& elm = g_rtable[bd.hash_asym()];
 	auto sum = std::accumulate(begin(elm.m_rv), end(elm.m_rv), 0);
 	int rix = 0;
@@ -461,6 +628,9 @@ int learn_CFR(Board& bd, bool learning, bool verbose) {
 	auto r = learn_CFR(bd, learning, verbose);
 	bd.undo_put();
 	if( learning ) {	//	学習フラグON → 後悔値テーブル更新
+		//if (g_count >= 1600 && bd == g_bd) {
+		//	g_bd.print_rtable();
+		//}
 		//bd.print();
 		for(int rx = 0; rx != BD_SIZE; ++rx) {
 			if( rx != rix && bd.is_empty(rx) ) {	//	反事実箇所に着手可能な場合
@@ -477,21 +647,31 @@ int learn_CFR(Board& bd, bool learning, bool verbose) {
 			bd.print_rtable();
 		//for (int i = 0; i != BD_SIZE; ++i) cout << elm.m_rv[i] << " ";
 		//cout << "\n";
+		//if (g_count >= 1600 && bd == g_bd) {
+		//	g_bd.print_rtable();
+		//}
 	}
 	return r;
 }
 void learn_CFR() {
 	g_rtable.clear();
 	Board bd;
-	Board bd2;
-	bd2.put(0, 0, WHITE);
-	//bd.put(1, 0, BLACK);
-	//bd.put(0, 1, WHITE);
-	//bd.put(1, 2, BLACK);
-	for(int i = 0; i != 10000; ++i) {
+	//Board bd2;
+	//bd2.put(0, 0, WHITE);
+	g_bd.init();
+	bd.put(0, 0, WHITE);
+	bd.put(1, 0, BLACK);
+	bd.put(2, 2, WHITE);
+	bd.put(1, 2, BLACK);
+	bd.put(0, 1, WHITE);
+	bd.put(2, 1, BLACK);
+	g_count = 0;
+	for(int i = 0; i != 100; ++i, ++g_count) {
 		learn_CFR(bd, true, false);
-		if( (i + 1) % 1000 == 0 )
-			bd2.print_rtable();
+		if( (i + 1) % 10 == 0 || i < 10 ) {
+			cout << (i+1) << ":\n";
+			bd.print_rtable();
+		}
 	}
 	//learn_CFR(bd, true, true);
 	//learn_CFR(bd, true, true);
@@ -508,4 +688,6 @@ Move Board::sel_move_CFR() {
 	}
 	Move mv;
 	return mv;
+}
+void learn_QPlus() {
 }

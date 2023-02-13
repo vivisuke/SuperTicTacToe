@@ -5,9 +5,15 @@ using namespace std;
 
 int main()
 {
-	init_vtable();
-	learn_CFR();
+	//init_vtable();
+	//learn_CFR();
 	Board bd;
+	for(int i = 0; i != 10; ++i) {
+		learn_MinMaxQ_untilEnd(bd, true);
+	//	learn_MinMaxQ(bd);
+	//	bd.print_qtable();
+	}
+	learn_MinMaxQ_untilEnd(bd, true);
 #if 0
 	//gen_all_position(bd);
 	bd.put(0, 0, WHITE);

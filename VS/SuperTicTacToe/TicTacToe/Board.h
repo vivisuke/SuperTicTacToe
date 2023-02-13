@@ -23,6 +23,10 @@
 void init_vtable();
 void print_next(class Board &bd);
 void learn_CFR();
+void learn_QPlus();		//	全アクションを試すQ学習？
+//void learn_MinMaxQ();	//	最大Ｑ値行動を選択、Ｑ値は割引率γの min-max 評価値 [-1, +1] とする
+void learn_MinMaxQ(class Board &bd, bool=false);
+void learn_MinMaxQ_untilEnd(const class Board &bd, bool=false);		//	最大Ｑ値行動で終局状態まで学習
 
 struct Move {
 public:
@@ -56,6 +60,7 @@ public:
 public:
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 
+	bool	operator==(const Board&) const;
 	bool	is_game_over() const { return m_game_over; }		//	終局状態か？
 	char	winner() const { return m_winner; }
 	char	next_color() const { return m_next_color; }			//	次の手番
@@ -68,6 +73,7 @@ public:
 	void	init();
 	void	print() const;
 	void	print_rtable() const;
+	void	print_qtable() const;
 	void	put(int ix, char col) { put(ix%N_HORZ, ix/N_HORZ, col); }
 	void	put(int x, int y, char col);
 	void	put(Move& mv, char col) { put(mv.m_x, mv.m_y, col); }
