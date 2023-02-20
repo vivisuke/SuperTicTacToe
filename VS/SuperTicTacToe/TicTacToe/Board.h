@@ -74,6 +74,7 @@ public:
 	void	print() const;
 	void	print_rtable() const;
 	void	print_qtable() const;
+	int		eval() const;
 	void	put(int ix, char col) { put(ix%N_HORZ, ix/N_HORZ, col); }
 	void	put(int x, int y, char col);
 	void	put(Move& mv, char col) { put(mv.m_x, mv.m_y, col); }
@@ -84,6 +85,7 @@ public:
 	Move	sel_move_MC(bool=false);				//	三目並ぶ手を優先するモンテカルロ法による着手決定
 	Move	sel_move_perfect();			//	完全読み結果を参照するAI
 	Move	sel_move_CFR();						//	CFRアルゴリズム AI
+	Move	sel_move_MinMax(int depth = 3);		//	評価関数＋ミニマックス AI
 	int		playout_random(bool=false);			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	int		playout_random(int N, bool=false);		//	N 回プレイアウトを行い、結果合計 [-N, N] を返す
 	//int		playout_three_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK

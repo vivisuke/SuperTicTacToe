@@ -3,21 +3,41 @@
 
 using namespace std;
 
+int g_count = 0;
+
+void do_search(Board &bd, int depth) {
+	if( bd.is_game_over() || depth == 0 ) {
+		++g_count;
+		if( g_count == 1 ) bd.print();
+		return;
+	}
+	Moves mvs;
+	bd.gen_moves(mvs);
+	for(int i = 0; i != mvs.size(); ++i) {
+		bd.put(mvs[i], bd.next_color());
+		do_search(bd, depth-1);
+		bd.undo_put();
+	}
+}
+
 int main()
 {
     Board bd;
+    g_count = 0;
+    do_search(bd, 3);
+    cout << "g_count = " << g_count << "\n";
 #if 0
     bd.print();
-    bd.put(0, 0, MARU);
+    bd.put(0, 0, WHITE);
     //bd.print();
-    bd.put(1, 1, MARU);
+    bd.put(1, 1, WHITE);
     //bd.print();
-    bd.put(2, 2, MARU);
+    bd.put(2, 2, WHITE);
     bd.print();
-    bd.put(3, 3, BATSU);
+    bd.put(3, 3, BLACK);
     bd.print();
-    bd.put(4, 3, BATSU);
-    bd.put(5, 3, BATSU);
+    bd.put(4, 3, BLACK);
+    bd.put(5, 3, BLACK);
     bd.print();
     bd.undo_put();
     bd.print();
@@ -35,12 +55,13 @@ int main()
 	auto w = bd.playout_random();
     bd.print();
     //cout << "winner = " << (int)w << "\n";
-    cout << "winner = " << (w==MARU?"O":w==BATSU?"X":"none") << "\n";
+    cout << "winner = " << (w==WHITE?"O":w==BLACK?"X":"none") << "\n";
 #endif
+#if	0
     const int N = 10000;
     for(int y = 0; y != N_VERT; ++y) {
 	    for(int x = 0; x != N_HORZ; ++x) {
-		    bd.put(x, y, MARU);
+		    bd.put(x, y, WHITE);
 		    auto sum = bd.playout_random(N);
 		    //cout << "sum = " << sum << "\n";
 		    //cout << sum << " ";
@@ -49,6 +70,7 @@ int main()
 	    }
 	    cout << "\n";
     }
+#endif
     //
     std::cout << "\nOK.\n";
 }

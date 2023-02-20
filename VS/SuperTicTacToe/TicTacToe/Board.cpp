@@ -20,8 +20,8 @@ const double BETA = 0.95;		//	Q値積和時割引率
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 int g_count = 0;			//	for Debug
 Board g_bd;				//	for Debug
@@ -183,6 +183,32 @@ void Board::print_qtable() const {
 		cout << "\n";
 	}
 	cout << "\n";
+}
+int eval(char c1, char c2, char c3) {
+	const int LINED3 = 100;				//	3目並んだ
+	const int LINED2 = 8;				//	2目並んだ
+	const int LINED1 = 1;				//	1目のみ
+	int sum = c1 + c2 + c3;
+	if( sum == WHITE * 3 ) return LINED3;
+	if( sum == BLACK * 3 ) return -LINED3;
+	if( sum == WHITE * 2 ) return LINED2;
+	if( sum == BLACK * 2 ) return -LINED2;
+	int n = c1*c1 + c2*c2 + c3*c3;		//	置かれた石数
+	if( n == 1 ) {
+		if( sum == WHITE ) return LINED1;
+		if( sum == BLACK ) return -LINED1;
+	}
+	return 0;
+}
+int Board::eval() const {
+	int ev = 0;
+	for(int y = 0; y != N_VERT; ++y)
+		ev += ::eval(get_color(0, y), get_color(1, y), get_color(2, y));
+	for(int x = 0; x != N_VERT; ++x)
+		ev += ::eval(get_color(x, 0), get_color(x, 1), get_color(x, 2));
+	ev += ::eval(get_color(0, 0), get_color(1, 1), get_color(2, 2));
+	ev += ::eval(get_color(2, 0), get_color(1, 1), get_color(0, 2));
+	return ev;
 }
 void Board::put(int x, int y, char col) {
 	m_board[xyToIndex(x, y)] = col;
@@ -690,4 +716,21 @@ Move Board::sel_move_CFR() {
 	return mv;
 }
 void learn_QPlus() {
+}
+Move Board::sel_move_MinMax(int depth) {
+	Move mv;
+	int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	for(int ix = 0; ix != BD_SIZE; ++ix) {
+		if( is_empty(ix) ) {
+			put(ix, next_color());
+			auto ev = eval();
+			undo_put();
+			if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+				mm = ev;
+				mv.m_x = ix % 3;
+				mv.m_y = ix / 3;
+			}
+		}
+	}
+	return mv;
 }

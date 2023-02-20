@@ -8,12 +8,27 @@ int main()
 	//init_vtable();
 	//learn_CFR();
 	Board bd;
+#if 0
+	bd.print();
+	cout << "eval = " << bd.eval() << "\n";
+	while( !bd.is_game_over() ) {
+		//auto mv = bd.sel_move_random();
+		//auto mv = bd.sel_move_MinMax();
+		auto mv = bd.next_color() == WHITE ? bd.sel_move_random() : bd.sel_move_MinMax();
+		bd.put(mv, bd.next_color());
+		bd.print();
+		cout << "eval = " << bd.eval() << "\n";
+	}
+#endif
+
+#if 0
 	for(int i = 0; i != 100*1000; ++i) {
 		learn_MinMaxQ_untilEnd(bd, false);
 	//	learn_MinMaxQ(bd);
 	//	bd.print_qtable();
 	}
 	learn_MinMaxQ_untilEnd(bd, true);
+#endif
 #if 0
 	//gen_all_position(bd);
 	bd.put(0, 0, WHITE);
@@ -106,7 +121,7 @@ int main()
 		cout << "\n";
 	}
 #endif
-#if 0
+#if 1
 	const int N_GAME = 1000;
 	int ww = 0, bw = 0;
 	Move mv;
@@ -118,15 +133,17 @@ int main()
 			//mv = bd.sel_move_MC(false);
 			//mv = bd.sel_move_MC(true);
 			if( bd.next_color() == WHITE ) {
-				mv = bd.sel_move_random();
+				//mv = bd.sel_move_random();
 				//mv = bd.sel_move_MC(false);
 				//mv = bd.sel_move_MC(true);
+				mv = bd.sel_move_MinMax(1);
 				//mv = bd.sel_move_perfect();
 			} else {
 				//mv = bd.sel_move_random();
 				//mv = bd.sel_move_MC(false);
 				//mv = bd.sel_move_MC(true);
-				mv = bd.sel_move_perfect();
+				mv = bd.sel_move_MinMax(1);
+				//mv = bd.sel_move_perfect();
 			}
 			//cout << "(" << (int)mv.m_x << ", " << (int)mv.m_y << ")\n\n";
 			bd.put(mv, bd.next_color());

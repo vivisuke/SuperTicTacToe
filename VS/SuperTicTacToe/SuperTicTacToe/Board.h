@@ -18,8 +18,11 @@
 #define		GBD_SIZE	(N_HORZ/3*N_VERT/3)
 
 #define		EMPTY		0
-#define		MARU		1
-#define		BATSU		(-1)
+#define		WHITE		1
+#define		BLACK		(-1)
+
+void build_3x3_eval_table();
+int	get_3x3_eval(int ix);
 
 struct Move {
 public:
@@ -31,6 +34,8 @@ public:
 	char	m_x;
 	char	m_y;
 };
+
+typedef std::vector<Move> Moves;
 
 struct HistItem {
 public:
@@ -68,16 +73,18 @@ public:
 	void	update_next_board(int x, int y);
 	bool	is_linedup(int x, int y) const;
 	bool	is_game_over(int x, int y) const;	//	終局（空欄無し or 三目並んだatグローバルボード）か？
+	void	put(const Move &mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	put(int x, int y, char col);
 	void	undo_put();
+	void	gen_moves(Moves&);
 	Move	sel_move_random();
-	int		playout_random();			//	現状態から終局までランダム対局、return MARU | EMPTY | BATSU
+	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	int		playout_random(int N);		//	
 private:
 	bool	m_game_over;				//	終局状態か？
 	char	m_next_color;				//	次の手番
 	char	m_next_board;				//	次に着手可能なローカルボード、-1 for 全ボードに着手可能
-	char	m_winner;					//	勝者：MARU | BATSU | EMPTY
+	char	m_winner;					//	勝者：WHITE | BLACK | EMPTY
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];
 	char	m_nput[GBD_SIZE];				//	各ローカルボード着手数

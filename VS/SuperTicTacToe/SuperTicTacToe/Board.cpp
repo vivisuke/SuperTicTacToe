@@ -17,6 +17,9 @@ std::random_device g_rnd;         // 非決定的な乱数生成器
 //std::mt19937 g_mt(2);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
+vector<int> g_eval;				//	盤面インデックス → 評価値テーブル
+
+//----------------------------------------------------------------------
 Board::Board() {
 	init();
 }
@@ -37,7 +40,7 @@ Board::Board(const Board& x)
 }
 void Board::init() {
 	m_game_over = false;
-	m_next_color = MARU;
+	m_next_color = WHITE;
 	m_next_board = -1;
 	m_stack.clear();
 	for(int i = 0; i != BD_SIZE; ++i)
@@ -59,8 +62,8 @@ void Board::print() const {
 		for(int x = 0; x != N_HORZ; ++x) {
 			switch( m_board[ix++] ) {
 			case EMPTY:	cout << "・"; break;
-			case MARU:	cout << "Ｏ"; break;
-			case BATSU:	cout << "Ｘ"; break;
+			case WHITE:	cout << "Ｏ"; break;
+			case BLACK:	cout << "Ｘ"; break;
 			}
 			if( x%3 == 2 ) cout << "｜";
 		}
@@ -69,8 +72,8 @@ void Board::print() const {
 			for(int x = 0; x != N_HORZ/3; ++x) {
 				switch( m_gboard[gx++] ) {
 				case EMPTY:	cout << "・"; break;
-				case MARU:	cout << "Ｏ"; break;
-				case BATSU:	cout << "Ｘ"; break;
+				case WHITE:	cout << "Ｏ"; break;
+				case BLACK:	cout << "Ｘ"; break;
 				}
 			}
 			cout << "｜";
@@ -95,8 +98,8 @@ void Board::print() const {
 		for(int x = 0; x != N_HORZ/3; ++x) {
 			switch( m_gboard[ix++] ) {
 			case EMPTY:	cout << "・"; break;
-			case MARU:	cout << "Ｏ"; break;
-			case BATSU:	cout << "Ｘ"; break;
+			case WHITE:	cout << "Ｏ"; break;
+			case BLACK:	cout << "Ｘ"; break;
 			}
 		}
 		cout << "\n";
@@ -170,7 +173,7 @@ void Board::put(int x, int y, char col) {
 		m_game_over = true;
 		m_winner = m_next_color;
 	}
-	m_next_color = (MARU + BATSU) - m_next_color;		//	手番交代
+	m_next_color = (WHITE + BLACK) - m_next_color;		//	手番交代
 }
 void Board::undo_put() {
 	const auto &item = m_stack.back();
@@ -182,7 +185,28 @@ void Board::undo_put() {
 		m_gboard[gix] = EMPTY;
 	}
 	m_stack.pop_back();
-	m_next_color = (MARU + BATSU) - m_next_color;		//	手番交代
+	m_game_over = false;
+	m_next_color = (WHITE + BLACK) - m_next_color;		//	手番交代
+}
+void Board::gen_moves(Moves& mvs) {
+	mvs.clear();
+	if( m_next_board < 0 ) {	//	全ローカルボードに着手可能な場合
+		for(int y = 0; y != N_VERT; ++y) {
+			for(int x = 0; x != N_HORZ; ++x) {
+				if( is_empty(x, y) )
+					mvs.push_back(Move(x, y));
+			}
+		}
+	} else {		//	next_board ローカルボードにのみ着手可能な場合
+		int x0 = (m_next_board % 3) * 3;
+		int y0 = (m_next_board / 3) * 3;
+		for(int v = 0; v != 3; ++v) {
+			for(int h = 0; h != 3; ++h) {
+				if( is_empty(x0 + h, y0 + v) )
+					mvs.push_back(Move(x0 + h, y0 + v));
+			}
+		}
+	}
 }
 Move Board::sel_move_random() {
 	if( m_stack.empty() ) {		//	履歴が無い＝初手の場合
@@ -228,4 +252,8 @@ int Board::playout_random(int N) {
 		//bd.print();
 	}
 	return sum;
+}
+void build_3x3_eval_table() {
+	g_eval.clear();
+	g_eval.resize(3*3*3*3*3*3*3*3*3);
 }
