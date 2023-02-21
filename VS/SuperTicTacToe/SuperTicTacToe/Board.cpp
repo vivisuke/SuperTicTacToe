@@ -14,8 +14,8 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-//std::mt19937 g_mt(2);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 vector<int> g_eval;				//	盤面インデックス → 評価値テーブル
 
@@ -53,6 +53,10 @@ void Board::init() {
 }
 const char* digstr[] = { "１", "２", "３", "４", "５", "６", "７", "８", "９", };
 void Board::print() const {
+	int lastix = -1;
+	if( !m_stack.empty() ) {
+		lastix = m_stack.back().m_y * N_HORZ + m_stack.back().m_x;
+	}
 	//	全ローカルボード表示
 	int ix = 0, gx = 0;
 	cout << "　　ａｂｃ　ｄｅｆ　ｇｈｉ\n";
@@ -60,20 +64,22 @@ void Board::print() const {
 	for(int y = 0; y != N_VERT; ++y) {
 		cout << digstr[y] << "｜";
 		for(int x = 0; x != N_HORZ; ++x) {
-			switch( m_board[ix++] ) {
+			switch( m_board[ix] ) {
 			case EMPTY:	cout << "・"; break;
-			case WHITE:	cout << "Ｏ"; break;
-			case BLACK:	cout << "Ｘ"; break;
+			case WHITE:	cout << (ix == lastix ? "☆" : "Ｏ"); break;
+			case BLACK:	cout << (ix == lastix ? "★" : "●"); break;
 			}
+			++ix;
 			if( x%3 == 2 ) cout << "｜";
 		}
 		if( y < N_VERT/3 ) {
+			//	グローバルボード表示
 			cout << "　｜";
 			for(int x = 0; x != N_HORZ/3; ++x) {
 				switch( m_gboard[gx++] ) {
 				case EMPTY:	cout << "・"; break;
 				case WHITE:	cout << "Ｏ"; break;
-				case BLACK:	cout << "Ｘ"; break;
+				case BLACK:	cout << "●"; break;
 				}
 			}
 			cout << "｜";
@@ -383,6 +389,107 @@ Move Board::sel_move_MinMax(int depth) {
 		}
 	}
 	cout << "MinMaxVal = " << mm << "\n";
+	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
+	return mmv;
+}
+int Board::alpha_beta(int alpha, int beta, int depth) {
+	if( depth <= 0 )
+		return eval();
+	//int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
+		for(int ix = 0; ix != BD_SIZE; ++ix) {
+			if( is_empty(ix) ) {
+				Move mv(ix % 9, ix / 9);
+				put(mv, next_color());
+				auto ev = alpha_beta(alpha, beta, depth-1);
+				undo_put();
+				if( next_color() == WHITE ) {
+					if( ev > alpha ) {
+						if( (alpha = ev) >= beta ) return alpha;
+					}
+				} else {
+					if( ev < beta ) {
+						if( (beta = ev) <= alpha ) return beta;
+					}
+				}
+			}
+		}
+	} else {
+		int x0 = (m_next_board % 3) * 3;
+		int y0 = (m_next_board / 3) * 3;
+		for(int v = 0; v != 3; ++v) {
+			for(int h = 0; h != 3; ++h) {
+				if( is_empty(x0 + h, y0 + v) ) {
+					Move mv(x0 + h, y0 + v);
+					put(mv, next_color());
+					auto ev = alpha_beta(alpha, beta, depth-1);
+					undo_put();
+					if( next_color() == WHITE ) {
+						if( ev > alpha ) {
+							if( (alpha = ev) >= beta ) return alpha;
+						}
+					} else {
+						if( ev < beta ) {
+							if( (beta = ev) <= alpha ) return beta;
+						}
+					}
+				}
+			}
+		}
+	}
+	return next_color() == WHITE ? alpha : beta;
+}
+Move Board::sel_move_AlphaBeta(int depth) {
+	Move mmv(-1, -1);
+	//int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	int alpha = -INT_MAX;
+	int beta = INT_MAX;
+	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
+		for(int ix = 0; ix != BD_SIZE; ++ix) {
+			if( is_empty(ix) ) {
+				Move mv(ix % 9, ix / 9);
+				put(mv, next_color());
+				auto ev = alpha_beta(alpha, beta, depth - 1);
+				undo_put();
+				if( next_color() == WHITE ) {
+					if( ev > alpha ) {
+						alpha = ev;
+						mmv = mv;
+					}
+				} else {
+					if( ev < beta ) {
+						beta = ev;
+						mmv = mv;
+					}
+				}
+			}
+		}
+	} else {
+		int x0 = (m_next_board % 3) * 3;
+		int y0 = (m_next_board / 3) * 3;
+		for(int v = 0; v != 3; ++v) {
+			for(int h = 0; h != 3; ++h) {
+				if( is_empty(x0 + h, y0 + v) ) {
+					Move mv(x0 + h, y0 + v);
+					put(mv, next_color());
+					auto ev = alpha_beta(alpha, beta, depth - 1);
+					undo_put();
+				if( next_color() == WHITE ) {
+					if( ev > alpha ) {
+						alpha = ev;
+						mmv = mv;
+					}
+				} else {
+					if( ev < beta ) {
+						beta = ev;
+						mmv = mv;
+					}
+				}
+				}
+			}
+		}
+	}
+	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
 	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
 	return mmv;
 }

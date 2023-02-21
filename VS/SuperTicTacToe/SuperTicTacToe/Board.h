@@ -86,7 +86,9 @@ public:
 	Move	sel_move_random();
 	Move	sel_move_Depth1();			//	•]‰¿ŠÖ”{‚Pèæ“Ç‚İ
 	int		minmax(int depth);
-	Move	sel_move_MinMax(int depth=3);			//	•]‰¿ŠÖ”{depthæ“Ç‚İ
+	Move	sel_move_MinMax(int depth=3);			//	•]‰¿ŠÖ”{depth ƒ~ƒjƒ}ƒbƒNƒX•]‰¿
+	int		alpha_beta(int alpha, int beta, int depth);
+	Move	sel_move_AlphaBeta(int depth=3);			//	•]‰¿ŠÖ”{depth ƒAƒ‹ƒtƒ@ƒx[ƒ^’Tõ
 	int		playout_random();			//	Œ»ó‘Ô‚©‚çI‹Ç‚Ü‚Åƒ‰ƒ“ƒ_ƒ€‘Î‹ÇAreturn WHITE | EMPTY | BLACK
 	int		playout_random(int N);		//	
 private:

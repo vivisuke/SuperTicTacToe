@@ -24,12 +24,18 @@ int main()
 {
     Board bd;
     bd.print();
+    Move mv;
 	while( !bd.is_game_over() ) {
 		cout << "eval = " << bd.eval() << "\n\n";
 		//auto mv = bd.sel_move_random();
 		//auto mv = bd.sel_move_Depth1();
 		//auto mv = bd.sel_move_MinMax(3);
-		auto mv = bd.sel_move_MinMax(5);
+		if( bd.next_color() == WHITE ) {
+			mv = bd.sel_move_random();
+		} else {
+			//mv = bd.sel_move_MinMax(5);
+			mv = bd.sel_move_AlphaBeta(3);
+		}
 		bd.put(mv, bd.next_color());
 		bd.print();
 	}
