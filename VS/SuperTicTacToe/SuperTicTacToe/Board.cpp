@@ -143,6 +143,47 @@ bool Board::is_game_over(int x, int y) const {		//	終局（空欄無し or 三目並んだa
 			return true;		// ／斜め方向に三目並んだ
 	return false;
 }
+int eval(char c1, char c2, char c3) {
+	const int LINED3 = 100;				//	3目並んだ
+	const int LINED2 = 8;				//	2目並んだ
+	const int LINED1 = 1;				//	1目のみ
+	int sum = c1 + c2 + c3;
+	if( sum == WHITE * 3 ) return LINED3;
+	if( sum == BLACK * 3 ) return -LINED3;
+	if( sum == WHITE * 2 ) return LINED2;
+	if( sum == BLACK * 2 ) return -LINED2;
+	int n = c1*c1 + c2*c2 + c3*c3;		//	置かれた石数
+	if( n == 1 ) {
+		if( sum == WHITE ) return LINED1;
+		if( sum == BLACK ) return -LINED1;
+	}
+	return 0;
+}
+int Board::eval() const {
+	int ev = 0;
+	for(int gy = 0; gy != N_VERT3; ++gy) {
+		for(int gx = 0; gx != N_HORZ3; ++gx) {
+			if( !m_linedup[gy*N_HORZ3 + gx] ) {	//	ローカルボードで三目並んでいない
+				int x0 = gx * N_HORZ3;
+				int y0 = gy * N_VERT3;
+				for(int i = 0; i != N_VERT3; ++i) {
+					ev += ::eval(get_color(x0, y0+i), get_color(x0+1, y0+i), get_color(x0+2, y0+i));
+					ev += ::eval(get_color(x0+i, y0), get_color(x0+i, y0+1), get_color(x0+i, y0+2));
+				}
+				ev += ::eval(get_color(x0, y0), get_color(x0+1, y0+1), get_color(x0+2, y0+2));
+				ev += ::eval(get_color(x0+2, y0), get_color(x0+1, y0+1), get_color(x0, y0+2));
+			}
+		}
+	}
+	const int GVAL = 100;
+	for(int i = 0; i != N_VERT3; ++i) {
+		ev += ::eval(get_gcolor(0, i), get_gcolor(1, i), get_gcolor(2, i)) * GVAL;
+		ev += ::eval(get_gcolor(i, 0), get_gcolor(i, 1), get_gcolor(i, 2)) * GVAL;
+	}
+	ev += ::eval(get_gcolor(0, 0), get_gcolor(1, 1), get_gcolor(2, 2)) * GVAL;
+	ev += ::eval(get_gcolor(2, 0), get_gcolor(1, 1), get_gcolor(0, 2)) * GVAL;
+	return ev;
+}
 void Board::update_next_board(int x, int y) {
 	int x3 = x % 3;
 	int y3 = y % 3;

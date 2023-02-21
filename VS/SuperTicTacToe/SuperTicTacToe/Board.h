@@ -12,10 +12,12 @@
 #include <vector>
 
 //	全盤面サイズ
+#define		N_HORZ3		3
+#define		N_VERT3		3
 #define		N_HORZ		9
 #define		N_VERT		9
 #define		BD_SIZE		(N_HORZ*N_VERT)
-#define		GBD_SIZE	(N_HORZ/3*N_VERT/3)
+#define		GBD_SIZE	(N_HORZ3*N_VERT3)
 
 #define		EMPTY		0
 #define		WHITE		1
@@ -73,6 +75,7 @@ public:
 	void	update_next_board(int x, int y);
 	bool	is_linedup(int x, int y) const;
 	bool	is_game_over(int x, int y) const;	//	終局（空欄無し or 三目並んだatグローバルボード）か？
+	int		eval() const;
 	void	put(const Move &mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	put(int x, int y, char col);
 	void	undo_put();
