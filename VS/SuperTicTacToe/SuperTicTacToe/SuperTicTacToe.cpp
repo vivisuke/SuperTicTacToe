@@ -27,7 +27,9 @@ int main()
 	while( !bd.is_game_over() ) {
 		cout << "eval = " << bd.eval() << "\n\n";
 		//auto mv = bd.sel_move_random();
-		auto mv = bd.sel_move_Depth1();
+		//auto mv = bd.sel_move_Depth1();
+		//auto mv = bd.sel_move_MinMax(3);
+		auto mv = bd.sel_move_MinMax(7);
 		bd.put(mv, bd.next_color());
 		bd.print();
 	}
