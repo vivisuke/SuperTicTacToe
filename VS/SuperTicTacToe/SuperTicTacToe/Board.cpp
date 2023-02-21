@@ -275,6 +275,44 @@ Move Board::sel_move_random() {
 	}
 	return lst[g_mt() % lst.size()];
 }
+Move Board::sel_move_Depth1() {
+	Move mmv(-1, -1);
+	int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
+		for(int ix = 0; ix != BD_SIZE; ++ix) {
+			//if (ix == 54)
+			//	cout << "ix == 54\n";
+			if( is_empty(ix) ) {
+				Move mv(ix % 9, ix / 9);
+				put(mv, next_color());
+				auto ev = eval();
+				undo_put();
+				if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+					mm = ev;
+					mmv = mv;
+				}
+			}
+		}
+	} else {
+		int x0 = (m_next_board % 3) * 3;
+		int y0 = (m_next_board / 3) * 3;
+		for(int v = 0; v != 3; ++v) {
+			for(int h = 0; h != 3; ++h) {
+				if( is_empty(x0 + h, y0 + v) ) {
+					Move mv(x0 + h, y0 + v);
+					put(mv, next_color());
+					auto ev = eval();
+					undo_put();
+					if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+						mm = ev;
+						mmv = mv;
+					}
+				}
+			}
+		}
+	}
+	return mmv;
+}
 int Board::playout_random() {
 	for(;;) {
 	    auto mv = sel_move_random();

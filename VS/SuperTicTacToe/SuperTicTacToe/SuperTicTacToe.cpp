@@ -24,13 +24,14 @@ int main()
 {
     Board bd;
     bd.print();
-    cout << "eval = " << bd.eval() << "\n";
 	while( !bd.is_game_over() ) {
-	    auto mv = bd.sel_move_random();
+		cout << "eval = " << bd.eval() << "\n\n";
+		//auto mv = bd.sel_move_random();
+		auto mv = bd.sel_move_Depth1();
 		bd.put(mv, bd.next_color());
 		bd.print();
-		cout << "eval = " << bd.eval() << "\n";
 	}
+	cout << "eval = " << bd.eval() << "\n\n";
 #if 0
     g_count = 0;
     do_search(bd, 3);

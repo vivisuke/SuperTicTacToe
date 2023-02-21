@@ -58,6 +58,7 @@ public:
 	Board(const Board&);
 public:
 	void	init();
+	char	next_board() const { return m_next_board; }
 	bool	is_game_over() const { return m_game_over; }		//	終局状態か？
 	char	next_color() const { return m_next_color; }			//	次の手番
 	void	print() const;
@@ -72,15 +73,18 @@ public:
 	bool	is_empty(int x, int y) const {
 		return get_color(x, y) == EMPTY;
 	}
+	bool	is_empty(int ix) const { return m_board[ix] == EMPTY; }
 	void	update_next_board(int x, int y);
 	bool	is_linedup(int x, int y) const;
 	bool	is_game_over(int x, int y) const;	//	終局（空欄無し or 三目並んだatグローバルボード）か？
 	int		eval() const;
 	void	put(const Move &mv, char col) { put(mv.m_x, mv.m_y, col); }
+	void	put(int ix, char col) { put(ix % N_HORZ, ix / N_HORZ, col); }
 	void	put(int x, int y, char col);
 	void	undo_put();
 	void	gen_moves(Moves&);
 	Move	sel_move_random();
+	Move	sel_move_Depth1();			//	評価関数＋１手先読み
 	int		playout_random();			//	現状態から終局までランダム対局、return WHITE | EMPTY | BLACK
 	int		playout_random(int N);		//	
 private:
