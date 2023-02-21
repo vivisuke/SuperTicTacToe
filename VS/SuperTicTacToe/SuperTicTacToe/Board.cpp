@@ -356,7 +356,7 @@ Move Board::sel_move_MinMax(int depth) {
 			if( is_empty(ix) ) {
 				Move mv(ix % 9, ix / 9);
 				put(mv, next_color());
-				auto ev = eval();
+				auto ev = minmax(depth - 1);
 				undo_put();
 				if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
 					mm = ev;
@@ -372,7 +372,7 @@ Move Board::sel_move_MinMax(int depth) {
 				if( is_empty(x0 + h, y0 + v) ) {
 					Move mv(x0 + h, y0 + v);
 					put(mv, next_color());
-					auto ev = eval();
+					auto ev = minmax(depth - 1);
 					undo_put();
 					if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
 						mm = ev;
@@ -383,6 +383,7 @@ Move Board::sel_move_MinMax(int depth) {
 		}
 	}
 	cout << "MinMaxVal = " << mm << "\n";
+	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
 	return mmv;
 }
 int Board::playout_random() {

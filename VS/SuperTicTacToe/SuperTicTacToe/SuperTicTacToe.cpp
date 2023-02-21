@@ -29,7 +29,7 @@ int main()
 		//auto mv = bd.sel_move_random();
 		//auto mv = bd.sel_move_Depth1();
 		//auto mv = bd.sel_move_MinMax(3);
-		auto mv = bd.sel_move_MinMax(7);
+		auto mv = bd.sel_move_MinMax(5);
 		bd.put(mv, bd.next_color());
 		bd.print();
 	}
