@@ -18,6 +18,7 @@ std::mt19937 g_mt(0);       // ƒƒ‹ƒZƒ“ƒkEƒcƒCƒXƒ^‚Ì32ƒrƒbƒg”ÅAˆø”‚Í‰ŠúƒV[ƒ
 //std::mt19937 g_mt(g_rnd());       // ƒƒ‹ƒZƒ“ƒkEƒcƒCƒXƒ^‚Ì32ƒrƒbƒg”ÅAˆø”‚Í‰ŠúƒV[ƒh
 
 vector<int> g_eval;				//	”Õ–ÊƒCƒ“ƒfƒbƒNƒX ¨ •]‰¿’lƒe[ƒuƒ‹
+int g_count;
 
 //----------------------------------------------------------------------
 Board::Board() {
@@ -166,6 +167,7 @@ int eval(char c1, char c2, char c3) {
 	return 0;
 }
 int Board::eval() const {
+	++g_count;
 	int ev = 0;
 	for(int gy = 0; gy != N_VERT3; ++gy) {
 		for(int gx = 0; gx != N_HORZ3; ++gx) {
@@ -210,8 +212,8 @@ void Board::put(int x, int y, char col) {
 		m_linedup[gix] = true;
 		m_gboard[gix] = col;
 	}
+	m_stack.push_back(HistItem(x, y, col, m_next_board, linedup));
 	update_next_board(x, y);
-	m_stack.push_back(HistItem(x, y, col, linedup));
 	if (m_stack.size() == BD_SIZE ) {		//	‹ó—“–³‚µ
 		m_game_over = true;
 		m_winner = EMPTY;
@@ -231,6 +233,7 @@ void Board::undo_put() {
 		m_linedup[gix] = false;
 		m_gboard[gix] = EMPTY;
 	}
+	m_next_board = item.m_next_board;
 	m_stack.pop_back();
 	m_game_over = false;
 	m_next_color = (WHITE + BLACK) - m_next_color;		//	è”ÔŒğ‘ã
@@ -283,7 +286,7 @@ Move Board::sel_move_random() {
 }
 Move Board::sel_move_Depth1() {
 	Move mmv(-1, -1);
-	int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	if( next_board() < 0 ) {	//	‘Sƒ[ƒJƒ‹ƒ{[ƒh‚É‘Å‚Ä‚éê‡
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			//if (ix == 54)
@@ -293,7 +296,7 @@ Move Board::sel_move_Depth1() {
 				put(mv, next_color());
 				auto ev = eval();
 				undo_put();
-				if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+				if( (is_white_turn() && ev > mm) || (!is_white_turn() && ev < mm)) {
 					mm = ev;
 					mmv = mv;
 				}
@@ -309,7 +312,7 @@ Move Board::sel_move_Depth1() {
 					put(mv, next_color());
 					auto ev = eval();
 					undo_put();
-					if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+					if( (is_white_turn() && ev > mm) || (!is_white_turn() && ev < mm)) {
 						mm = ev;
 						mmv = mv;
 					}
@@ -319,18 +322,23 @@ Move Board::sel_move_Depth1() {
 	}
 	return mmv;
 }
-int Board::minmax(int depth) {
-	if( depth <= 0 )
-		return eval();
-	int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+int Board::min_max(int depth, int ply) {
+	if( depth <= 0 ) {
+		//return eval();
+		auto ev = eval();
+		//cout << string(ply*2, ' ') << ev << "\n";
+		cout << ev << " ";
+		return ev;
+	}
+	int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	if( next_board() < 0 ) {	//	‘Sƒ[ƒJƒ‹ƒ{[ƒh‚É‘Å‚Ä‚éê‡
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			if( is_empty(ix) ) {
 				Move mv(ix % 9, ix / 9);
 				put(mv, next_color());
-				auto ev = minmax(depth-1);
+				auto ev = min_max(depth-1, ply+1);
 				undo_put();
-				if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+				if( (is_white_turn() && ev > mm) || (!is_white_turn() && ev < mm)) {
 					mm = ev;
 				}
 			}
@@ -343,28 +351,31 @@ int Board::minmax(int depth) {
 				if( is_empty(x0 + h, y0 + v) ) {
 					Move mv(x0 + h, y0 + v);
 					put(mv, next_color());
-					auto ev = minmax(depth-1);
+					auto ev = min_max(depth-1, ply+1);
 					undo_put();
-					if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+					if( (is_white_turn() && ev > mm) || (!is_white_turn() && ev < mm)) {
 						mm = ev;
 					}
 				}
 			}
 		}
 	}
+	//cout << string(ply*2, ' ') << mm << "\n";
+	cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
 	return mm;
 }
 Move Board::sel_move_MinMax(int depth) {
+	g_count = 0;
 	Move mmv(-1, -1);
-	int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	if( next_board() < 0 ) {	//	‘Sƒ[ƒJƒ‹ƒ{[ƒh‚É‘Å‚Ä‚éê‡
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			if( is_empty(ix) ) {
 				Move mv(ix % 9, ix / 9);
 				put(mv, next_color());
-				auto ev = minmax(depth - 1);
+				auto ev = min_max(depth - 1, 1);
 				undo_put();
-				if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+				if( (is_white_turn() && ev > mm) || (!is_white_turn() && ev < mm)) {
 					mm = ev;
 					mmv = mv;
 				}
@@ -378,9 +389,9 @@ Move Board::sel_move_MinMax(int depth) {
 				if( is_empty(x0 + h, y0 + v) ) {
 					Move mv(x0 + h, y0 + v);
 					put(mv, next_color());
-					auto ev = minmax(depth - 1);
+					auto ev = min_max(depth - 1, 1);
 					undo_put();
-					if( (next_color() == WHITE && ev > mm) || (next_color() != WHITE && ev < mm)) {
+					if( (is_white_turn() && ev > mm) || (!is_white_turn() && ev < mm)) {
 						mm = ev;
 						mmv = mv;
 					}
@@ -388,14 +399,20 @@ Move Board::sel_move_MinMax(int depth) {
 			}
 		}
 	}
+	cout << "g_count = " << g_count << "\n";
 	cout << "MinMaxVal = " << mm << "\n";
 	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
 	return mmv;
 }
 int Board::alpha_beta(int alpha, int beta, int depth) {
-	if( depth <= 0 )
-		return eval();
-	//int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
+	if( depth <= 0 ) {
+		//return eval();
+		auto ev = eval();
+		//cout << string(ply*2, ' ') << ev << "\n";
+		cout << ev << " ";
+		return ev;
+	}
+	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	if( next_board() < 0 ) {	//	‘Sƒ[ƒJƒ‹ƒ{[ƒh‚É‘Å‚Ä‚éê‡
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			if( is_empty(ix) ) {
@@ -403,13 +420,17 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 				put(mv, next_color());
 				auto ev = alpha_beta(alpha, beta, depth-1);
 				undo_put();
-				if( next_color() == WHITE ) {
+				if( is_white_turn() ) {
 					if( ev > alpha ) {
-						if( (alpha = ev) >= beta ) return alpha;
+						if( (alpha = ev) >= beta )
+							goto ret;
+							//return alpha;
 					}
 				} else {
 					if( ev < beta ) {
-						if( (beta = ev) <= alpha ) return beta;
+						if( (beta = ev) <= alpha )
+							goto ret;
+							//return beta;
 					}
 				}
 			}
@@ -424,26 +445,35 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 					put(mv, next_color());
 					auto ev = alpha_beta(alpha, beta, depth-1);
 					undo_put();
-					if( next_color() == WHITE ) {
+					if( is_white_turn() ) {
 						if( ev > alpha ) {
-							if( (alpha = ev) >= beta ) return alpha;
+							if( (alpha = ev) >= beta )
+								goto ret;
+								//return alpha;
 						}
 					} else {
 						if( ev < beta ) {
-							if( (beta = ev) <= alpha ) return beta;
+							if( (beta = ev) <= alpha )
+								goto ret;
+								//return beta;
 						}
 					}
 				}
 			}
 		}
 	}
-	return next_color() == WHITE ? alpha : beta;
+ret:
+	//cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
+	cout << (is_white_turn() ? "W: " : "B: ");
+	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
+	return is_white_turn() ? alpha : beta;
 }
 Move Board::sel_move_AlphaBeta(int depth) {
+	g_count = 0;
 	Move mmv(-1, -1);
-	//int mm = next_color() == WHITE ? -INT_MAX : INT_MAX;
-	int alpha = -INT_MAX;
-	int beta = INT_MAX;
+	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
+	int alpha = -20000;		//-INT_MAX;
+	int beta = 20000;		//INT_MAX;
 	if( next_board() < 0 ) {	//	‘Sƒ[ƒJƒ‹ƒ{[ƒh‚É‘Å‚Ä‚éê‡
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			if( is_empty(ix) ) {
@@ -451,7 +481,7 @@ Move Board::sel_move_AlphaBeta(int depth) {
 				put(mv, next_color());
 				auto ev = alpha_beta(alpha, beta, depth - 1);
 				undo_put();
-				if( next_color() == WHITE ) {
+				if( is_white_turn() ) {
 					if( ev > alpha ) {
 						alpha = ev;
 						mmv = mv;
@@ -474,21 +504,22 @@ Move Board::sel_move_AlphaBeta(int depth) {
 					put(mv, next_color());
 					auto ev = alpha_beta(alpha, beta, depth - 1);
 					undo_put();
-				if( next_color() == WHITE ) {
-					if( ev > alpha ) {
-						alpha = ev;
-						mmv = mv;
+					if( is_white_turn() ) {
+						if( ev > alpha ) {
+							alpha = ev;
+							mmv = mv;
+						}
+					} else {
+						if( ev < beta ) {
+							beta = ev;
+							mmv = mv;
+						}
 					}
-				} else {
-					if( ev < beta ) {
-						beta = ev;
-						mmv = mv;
-					}
-				}
 				}
 			}
 		}
 	}
+	cout << "g_count = " << g_count << "\n";
 	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
 	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
 	return mmv;

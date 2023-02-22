@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int g_count = 0;
+extern int g_count;
 
 void do_search(Board &bd, int depth) {
 	if( bd.is_game_over() || depth == 0 ) {
@@ -30,10 +30,12 @@ int main()
 		//auto mv = bd.sel_move_random();
 		//auto mv = bd.sel_move_Depth1();
 		//auto mv = bd.sel_move_MinMax(3);
-		if( bd.next_color() == WHITE ) {
-			mv = bd.sel_move_random();
+		if( bd.is_white_turn() ) {
+			//mv = bd.sel_move_random();
+			//mv = bd.sel_move_MinMax(3);
+			mv = bd.sel_move_AlphaBeta(3);
 		} else {
-			//mv = bd.sel_move_MinMax(5);
+			mv = bd.sel_move_MinMax(3);
 			mv = bd.sel_move_AlphaBeta(3);
 		}
 		bd.put(mv, bd.next_color());

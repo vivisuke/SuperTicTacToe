@@ -41,15 +41,17 @@ typedef std::vector<Move> Moves;
 
 struct HistItem {
 public:
-	HistItem(char x = 0, char y = 0, char col = 0, bool linedup = false)
-		: m_x(x), m_y(y), m_col(col), m_linedup(linedup)
+	HistItem(char x = 0, char y = 0, char col = 0, char next_board = -1, bool linedup = false)
+		: m_x(x), m_y(y), m_col(col), m_next_board(next_board), m_linedup(linedup)
 	{
 	}
 public:
 	char	m_x;
 	char	m_y;
 	char	m_col;
+	char	m_next_board;
 	bool	m_linedup;
+
 };
 
 class Board {
@@ -61,6 +63,7 @@ public:
 	char	next_board() const { return m_next_board; }
 	bool	is_game_over() const { return m_game_over; }		//	I‹Çó‘Ô‚©H
 	char	next_color() const { return m_next_color; }			//	Ÿ‚Ìè”Ô
+	bool	is_white_turn() const { return m_next_color == WHITE; }			//	”’‚Ìè”ÔH
 	void	print() const;
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 	static int xyToGix(int x, int y) { return (x/3) + (y/3)*(N_HORZ/3); }
@@ -85,7 +88,7 @@ public:
 	void	gen_moves(Moves&);
 	Move	sel_move_random();
 	Move	sel_move_Depth1();			//	•]‰¿ŠÖ”{‚Pèæ“Ç‚İ
-	int		minmax(int depth);
+	int		min_max(int depth, int ply);
 	Move	sel_move_MinMax(int depth=3);			//	•]‰¿ŠÖ”{depth ƒ~ƒjƒ}ƒbƒNƒX•]‰¿
 	int		alpha_beta(int alpha, int beta, int depth);
 	Move	sel_move_AlphaBeta(int depth=3);			//	•]‰¿ŠÖ”{depth ƒAƒ‹ƒtƒ@ƒx[ƒ^’Tõ
