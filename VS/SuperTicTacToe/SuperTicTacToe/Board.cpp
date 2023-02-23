@@ -9,6 +9,7 @@
 
 #include <random>
 #include <iostream>
+#include <assert.h>
 #include "Board.h"
 
 using namespace std;
@@ -58,6 +59,7 @@ void Board::print() const {
 	if( !m_stack.empty() ) {
 		lastix = m_stack.back().m_y * N_HORZ + m_stack.back().m_x;
 	}
+	cout << "n_put = " << nput() << "\n";
 	//	全ローカルボード表示
 	int ix = 0, gx = 0;
 	cout << "　　ａｂｃ　ｄｅｆ　ｇｈｉ\n";
@@ -98,6 +100,7 @@ void Board::print() const {
 		cout << "did put(" << (int)item.m_x << ", " << (int)item.m_y << ")\n";
 	}
 	cout << "\n";
+	assert( nput() == count_stones() );
 #if 0
 	//	グローバルボード表示
 	ix = 0;
@@ -113,6 +116,18 @@ void Board::print() const {
 	}
 	cout << "\n";
 #endif
+}
+int Board::nput() const {
+	int n = 0;
+	for(int i = 0; i != GBD_SIZE; ++i)
+		n += m_nput[i];
+	return n;
+}
+int Board::count_stones() const {
+	int n = 0;
+	for(int i = 0; i != BD_SIZE; ++i)
+		n += is_empty(i) ? 0 : 1;
+	return n;
 }
 //char Board::get_color(int x, int y) const {
 //}
@@ -323,7 +338,7 @@ Move Board::sel_move_Depth1() {
 	return mmv;
 }
 int Board::min_max(int depth, int ply) {
-	if( depth <= 0 ) {
+	if( is_game_over() || depth <= 0 ) {
 		//return eval();
 		auto ev = eval();
 		//cout << string(ply*2, ' ') << ev << "\n";
@@ -405,7 +420,7 @@ Move Board::sel_move_MinMax(int depth) {
 	return mmv;
 }
 int Board::alpha_beta(int alpha, int beta, int depth) {
-	if( depth <= 0 ) {
+	if( is_game_over() || depth <= 0 ) {
 		//return eval();
 		auto ev = eval();
 		//cout << string(ply*2, ' ') << ev << "\n";

@@ -65,6 +65,8 @@ public:
 	char	next_color() const { return m_next_color; }			//	Ÿ‚Ìè”Ô
 	bool	is_white_turn() const { return m_next_color == WHITE; }			//	”’‚Ìè”ÔH
 	void	print() const;
+	int		nput() const;
+	int		count_stones() const;
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 	static int xyToGix(int x, int y) { return (x/3) + (y/3)*(N_HORZ/3); }
 	char	get_color(int x, int y) const {

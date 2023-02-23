@@ -33,10 +33,14 @@ int main()
 		if( bd.is_white_turn() ) {
 			//mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(5);
+			mv = bd.sel_move_AlphaBeta(7);
+			//if( mv.m_x < 0 )
+			//	mv = bd.sel_move_AlphaBeta(5);
 		} else {
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(5);
+			mv = bd.sel_move_AlphaBeta(7);
+			//if( mv.m_x < 0 )
+			//	mv = bd.sel_move_AlphaBeta(5);
 		}
 		bd.put(mv, bd.next_color());
 		bd.print();
