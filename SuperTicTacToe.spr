@@ -159,5 +159,15 @@
 0157 ◎ C 02/22 02/22 0.001│ToDo│超三目並べ：αβ探索実装
 0158 ◎ C 02/22 02/23 0.001│問題│MinMax() と AlphaBeta() の最善手評価値が異なる場合がある？
 									原因：sel_move_MinMax() をコールすると m_next_board の値が変わっている
-0159 ● C 02/22            │ToDo│
-0160 ● C 02/22            │ToDo│
+0159 ● C 02/23            │ToDo│GDScript > Board クラス：石の値を ±1 に変更、シンボルも WHITE, BLACK に
+0160 ◎ C 02/23 02/23 0.001│ToDo│sel_move_AlphaBeta()：for 文で着手位置を回す部分を共通化
+0161 ● C 02/23            │ToDo│
+0162 ● C 02/23            │ToDo│
+0163 ● C 02/23            │ToDo│
+0164 ● C 02/23            │ToDo│
+0165 ● C 02/23            │ToDo│
+0166 ● C 02/23            │ToDo│
+0167 ● C 02/23            │ToDo│
+0168 ● C 02/23            │ToDo│
+0169 ● C 02/23            │ToDo│
+0170 ● C 02/23            │ToDo│

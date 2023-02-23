@@ -327,7 +327,7 @@ int Board::min_max(int depth, int ply) {
 		//return eval();
 		auto ev = eval();
 		//cout << string(ply*2, ' ') << ev << "\n";
-		cout << ev << " ";
+		//cout << ev << " ";
 		return ev;
 	}
 	int mm = is_white_turn() ? -INT_MAX : INT_MAX;
@@ -361,7 +361,7 @@ int Board::min_max(int depth, int ply) {
 		}
 	}
 	//cout << string(ply*2, ' ') << mm << "\n";
-	cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
+	//cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
 	return mm;
 }
 Move Board::sel_move_MinMax(int depth) {
@@ -409,7 +409,7 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 		//return eval();
 		auto ev = eval();
 		//cout << string(ply*2, ' ') << ev << "\n";
-		cout << ev << " ";
+		//cout << ev << " ";
 		return ev;
 	}
 	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
@@ -464,8 +464,8 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 	}
 ret:
 	//cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
-	cout << (is_white_turn() ? "W: " : "B: ");
-	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
+	//cout << (is_white_turn() ? "W: " : "B: ");
+	//cout << "alpha = " << alpha << ", beta = " << beta << "\n";
 	return is_white_turn() ? alpha : beta;
 }
 Move Board::sel_move_AlphaBeta(int depth) {
@@ -474,6 +474,38 @@ Move Board::sel_move_AlphaBeta(int depth) {
 	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	int alpha = -20000;		//-INT_MAX;
 	int beta = 20000;		//INT_MAX;
+	int x0 = 0;
+	int y0 = 0;
+	int NH = 9;
+	int NV = 9;
+	if( next_board() >= 0 ) {	//	次ローカルボードが有効な場合
+		x0 = (m_next_board % 3) * 3;
+		y0 = (m_next_board / 3) * 3;
+		NH = 3;
+		NV = 3;
+	}
+	for(int v = 0; v != NV; ++v) {
+		for(int h = 0; h != NH; ++h) {
+			if( is_empty(x0 + h, y0 + v) ) {
+				Move mv(x0 + h, y0 + v);
+				put(mv, next_color());
+				auto ev = alpha_beta(alpha, beta, depth - 1);
+				undo_put();
+				if( is_white_turn() ) {
+					if( ev > alpha ) {
+						alpha = ev;
+						mmv = mv;
+					}
+				} else {
+					if( ev < beta ) {
+						beta = ev;
+						mmv = mv;
+					}
+				}
+			}
+		}
+	}
+#if 0
 	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			if( is_empty(ix) ) {
@@ -519,6 +551,7 @@ Move Board::sel_move_AlphaBeta(int depth) {
 			}
 		}
 	}
+#endif
 	cout << "g_count = " << g_count << "\n";
 	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
 	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
