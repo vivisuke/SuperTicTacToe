@@ -413,6 +413,38 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 		return ev;
 	}
 	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
+	int x0 = 0;
+	int y0 = 0;
+	int NH = 9;
+	int NV = 9;
+	if( next_board() >= 0 ) {	//	次ローカルボードが有効な場合
+		x0 = (m_next_board % 3) * 3;
+		y0 = (m_next_board / 3) * 3;
+		NH = 3;
+		NV = 3;
+	}
+	for(int v = 0; v != NV; ++v) {
+		for(int h = 0; h != NH; ++h) {
+			if( is_empty(x0 + h, y0 + v) ) {
+				Move mv(x0 + h, y0 + v);
+				put(mv, next_color());
+				auto ev = alpha_beta(alpha, beta, depth-1);
+				undo_put();
+				if( is_white_turn() ) {
+					if( ev > alpha ) {
+						if( (alpha = ev) >= beta )
+							goto ret;
+					}
+				} else {
+					if( ev < beta ) {
+						if( (beta = ev) <= alpha )
+							goto ret;
+					}
+				}
+			}
+		}
+	}
+#if 0
 	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
 		for(int ix = 0; ix != BD_SIZE; ++ix) {
 			if( is_empty(ix) ) {
@@ -462,6 +494,7 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 			}
 		}
 	}
+#endif
 ret:
 	//cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
 	//cout << (is_white_turn() ? "W: " : "B: ");
