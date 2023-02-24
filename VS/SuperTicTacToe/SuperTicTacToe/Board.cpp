@@ -210,6 +210,29 @@ int Board::eval() const {
 	ev += ::eval(get_gcolor(2, 0), get_gcolor(1, 1), get_gcolor(0, 2)) * GVAL;
 	return ev;
 }
+int Board::eval_index() const {
+	const int GVAL = 100;
+	++g_count;
+	if( is_game_over() )
+		return m_winner * GVAL * GVAL;
+	int ev = 0;
+	for(int gy = 0; gy != N_VERT3; ++gy) {
+		for(int gx = 0; gx != N_HORZ3; ++gx) {
+			if( !m_linedup[gy*N_HORZ3 + gx] ) {	//	ローカルボードで三目並んでいない
+				int x0 = gx * N_HORZ3;
+				int y0 = gy * N_VERT3;
+				int ix = (get_color3(x0, y0) * 3 + get_color3(x0 + 1, y0)) * 3 + get_color3(x0 + 2, y0);
+				ix = ((ix * 3 + get_color3(x0, y0 + 1)) * 3 + get_color3(x0 + 1, y0 + 1)) * 3 + get_color3(x0 + 2, y0 + 1);
+				ix = ((ix * 3 + get_color3(x0, y0 + 2)) * 3 + get_color3(x0 + 1, y0 + 2)) * 3 + get_color3(x0 + 2, y0 + 2);
+				ev += g_eval[ix];
+			}
+		}
+	}
+	int ix = (get_gcolor3(0, 0) * 3 + get_gcolor3(1, 0)) * 3 + get_gcolor3(2, 0);
+	ix = ((ix * 3 + get_gcolor3(0, 1)) * 3 + get_gcolor3(1, 1)) * 3 + get_gcolor3(2, 1);
+	ix = ((ix * 3 + get_gcolor3(0, 2)) * 3 + get_gcolor3(1, 2)) * 3 + get_gcolor3(2, 2);
+	ev += g_eval[ix] * GVAL;
+}
 void Board::update_next_board(int x, int y) {
 	int x3 = x % 3;
 	int y3 = y % 3;
@@ -425,6 +448,8 @@ Move Board::sel_move_MinMax(int depth) {
 int Board::alpha_beta(int alpha, int beta, int depth) {
 	if( is_game_over() || depth <= 0 ) {
 		auto ev = eval();
+		auto ev2 = eval_index();
+		assert(ev == ev2);
 		//cout << string(ply*2, ' ') << ev << "\n";
 		//cout << ev << " ";
 		return ev;
@@ -576,7 +601,7 @@ void build_3x3_eval_table() {
 		//cout << "\n";
 		//print(g_board3x3);
 		g_eval[ix] = eval(g_board3x3);
-		cout << g_eval[ix] << "\t";
+		//cout << g_eval[ix] << "\t";
 	}
-	cout << "\n";
+	//cout << "\n";
 }

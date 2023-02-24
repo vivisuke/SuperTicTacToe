@@ -72,8 +72,14 @@ public:
 	char	get_color(int x, int y) const {
 		return m_board[x + y*N_HORZ];
 	}
+	char	get_color3(int x, int y) const {		//	0, 1, 2 の値を返す
+		return (m_board[x + y*N_HORZ] + 3) % 3;
+	}
 	char	get_gcolor(int x, int y) const {
 		return m_gboard[x + y*3];
+	}
+	char	get_gcolor3(int x, int y) const {		//	0, 1, 2 の値を返す
+		return (m_gboard[x + y*3] + 3) % 3;
 	}
 	bool	is_empty(int x, int y) const {
 		return get_color(x, y) == EMPTY;
@@ -83,6 +89,7 @@ public:
 	bool	is_linedup(int x, int y) const;
 	bool	is_game_over(int x, int y) const;	//	終局（空欄無し or 三目並んだatグローバルボード）か？
 	int		eval() const;
+	int		eval_index() const;					//	事前に計算した盤面インデックス→評価値を使用する版
 	void	put(const Move &mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	put(int ix, char col) { put(ix % N_HORZ, ix / N_HORZ, col); }
 	void	put(int x, int y, char col);

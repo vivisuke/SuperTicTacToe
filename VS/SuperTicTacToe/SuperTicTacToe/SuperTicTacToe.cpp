@@ -25,7 +25,7 @@ int main()
 	build_3x3_eval_table();
 	//
     Board bd;
-#if 0
+#if 1
     bd.print();
     Move mv;
 	while( !bd.is_game_over() ) {
