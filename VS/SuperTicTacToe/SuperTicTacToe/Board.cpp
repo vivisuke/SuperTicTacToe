@@ -15,10 +15,11 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 vector<int> g_eval;				//	盤面インデックス → 評価値テーブル
+char g_board3x3[GBD_SIZE];		//	3x3盤面
 int g_count;
 
 //----------------------------------------------------------------------
@@ -182,7 +183,10 @@ int eval(char c1, char c2, char c3) {
 	return 0;
 }
 int Board::eval() const {
+	const int GVAL = 100;
 	++g_count;
+	if( is_game_over() )
+		return m_winner * GVAL * GVAL;
 	int ev = 0;
 	for(int gy = 0; gy != N_VERT3; ++gy) {
 		for(int gx = 0; gx != N_HORZ3; ++gx) {
@@ -198,7 +202,6 @@ int Board::eval() const {
 			}
 		}
 	}
-	const int GVAL = 100;
 	for(int i = 0; i != N_VERT3; ++i) {
 		ev += ::eval(get_gcolor(0, i), get_gcolor(1, i), get_gcolor(2, i)) * GVAL;
 		ev += ::eval(get_gcolor(i, 0), get_gcolor(i, 1), get_gcolor(i, 2)) * GVAL;
@@ -421,7 +424,6 @@ Move Board::sel_move_MinMax(int depth) {
 }
 int Board::alpha_beta(int alpha, int beta, int depth) {
 	if( is_game_over() || depth <= 0 ) {
-		//return eval();
 		auto ev = eval();
 		//cout << string(ply*2, ' ') << ev << "\n";
 		//cout << ev << " ";
@@ -461,57 +463,6 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 			}
 		}
 	}
-#if 0
-	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
-		for(int ix = 0; ix != BD_SIZE; ++ix) {
-			if( is_empty(ix) ) {
-				Move mv(ix % 9, ix / 9);
-				put(mv, next_color());
-				auto ev = alpha_beta(alpha, beta, depth-1);
-				undo_put();
-				if( is_white_turn() ) {
-					if( ev > alpha ) {
-						if( (alpha = ev) >= beta )
-							goto ret;
-							//return alpha;
-					}
-				} else {
-					if( ev < beta ) {
-						if( (beta = ev) <= alpha )
-							goto ret;
-							//return beta;
-					}
-				}
-			}
-		}
-	} else {
-		int x0 = (m_next_board % 3) * 3;
-		int y0 = (m_next_board / 3) * 3;
-		for(int v = 0; v != 3; ++v) {
-			for(int h = 0; h != 3; ++h) {
-				if( is_empty(x0 + h, y0 + v) ) {
-					Move mv(x0 + h, y0 + v);
-					put(mv, next_color());
-					auto ev = alpha_beta(alpha, beta, depth-1);
-					undo_put();
-					if( is_white_turn() ) {
-						if( ev > alpha ) {
-							if( (alpha = ev) >= beta )
-								goto ret;
-								//return alpha;
-						}
-					} else {
-						if( ev < beta ) {
-							if( (beta = ev) <= alpha )
-								goto ret;
-								//return beta;
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
 ret:
 	//cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
 	//cout << (is_white_turn() ? "W: " : "B: ");
@@ -557,53 +508,6 @@ Move Board::sel_move_AlphaBeta(int depth) {
 			}
 		}
 	}
-#if 0
-	if( next_board() < 0 ) {	//	全ローカルボードに打てる場合
-		for(int ix = 0; ix != BD_SIZE; ++ix) {
-			if( is_empty(ix) ) {
-				Move mv(ix % 9, ix / 9);
-				put(mv, next_color());
-				auto ev = alpha_beta(alpha, beta, depth - 1);
-				undo_put();
-				if( is_white_turn() ) {
-					if( ev > alpha ) {
-						alpha = ev;
-						mmv = mv;
-					}
-				} else {
-					if( ev < beta ) {
-						beta = ev;
-						mmv = mv;
-					}
-				}
-			}
-		}
-	} else {
-		int x0 = (m_next_board % 3) * 3;
-		int y0 = (m_next_board / 3) * 3;
-		for(int v = 0; v != 3; ++v) {
-			for(int h = 0; h != 3; ++h) {
-				if( is_empty(x0 + h, y0 + v) ) {
-					Move mv(x0 + h, y0 + v);
-					put(mv, next_color());
-					auto ev = alpha_beta(alpha, beta, depth - 1);
-					undo_put();
-					if( is_white_turn() ) {
-						if( ev > alpha ) {
-							alpha = ev;
-							mmv = mv;
-						}
-					} else {
-						if( ev < beta ) {
-							beta = ev;
-							mmv = mv;
-						}
-					}
-				}
-			}
-		}
-	}
-#endif
 	cout << "g_count = " << g_count << "\n";
 	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
 	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
@@ -628,7 +532,50 @@ int Board::playout_random(int N) {
 	}
 	return sum;
 }
+//----------------------------------------------------------------------
+void set(char board[], int index) {
+	for(int i = GBD_SIZE; --i >= 0;) {
+		switch( index % 3 ) {
+		case 0:	board[i] = EMPTY;	break;
+		case 1:	board[i] = WHITE;	break;
+		case 2:	board[i] = BLACK;	break;
+		}
+		index /= 3;
+	}
+}
+void print(const char board[]) {
+	for(int i = 0; i != GBD_SIZE; ++i) {
+		switch( board[i] ) {
+		case EMPTY:	cout << "・";	break;
+		case WHITE:	cout << "○";	break;
+		case BLACK:	cout << "●";	break;
+		}
+		if( (i + 1) %3 == 0 ) cout << "\n";
+	}
+	cout << "\n";
+}
+int eval(const char board[]) {
+	int ev = 0;
+	for(int i = 0; i != N_HORZ; ++i) {
+		ev += eval(board[i*3 + 0], board[i*3 + 1], board[i*3 + 2]);
+		ev += eval(board[0*3 + i], board[1*3 + i], board[2*3 + i]);
+	}
+	ev += eval(board[0*3 + 0], board[1*3 + 1], board[2*3 + 2]);
+	ev += eval(board[2*3 + 0], board[1*3 + 1], board[0*3 + 2]);
+	return ev;
+}
 void build_3x3_eval_table() {
 	g_eval.clear();
 	g_eval.resize(3*3*3*3*3*3*3*3*3);
+	//
+	//for(int i = 0; i != GBD_SIZE; ++i) g_board3x3[i] = EMPTY;
+	//print(g_board3x3);
+	//cout << "eval = " << eval(g_board3x3) << "\n";
+	for(int ix = 0; ix != g_eval.size(); ++ix) {
+		set(g_board3x3, ix);
+		//print(g_board3x3);
+		g_eval[ix] = eval(g_board3x3);
+		cout << g_eval[ix] << "\t";
+	}
+	cout << "\n";
 }

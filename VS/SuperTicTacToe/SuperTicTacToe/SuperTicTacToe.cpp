@@ -22,7 +22,10 @@ void do_search(Board &bd, int depth) {
 
 int main()
 {
+	build_3x3_eval_table();
+	//
     Board bd;
+#if 0
     bd.print();
     Move mv;
 	while( !bd.is_game_over() ) {
@@ -33,12 +36,12 @@ int main()
 		if( bd.is_white_turn() ) {
 			//mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(7);
+			mv = bd.sel_move_AlphaBeta(9);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		} else {
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(7);
+			mv = bd.sel_move_AlphaBeta(9);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		}
@@ -46,6 +49,7 @@ int main()
 		bd.print();
 	}
 	cout << "eval = " << bd.eval() << "\n\n";
+#endif
 #if 0
     g_count = 0;
     do_search(bd, 3);
