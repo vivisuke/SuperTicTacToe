@@ -554,9 +554,9 @@ void print(const char board[]) {
 	}
 	cout << "\n";
 }
-int eval(const char board[]) {
+int eval(const char board[GBD_SIZE]) {
 	int ev = 0;
-	for(int i = 0; i != N_HORZ; ++i) {
+	for(int i = 0; i != 3; ++i) {
 		ev += eval(board[i*3 + 0], board[i*3 + 1], board[i*3 + 2]);
 		ev += eval(board[0*3 + i], board[1*3 + i], board[2*3 + i]);
 	}
@@ -573,6 +573,7 @@ void build_3x3_eval_table() {
 	//cout << "eval = " << eval(g_board3x3) << "\n";
 	for(int ix = 0; ix != g_eval.size(); ++ix) {
 		set(g_board3x3, ix);
+		//cout << "\n";
 		//print(g_board3x3);
 		g_eval[ix] = eval(g_board3x3);
 		cout << g_eval[ix] << "\t";
