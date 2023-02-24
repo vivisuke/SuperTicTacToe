@@ -432,18 +432,20 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 	int y0 = 0;
 	int NH = 9;
 	int NV = 9;
+	int d = 2;
 	if( next_board() >= 0 ) {	//	次ローカルボードが有効な場合
 		x0 = (m_next_board % 3) * 3;
 		y0 = (m_next_board / 3) * 3;
 		NH = 3;
 		NV = 3;
+		d = 1;
 	}
 	for(int v = 0; v != NV; ++v) {
 		for(int h = 0; h != NH; ++h) {
 			if( is_empty(x0 + h, y0 + v) ) {
 				Move mv(x0 + h, y0 + v);
 				put(mv, next_color());
-				auto ev = alpha_beta(alpha, beta, depth-1);
+				auto ev = alpha_beta(alpha, beta, depth-d);
 				undo_put();
 				if( is_white_turn() ) {
 					if( ev > alpha ) {
@@ -526,18 +528,20 @@ Move Board::sel_move_AlphaBeta(int depth) {
 	int y0 = 0;
 	int NH = 9;
 	int NV = 9;
+	int d = 2;
 	if( next_board() >= 0 ) {	//	次ローカルボードが有効な場合
 		x0 = (m_next_board % 3) * 3;
 		y0 = (m_next_board / 3) * 3;
 		NH = 3;
 		NV = 3;
+		d = 1;
 	}
 	for(int v = 0; v != NV; ++v) {
 		for(int h = 0; h != NH; ++h) {
 			if( is_empty(x0 + h, y0 + v) ) {
 				Move mv(x0 + h, y0 + v);
 				put(mv, next_color());
-				auto ev = alpha_beta(alpha, beta, depth - 1);
+				auto ev = alpha_beta(alpha, beta, depth - d);
 				undo_put();
 				if( is_white_turn() ) {
 					if( ev > alpha ) {
