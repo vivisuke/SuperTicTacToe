@@ -90,6 +90,7 @@ public:
 	bool	is_game_over(int x, int y) const;	//	終局（空欄無し or 三目並んだatグローバルボード）か？
 	int		eval() const;
 	int		eval_index() const;					//	事前に計算した盤面インデックス→評価値を使用する版
+	int		eval_diff_index() const;			//	各盤面インデックス→評価値を使用する版
 	void	put(const Move &mv, char col) { put(mv.m_x, mv.m_y, col); }
 	void	put(int ix, char col) { put(ix % N_HORZ, ix / N_HORZ, col); }
 	void	put(int x, int y, char col);

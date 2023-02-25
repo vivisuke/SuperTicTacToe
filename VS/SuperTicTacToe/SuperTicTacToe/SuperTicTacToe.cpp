@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <assert.h>
 #include "Board.h"
 
 using namespace std;
@@ -25,23 +26,43 @@ int main()
 	build_3x3_eval_table();
 	//
     Board bd;
+#if 0
+    auto ev1 = bd.eval();
+    auto ev2 = bd.eval_index();
+    auto ev3 = bd.eval_diff_index();
+    assert( ev1 == ev2 );
+    assert( ev1 == ev3 );
+    bd.put(0, 0, WHITE);
+    ev1 = bd.eval();
+    ev2 = bd.eval_index();
+    ev3 = bd.eval_diff_index();
+    assert( ev1 == ev2 );
+    assert( ev1 == ev3 );
+#endif
+
 #if 1
     bd.print();
     Move mv;
 	while( !bd.is_game_over() ) {
+	    auto ev1 = bd.eval();
+	    auto ev2 = bd.eval_index();
+	    auto ev3 = bd.eval_diff_index();
+	    assert( ev1 == ev2 );
+	    assert( ev1 == ev3 );
 		cout << "eval = " << bd.eval() << "\n\n";
 		//auto mv = bd.sel_move_random();
 		//auto mv = bd.sel_move_Depth1();
 		//auto mv = bd.sel_move_MinMax(3);
 		if( bd.is_white_turn() ) {
-			//mv = bd.sel_move_random();
+			mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(9);
+			//mv = bd.sel_move_AlphaBeta(5);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		} else {
+			//mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(9);
+			mv = bd.sel_move_AlphaBeta(5);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		}

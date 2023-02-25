@@ -15,11 +15,14 @@
 using namespace std;
 
 std::random_device g_rnd;         // 非決定的な乱数生成器
-//std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
-std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+std::mt19937 g_mt(0);       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
+//std::mt19937 g_mt(g_rnd());       // メルセンヌ・ツイスタの32ビット版、引数は初期シード
 
 vector<int> g_eval;				//	盤面インデックス → 評価値テーブル
 char g_board3x3[GBD_SIZE];		//	3x3盤面
+short g_pow_table[] = {	pow(3, 8), pow(3, 7), pow(3, 6),
+						pow(3, 5), pow(3, 4), pow(3, 3),
+						pow(3, 2), pow(3, 1), pow(3, 0), };
 int g_count;
 
 //----------------------------------------------------------------------
@@ -102,6 +105,11 @@ void Board::print() const {
 		const auto &item = m_stack.back();
 		cout << "did put(" << (int)item.m_x << ", " << (int)item.m_y << ")\n";
 	}
+	//	盤面インデックス表示
+	cout << "indexes = ";
+	for(int i = 0; i != GBD_SIZE; ++i) cout << m_bd_index[i] << ", ";
+	cout << m_gbd_index << "\n";
+	//
 	cout << "\n";
 	assert( nput() == count_stones() );
 #if 0
@@ -235,6 +243,18 @@ int Board::eval_index() const {
 	ix = ((ix * 3 + get_gcolor3(0, 2)) * 3 + get_gcolor3(1, 2)) * 3 + get_gcolor3(2, 2);
 	ev += g_eval[ix] * GVAL;
 }
+int Board::eval_diff_index() const {
+	const int GVAL = 100;
+	++g_count;
+	if( is_game_over() )
+		return m_winner * GVAL * GVAL;
+	int ev = 0;
+	for(int i = 0; i != GBD_SIZE; ++i) {
+		if( !m_linedup[i] )
+			ev += g_eval[m_bd_index[i]];
+	}
+	return ev + g_eval[m_gbd_index];
+}
 void Board::update_next_board(int x, int y) {
 	int x3 = x % 3;
 	int y3 = y % 3;
@@ -248,12 +268,16 @@ void Board::put(int x, int y, char col) {
 	//int gy = y / 3;
 	//int gix = gx + gy*3;		//	グローバルボード内インデックス
 	auto gix = xyToGix(x, y);
+	int mx = x % 3;
+	int my = y % 3;
+	m_bd_index[gix] += g_pow_table[mx+my*3] * (col==WHITE?1:2);	//	盤面インデックス更新
 	m_nput[gix] += 1;		// 各ローカルボードの着手数
 	bool linedup = false;	// ローカルボード内で三目並んだか？
 	if( !m_linedup[gix] && is_linedup(x, y) ) {
 		linedup = true;		//	この着手で三目並んだ
 		m_linedup[gix] = true;
 		m_gboard[gix] = col;
+		m_gbd_index += g_pow_table[gix] * (col==WHITE?1:2);	//	盤面インデックス更新
 	}
 	m_stack.push_back(HistItem(x, y, col, m_next_board, linedup));
 	update_next_board(x, y);
@@ -271,10 +295,14 @@ void Board::undo_put() {
 	const auto &item = m_stack.back();
 	m_board[xyToIndex(item.m_x, item.m_y)] = EMPTY;
 	auto gix = xyToGix(item.m_x, item.m_y);
+	int mx = item.m_x % 3;
+	int my = item.m_y % 3;
+	m_bd_index[gix] -= g_pow_table[mx+my*3] * (item.m_col==WHITE?1:2);	//	盤面インデックス更新
 	m_nput[gix] -= 1;		// 各ローカルボードの着手数
 	if( item.m_linedup ) {	//	この着手で三目並んでた場合
 		m_linedup[gix] = false;
 		m_gboard[gix] = EMPTY;
+		m_gbd_index -= g_pow_table[gix] * (item.m_col==WHITE?1:2);	//	盤面インデックス更新
 	}
 	m_next_board = item.m_next_board;
 	m_stack.pop_back();
@@ -593,7 +621,7 @@ int eval(const char board[GBD_SIZE]) {
 }
 void build_3x3_eval_table() {
 	g_eval.clear();
-	g_eval.resize(3*3*3*3*3*3*3*3*3);
+	g_eval.resize(pow(3, 9));
 	//
 	//for(int i = 0; i != GBD_SIZE; ++i) g_board3x3[i] = EMPTY;
 	//print(g_board3x3);
