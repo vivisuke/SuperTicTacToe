@@ -52,7 +52,9 @@ void Board::init() {
 		m_gboard[i] = EMPTY;
 		m_nput[i] = 0;
 		m_linedup[i] = false;
+		m_bd_index[i] = 0;
 	}
+	m_gbd_index = 0;
 }
 const char* digstr[] = { "‚P", "‚Q", "‚R", "‚S", "‚T", "‚U", "‚V", "‚W", "‚X", };
 void Board::print() const {

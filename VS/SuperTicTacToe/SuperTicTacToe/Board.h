@@ -110,7 +110,9 @@ private:
 	char	m_winner;					//	勝者：WHITE | BLACK | EMPTY
 	char	m_board[BD_SIZE];
 	char	m_gboard[GBD_SIZE];
-	char	m_nput[GBD_SIZE];				//	各ローカルボード着手数
-	bool	m_linedup[GBD_SIZE];			//	各ローカルボード：三目並んでいる
+	char	m_nput[GBD_SIZE];			//	各ローカルボード着手数
+	bool	m_linedup[GBD_SIZE];		//	各ローカルボード：三目並んでいる
+	short	m_bd_index[GBD_SIZE];		//	各ローカルボード盤面インデックス
+	short	m_gbd_index;				//	グローバルボード盤面インデックス
 	std::vector<HistItem>		m_stack;
 };
