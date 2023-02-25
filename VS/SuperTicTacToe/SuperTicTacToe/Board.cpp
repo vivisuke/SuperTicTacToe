@@ -253,7 +253,7 @@ int Board::eval_diff_index() const {
 		if( !m_linedup[i] )
 			ev += g_eval[m_bd_index[i]];
 	}
-	return ev + g_eval[m_gbd_index];
+	return ev + g_eval[m_gbd_index] * GVAL;
 }
 void Board::update_next_board(int x, int y) {
 	int x3 = x % 3;

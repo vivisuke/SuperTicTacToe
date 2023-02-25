@@ -54,9 +54,9 @@ int main()
 		//auto mv = bd.sel_move_Depth1();
 		//auto mv = bd.sel_move_MinMax(3);
 		if( bd.is_white_turn() ) {
-			mv = bd.sel_move_random();
+			//mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			//mv = bd.sel_move_AlphaBeta(5);
+			mv = bd.sel_move_AlphaBeta(5);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		} else {
