@@ -69,6 +69,7 @@ public:
 	int		count_stones() const;
 	static int xyToIndex(int x, int y) { return x + y*N_HORZ; }
 	static int xyToGix(int x, int y) { return (x/3) + (y/3)*(N_HORZ/3); }
+	char	winner() const { return m_winner; }
 	char	get_color(int x, int y) const {
 		return m_board[x + y*N_HORZ];
 	}

@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <chrono>
 #include <assert.h>
 #include "Board.h"
 
@@ -39,8 +40,42 @@ int main()
     assert( ev1 == ev2 );
     assert( ev1 == ev3 );
 #endif
+    auto start = std::chrono::system_clock::now();      // 計測スタート時刻を保存
+    int wwin = 0, bwin = 0;
+    const int LOOP = 100;
+    Move mv;
+    for(int i = 0; i != LOOP; ++i) {
+    	cout << ".";
+	    Board bd;
+		while( !bd.is_game_over() ) {
+			if( bd.is_white_turn() ) {
+				mv = bd.sel_move_random();
+				//mv = bd.sel_move_MinMax(3);
+				//mv = bd.sel_move_AlphaBeta(9);
+				//if( mv.m_x < 0 )
+				//	mv = bd.sel_move_AlphaBeta(5);
+			} else {
+				//mv = bd.sel_move_random();
+				//mv = bd.sel_move_MinMax(3);
+				mv = bd.sel_move_AlphaBeta(7);
+				//if( mv.m_x < 0 )
+				//	mv = bd.sel_move_AlphaBeta(5);
+			}
+			bd.put(mv, bd.next_color());
+		}
+		if( bd.winner() == WHITE ) ++wwin;
+		else if( bd.winner() == BLACK ) ++bwin;
+    }
+    auto end = std::chrono::system_clock::now();       // 計測終了時刻を保存
+    auto dur = end - start;        // 要した時間を計算
+    auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
+   	cout << "\n";
+    cout << "white won: " << (100.0)*wwin/LOOP << "%\n";
+    cout << "black won: " << (100.0)*bwin/LOOP << "%\n";
+    cout << "draw: " << (100.0)*(LOOP - wwin - bwin)/LOOP << "%\n";
+    cout << "\ndur = " << msec << "millisec\n";
 
-#if 1
+#if 0
     bd.print();
     Move mv;
 	while( !bd.is_game_over() ) {
@@ -56,13 +91,13 @@ int main()
 		if( bd.is_white_turn() ) {
 			//mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(5);
+			mv = bd.sel_move_AlphaBeta(9);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		} else {
 			//mv = bd.sel_move_random();
 			//mv = bd.sel_move_MinMax(3);
-			mv = bd.sel_move_AlphaBeta(5);
+			mv = bd.sel_move_AlphaBeta(9);
 			//if( mv.m_x < 0 )
 			//	mv = bd.sel_move_AlphaBeta(5);
 		}

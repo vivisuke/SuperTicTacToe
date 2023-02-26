@@ -173,8 +173,8 @@
 0168 ◎ C 02/25 02/26 0.001│ToDo│Board::eval_diff_index()：盤面インデックス情報を参照して評価値計算
 0169 ◎ C 02/25 02/26 0.001│ToDo│Board::undo_put()：ボードインデックス情報を元に戻す
 0170 ◎ C 02/25 02/26 0.001│問題│Board::eval_diff_index() の返す値が不正になることがある
-0171 ● C 02/25            │ToDo│
-0172 ● C 02/25            │ToDo│
+0171 ◎ C 02/25 02/26 0.001│ToDo│alpha_beta()：eval_diff_index() コールに変更
+0172 ◎ C 02/25 02/26 0.001│ToDo│eval(), eval_diff_index() 処理時間計測
 0173 ● C 02/25            │ToDo│
 0174 ● C 02/25            │ToDo│
 0175 ● C 02/25            │ToDo│

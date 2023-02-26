@@ -477,12 +477,13 @@ Move Board::sel_move_MinMax(int depth) {
 }
 int Board::alpha_beta(int alpha, int beta, int depth) {
 	if( is_game_over() || depth <= 0 ) {
-		auto ev = eval();
-		auto ev2 = eval_index();
-		assert(ev == ev2);
+		return eval_diff_index();
+		//auto ev = eval();
+		//auto ev2 = eval_index();
+		//assert(ev == ev2);
 		//cout << string(ply*2, ' ') << ev << "\n";
 		//cout << ev << " ";
-		return ev;
+		//return ev;
 	}
 	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	int x0 = 0;
@@ -563,9 +564,9 @@ Move Board::sel_move_AlphaBeta(int depth) {
 			}
 		}
 	}
-	cout << "g_count = " << g_count << "\n";
-	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
-	cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
+	//cout << "g_count = " << g_count << "\n";
+	//cout << "alpha = " << alpha << ", beta = " << beta << "\n";
+	//cout << "move = (" << (int)mmv.m_x << ", " << (int)mmv.m_y << ")\n";
 	return mmv;
 }
 int Board::playout_random() {
