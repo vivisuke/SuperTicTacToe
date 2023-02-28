@@ -1,8 +1,7 @@
-[gd_scene load_steps=27 format=2]
+[gd_scene load_steps=26 format=2]
 
 [ext_resource path="res://scripts/TitleBar.gd" type="Script" id=1]
 [ext_resource path="res://fonts/arialbd.ttf" type="DynamicFontData" id=2]
-[ext_resource path="res://scripts/Board.gd" type="Script" id=3]
 [ext_resource path="res://images/close_black.png" type="Texture" id=4]
 [ext_resource path="res://images/circle_black.png" type="Texture" id=5]
 [ext_resource path="res://images/big_circle_black.png" type="Texture" id=6]
@@ -164,7 +163,6 @@ margin_top = 200.0
 margin_right = 500.0
 margin_bottom = 700.0
 color = Color( 0.752941, 0.752941, 0.752941, 1 )
-script = ExtResource( 3 )
 
 [node name="TileMapBG" type="TileMap" parent="Board"]
 position = Vector2( 20, 20 )

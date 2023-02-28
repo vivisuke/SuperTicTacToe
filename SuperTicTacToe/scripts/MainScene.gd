@@ -66,10 +66,13 @@ const ev_pat_table = [	# ○から見たパターン評価値
 ]
 const mb_str = ["Ｘ", "Ｏ"]
 enum {
-	EMPTY = -1,
-	BATSU = 0, MARU,
+	BLACK = -1, EMPTY, WHITE,				#	盤面石値、WHITE for 先手
+	TS_EMPTY = -1, TS_BATSU, TS_MARU,		#	タイルセットID
 	HUMAN = 0, AI_RANDOM, AI_DEPTH_1, AI_DEPTH_3,
 }
+var g_board3x3 = []			# 3x3 盤面 for 作業用
+var g_eval = []				# 盤面インデックス→評価値 テーブル
+
 class HistItem:
 	var x:int				# 着手位置
 	var y:int
@@ -104,7 +107,7 @@ class Board:
 		n_put = 0
 		is_game_over = false
 		winner = -1
-		next_color = MARU
+		next_color = WHITE
 		n_put_local = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		three_lined_up = [false, false, false, false, false, false, false, false, false]
 		next_board = -1
@@ -147,11 +150,11 @@ class Board:
 			txt += "\n"
 		txt += "\n"
 		if is_game_over:
-			if winner == MARU: txt += "O won.\n"
-			elif winner == BATSU: txt += "X won.\n"
+			if winner == WHITE: txt += "O won.\n"
+			elif winner == BLACK: txt += "X won.\n"
 			else: txt += "draw.\n"
 		else:
-			txt += "next turn color: %s\n" % ("O" if next_color == MARU else "X")
+			txt += "next turn color: %s\n" % ("O" if next_color == WHITE else "X")
 			txt += "next board = %d\n" % next_board
 		txt += "last_put_pos = [%d, %d]\n" % last_put_pos()
 		print(txt)
@@ -188,11 +191,11 @@ class Board:
 		if !is_game_over && n_put == N_HORZ*N_VERT:
 			is_game_over = true
 		stack.push_back(HistItem.new(x, y, linedup, next_board))
-		next_color = (MARU + BATSU) - next_color	# 手番交代
+		next_color = (WHITE + BLACK) - next_color	# 手番交代
 		update_next_board(x, y)					# next_board 設定
 	func unput():
 		if stack.empty(): return
-		next_color = (MARU + BATSU) - next_color	# 手番交代
+		next_color = (WHITE + BLACK) - next_color	# 手番交代
 		var itm = stack.pop_back()
 		l_board[itm.x + itm.y*N_HORZ] = EMPTY
 		if itm.linedup:				# 着手で三目並んだ場合
@@ -203,7 +206,7 @@ class Board:
 		next_board = itm.next_board
 		pass
 	func change_turn():				# 手番交代
-		next_color = (MARU + BATSU) - next_color
+		next_color = (WHITE + BLACK) - next_color
 	func is_three_stones(x : int, y : int):		# 三目並んだか？
 		var x3 : int = x % 3
 		var x0 : int = x - x3		# ローカルボード内左端座標
@@ -294,23 +297,23 @@ class Board:
 					put(x0+h, y0+v, next_color)
 					if is_game_over:
 						unput()
-						if next_color == MARU:
+						if next_color == WHITE:
 							return 9000
 						else:
 							return -9000
 					var ev = alpha_bata(alpha, beta, depth-1)
 					unput()
-					if next_color == MARU:
+					if next_color == WHITE:
 						alpha = max(ev, alpha)
 						if alpha >= beta: return alpha
 					else:
 						beta = min(ev, beta)
 						if alpha >= beta: return beta
-		if next_color == MARU:
+		if next_color == WHITE:
 			return alpha
 		else:
 			return beta
-	func select_depth_3():		# ３手先読み（着手評価のみ）で着手決定
+	func select_depth_3():		# ３手先読み＋評価関数で着手決定
 		var bd = Board.new()
 		bd.copy(self)
 		var DEPTH = 3
@@ -335,7 +338,7 @@ class Board:
 					bd.put(x0+h, y0+v, next_color)
 					var ev = bd.alpha_bata(alpha, beta, DEPTH)
 					bd.unput()
-					if next_color == MARU:
+					if next_color == WHITE:
 						if ev > alpha:
 							alpha = ev
 							ps = [x0+h, y0+v]
@@ -377,7 +380,7 @@ class Board:
 			i4 = i4 * 3 + get_color_g(2 - g, g) + 1
 		ev += (ev_pat_table[i3] + ev_pat_table[i4]) * 32
 		if next_board < 0:		# 全ボードに着手可能
-			if next_color == MARU:
+			if next_color == WHITE:
 				ev += 16
 			else:
 				ev -= 16
@@ -444,7 +447,7 @@ var put_pos = [-1, -1]			# 直前着手位置
 var AI_thinking = false
 var waiting = 0;				# ウェイト中カウンタ
 var game_started = false				# ゲーム中
-var next_color = MARU
+var next_color = WHITE
 var maru_player = HUMAN
 var batsu_player = HUMAN
 #var next_logical_board = [-1, -1]	# 着手可能ロジカルボード
@@ -455,14 +458,15 @@ var rng = RandomNumberGenerator.new()
 
 func _ready():
 	print(Time.get_ticks_usec())
+	build_3x3_eval_table()			# 3x3盤面→評価値テーブル構築
 	#
 	g_bd = Board.new()
 	g_bd.print()
 	print("eval_board = ", g_bd.eval_board())
-	g_bd.put(0, 0, MARU)
+	g_bd.put(0, 0, WHITE)
 	g_bd.print()
 	print("eval_board = ", g_bd.eval_board())
-	g_bd.put(1, 1, BATSU)
+	g_bd.put(1, 1, BLACK)
 	g_bd.print()
 	print("eval_board = %d\n" % g_bd.eval_board())
 	g_bd.unput()
@@ -484,10 +488,40 @@ func _ready():
 	init_board()
 	update_next_label()
 	#update_next_underline()
-	#put(2, 2, MARU)
+	#put(2, 2, WHITE)
 	$MessLabel.text = "【Start Game】を押してください。"
 	print(Time.get_ticks_usec())
 	pass # Replace with function body.
+func col2tsid(col):
+	match col:
+		EMPTY:	return TS_EMPTY
+		WHITE:	return TS_MARU
+		BLACK:	return TS_BATSU
+func tsid2col(id):
+	match id:
+		TS_EMPTY:	return EMPTY
+		TS_MARU:	return WHITE
+		TS_BATSU:	return BLACK
+func eval3(c1, c2, c3):
+	pass
+func eval3x3(bd : Array):
+	pass
+func set_board3x3(index : int):
+	var i = 8
+	while i >= 0:
+		match index % 3:
+			0:	g_board3x3[i] = EMPTY
+			1:	g_board3x3[i] = WHITE
+			2:	g_board3x3[i] = BLACK
+		index /= 3
+		i -= 1
+func build_3x3_eval_table():
+	g_board3x3.resize(3*3)
+	g_eval.resize(pow(3, 9))		# 3^9
+	for ix in range(g_eval.size()):
+		set_board3x3(ix);
+		g_eval[ix] = eval3x3(g_board3x3);
+	pass
 func setup_player_option_button(ob):
 	ob.add_item(": Human", 0)	
 	ob.add_item(": AI Random", 1)	
@@ -512,7 +546,7 @@ func init_board():
 	put_pos = [-1, -1]
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 	three_lined_up = [false, false, false, false, false, false, false, false, false]
-	next_color = MARU
+	next_color = WHITE
 	#for y in range(N_VERT):
 	#	for x in range(N_HORZ):
 	#		$Board/TileMapLocal.set_cell(x, y, -1)
@@ -525,15 +559,15 @@ func init_board():
 	pass
 func update_next_label():
 	if game_started:
-		$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == MARU else "Ｘ")
+		$MessLabel.text = "次は%sの手番です。" % ("Ｏ" if next_color == WHITE else "Ｘ")
 	update_next_underline()
 func update_next_underline():
-	$MaruPlayer/Underline.visible = game_started && next_color == MARU
-	$BatsuPlayer/Underline.visible = game_started && next_color == BATSU
+	$MaruPlayer/Underline.visible = game_started && next_color == WHITE
+	$BatsuPlayer/Underline.visible = game_started && next_color == BLACK
 func can_put_local(x : int, y : int):
 	return $Board/TileMapBG.get_cell(x, y) == NEXT_LOCAL_BOARD
 func is_empty(x : int, y : int):
-	return $Board/TileMapLocal.get_cell(x, y) == -1
+	return $Board/TileMapLocal.get_cell(x, y) == TS_EMPTY
 func put(x : int, y : int, col):
 	if !is_empty(x, y): return
 	n_put += 1
@@ -544,7 +578,7 @@ func put(x : int, y : int, col):
 		$Board/TileMapCursor.set_cell(put_pos[0], put_pos[1], -1)
 	put_pos = [x, y]
 	$Board/TileMapCursor.set_cell(put_pos[0], put_pos[1], 0)
-	$Board/TileMapLocal.set_cell(x, y, col)
+	$Board/TileMapLocal.set_cell(x, y, col2tsid(col))
 	if n_put == N_HORZ * N_VERT:	# 全て着手済み → 終局
 		#game_started = false
 		do_game_over()
@@ -632,7 +666,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 		for gy2 in range(N_VERT/3):
 			for gx2 in range(N_HORZ/3):
 				$Board/TileMapBG.set_cell(gx2, gy2, NEXT_LOCAL_BOARD)
-	next_color = (MARU + BATSU) - next_color
+	next_color = (WHITE + BLACK) - next_color
 	update_next_label()
 	#update_next_underline()
 	update_board_tilemaps()
@@ -641,12 +675,12 @@ func _process(delta):
 	if waiting > 0:
 		waiting -= 1
 	elif( game_started && !AI_thinking &&
-			(next_color == MARU && maru_player >= AI_RANDOM || next_color == BATSU && batsu_player >= AI_RANDOM) ):
+			(next_color == WHITE && maru_player >= AI_RANDOM || next_color == BLACK && batsu_player >= AI_RANDOM) ):
 		#if !game_started:
 		#	print("??? game_started = ", game_started)
 		AI_thinking = true
 		#var pos = AI_think_random()
-		var typ = maru_player if next_color == MARU else batsu_player
+		var typ = maru_player if next_color == WHITE else batsu_player
 		var pos = (g_bd.select_random() if typ == AI_RANDOM else
 					g_bd.select_depth_1() if typ == AI_DEPTH_1 else
 					g_bd.select_depth_3())
