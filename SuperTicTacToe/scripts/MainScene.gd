@@ -502,7 +502,20 @@ func tsid2col(id):
 		TS_EMPTY:	return EMPTY
 		TS_MARU:	return WHITE
 		TS_BATSU:	return BLACK
-func eval3(c1, c2, c3):
+const LINED3 = 100;				#	3目並んだ
+const LINED2 = 8;				#	2目並んだ
+const LINED1 = 1;				#	1目のみ
+func eval3(c1, c2, c3):		# 石の値は 0 for 空欄、±1 for 白・黒 と仮定
+	var sum = c1 + c2 + c3;
+	if( sum == WHITE * 3 ): return LINED3;
+	if( sum == BLACK * 3 ): return -LINED3;
+	if( sum == WHITE * 2 ): return LINED2;
+	if( sum == BLACK * 2 ): return -LINED2;
+	var n = c1*c1 + c2*c2 + c3*c3;		#	置かれた石数
+	if( n == 1 ):
+		if( sum == WHITE ): return LINED1;
+		if( sum == BLACK ): return -LINED1;
+	return 0;
 	pass
 func eval3x3(bd : Array):
 	pass
