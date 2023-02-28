@@ -138,22 +138,24 @@ class Board:
 		if stack.empty(): return [-1, -1]
 		else: return [stack.back().x, stack.back().y]
 	func print():
-		var txt = "  abc def ghi\n"
-		txt += " +---+---+---+\n"
+		var txt = "   ａｂｃ　ｄｅｆ　ｇｈｉ\n"
+		txt += " ＋－－－＋－－－＋－－－＋\n"
 		for y in range(N_VERT):
-			txt += "%d|" % (y+1)
+			txt += "%d｜" % (y+1)
 			for x in range(N_HORZ):
 				if last_put_pos() != [x, y]:
-					txt += "X.O"[l_board[x + y*N_HORZ]+1]
+					txt += ["●", "・", "○"][l_board[x + y*N_HORZ]+1]
+					#txt += "X.O"[l_board[x + y*N_HORZ]+1]
 				else:
-					txt += "#.C"[l_board[x + y*N_HORZ]+1]
-				if x % 3 == 2: txt += "|"
+					txt += ["◆", "・", "◇"][l_board[x + y*N_HORZ]+1]
+					#txt += "#.C"[l_board[x + y*N_HORZ]+1]
+				if x % 3 == 2: txt += "｜"
 			txt += "\n"
-			if y % 3 == 2: txt += " +---+---+---+\n"
+			if y % 3 == 2: txt += " ＋－－－＋－－－＋－－－＋\n"
 		txt += "\n"
 		for y in range(N_VERT/3):
 			for x in range(N_HORZ/3):
-				txt += "X.O"[g_board[x + y*(N_HORZ/3)]+1]
+				txt += ["●", "・", "○"][g_board[x + y*(N_HORZ/3)]+1]
 			txt += "\n"
 		txt += "\n"
 		#
