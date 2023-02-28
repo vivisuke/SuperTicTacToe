@@ -547,14 +547,6 @@ func init_board():
 	n_put_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 	three_lined_up = [false, false, false, false, false, false, false, false, false]
 	next_color = WHITE
-	#for y in range(N_VERT):
-	#	for x in range(N_HORZ):
-	#		$Board/TileMapLocal.set_cell(x, y, -1)
-	#		$Board/TileMapCursor.set_cell(x, y, -1)
-	#for y in range(N_VERT/3):
-	#	for x in range(N_HORZ/3):
-	#		$Board/TileMapBG.set_cell(x, y, NEXT_LOCAL_BOARD)
-	#		$Board/TileMapGlobal.set_cell(x, y, -1)
 	update_board_tilemaps()		# g_bd の状態から TileMap たちを設定
 	pass
 func update_next_label():
@@ -654,7 +646,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 	if $Board/TileMapGlobal.get_cell(gx, gy) == -1 && is_three_stones(x, y):
 		# ローカルボード内で三目並んだ場合
 		three_lined_up[gx + gy*3] = true
-		$Board/TileMapGlobal.set_cell(gx, gy, next_color)
+		$Board/TileMapGlobal.set_cell(gx, gy, col2tsid(next_color))
 		if is_three_stones_global(gx, gy):
 			print("*** Game Over")
 			#game_started = false
