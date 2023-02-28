@@ -530,14 +530,14 @@ func setup_player_option_button(ob):
 func update_board_tilemaps():		# g_bd の状態から TileMap たちを設定
 	for y in range(N_VERT):
 		for x in range(N_HORZ):
-			$Board/TileMapLocal.set_cell(x, y, g_bd.get_color(x, y))
+			$Board/TileMapLocal.set_cell(x, y, col2tsid(g_bd.get_color(x, y)))
 			$Board/TileMapCursor.set_cell(x, y, 0 if g_bd.last_put_pos() == [x, y] else -1)
 	var ix = 0
 	for y in range(N_VERT/3):
 		for x in range(N_HORZ/3):
 			var c = -1 if g_bd.next_board >= 0 && ix != g_bd.next_board else NEXT_LOCAL_BOARD
 			$Board/TileMapBG.set_cell(x, y, c)
-			$Board/TileMapGlobal.set_cell(x, y, g_bd.get_color_g(x, y))
+			$Board/TileMapGlobal.set_cell(x, y, col2tsid(g_bd.get_color_g(x, y)))
 			ix += 1
 	pass
 func init_board():
