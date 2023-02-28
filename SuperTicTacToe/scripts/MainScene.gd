@@ -64,6 +64,9 @@ const ev_pat_table = [	# ○から見たパターン評価値
 	0,  	# ＯＯＸ
 	32,  	# ＯＯＯ
 ]
+const g_pow_table = [	pow(3, 8), pow(3, 7), pow(3, 6),
+						pow(3, 5), pow(3, 4), pow(3, 3),
+						pow(3, 2), pow(3, 1), pow(3, 0), ]
 const mb_str = ["Ｘ", "Ｏ"]
 enum {
 	BLACK = -1, EMPTY, WHITE,				#	盤面石値、WHITE for 先手
@@ -153,6 +156,12 @@ class Board:
 				txt += "X.O"[g_board[x + y*(N_HORZ/3)]+1]
 			txt += "\n"
 		txt += "\n"
+		#
+		for i in range(9):
+			txt += "%d " % bd_index[i]
+			if i % 3 == 2: txt += "\n";
+		txt += "%d\n" % gbd_index
+		#
 		if is_game_over:
 			if winner == WHITE: txt += "O won.\n"
 			elif winner == BLACK: txt += "X won.\n"
@@ -182,12 +191,16 @@ class Board:
 		var gx = x / 3
 		var gy = y / 3
 		var ix = gx + gy*3
+		var mx = x % 3;
+		var my = y % 3;
+		bd_index[ix] += g_pow_table[mx+my*3] * (1 if col==WHITE else 2);	#	盤面インデックス更新
 		n_put_local[ix] += 1		# 各ローカルボードの着手数
 		var linedup = false			# ローカルボード内で三目ならんだか？
 		#var igo = is_game_over		# グローバルボード内で三目ならんだか？
 		if !three_lined_up[ix] && is_three_stones(x, y):	# 三目並んだ→グローバルボード更新
 			linedup = true
 			g_board[ix] = col
+			gbd_index += g_pow_table[ix] * (1 if col==WHITE else 2);	#	盤面インデックス更新
 			three_lined_up[ix] = true
 			if is_three_stones_global(gx, gy):
 				is_game_over = true
@@ -197,7 +210,7 @@ class Board:
 		stack.push_back(HistItem.new(x, y, linedup, next_board))
 		next_color = (WHITE + BLACK) - next_color	# 手番交代
 		update_next_board(x, y)					# next_board 設定
-	func unput():
+	func undo_put():
 		if stack.empty(): return
 		next_color = (WHITE + BLACK) - next_color	# 手番交代
 		var itm = stack.pop_back()
@@ -300,13 +313,13 @@ class Board:
 				if is_empty(x0+h, y0+v):
 					put(x0+h, y0+v, next_color)
 					if is_game_over:
-						unput()
+						undo_put()
 						if next_color == WHITE:
 							return 9000
 						else:
 							return -9000
 					var ev = alpha_bata(alpha, beta, depth-1)
-					unput()
+					undo_put()
 					if next_color == WHITE:
 						alpha = max(ev, alpha)
 						if alpha >= beta: return alpha
@@ -341,7 +354,7 @@ class Board:
 				if bd.is_empty(x0+h, y0+v):
 					bd.put(x0+h, y0+v, next_color)
 					var ev = bd.alpha_bata(alpha, beta, DEPTH)
-					bd.unput()
+					bd.undo_put()
 					if next_color == WHITE:
 						if ev > alpha:
 							alpha = ev
@@ -466,17 +479,17 @@ func _ready():
 	#
 	g_bd = Board.new()
 	g_bd.print()
-	print("eval_board = ", g_bd.eval_board())
-	g_bd.put(0, 0, WHITE)
-	g_bd.print()
-	print("eval_board = ", g_bd.eval_board())
-	g_bd.put(1, 1, BLACK)
-	g_bd.print()
-	print("eval_board = %d\n" % g_bd.eval_board())
-	g_bd.unput()
-	g_bd.print()
-	g_bd.unput()
-	g_bd.print()
+	#print("eval_board = ", g_bd.eval_board())
+	#g_bd.put(0, 0, WHITE)
+	#g_bd.print()
+	#print("eval_board = ", g_bd.eval_board())
+	#g_bd.put(1, 1, BLACK)
+	#g_bd.print()
+	#print("eval_board = %d\n" % g_bd.eval_board())
+	#g_bd.undo_put()
+	#g_bd.print()
+	#g_bd.undo_put()
+	#g_bd.print()
 	#
 	BOARD_ORG_X = $Board/TileMapLocal.global_position.x
 	BOARD_ORG_Y = $Board/TileMapLocal.global_position.y
@@ -733,6 +746,7 @@ func _input(event):
 			var gy = int(pos.y) / 3
 			if !can_put_local(gx, gy): return
 			if put_and_post_proc(pos.x, pos.y): return
+			g_bd.print()
 			waiting = WAIT
 	pass
 
