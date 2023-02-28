@@ -95,6 +95,8 @@ class Board:
 	var g_board
 	var n_put_local = []		# 各ローカルボードの着手数
 	var three_lined_up = []		# 各ローカルボード：三目並んだか？
+	var bd_index = []			# 各ローカルボード盤面インデックス
+	var gbd_index				# グローバルボード盤面インデックス
 	var stack = []				# 要素：HistItem
 	var rng = RandomNumberGenerator.new()
 	func _init():
@@ -110,6 +112,8 @@ class Board:
 		next_color = WHITE
 		n_put_local = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		three_lined_up = [false, false, false, false, false, false, false, false, false]
+		bd_index = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		gbd_index = 0
 		next_board = -1
 		l_board = []
 		for ix in range(N_HORZ*N_VERT): l_board.push_back(EMPTY)
