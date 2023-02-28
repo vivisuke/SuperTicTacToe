@@ -517,7 +517,14 @@ func eval3(c1, c2, c3):		# 石の値は 0 for 空欄、±1 for 白・黒 と仮�
 		if( sum == BLACK ): return -LINED1;
 	return 0;
 	pass
-func eval3x3(bd : Array):
+func eval3x3(board : Array):
+	var ev = 0;
+	for i in range(3):
+		ev += eval3(board[i*3 + 0], board[i*3 + 1], board[i*3 + 2]);
+		ev += eval3(board[0*3 + i], board[1*3 + i], board[2*3 + i]);
+	ev += eval3(board[0*3 + 0], board[1*3 + 1], board[2*3 + 2]);
+	ev += eval3(board[2*3 + 0], board[1*3 + 1], board[0*3 + 2]);
+	return ev;
 	pass
 func set_board3x3(index : int):
 	var i = 8
@@ -534,6 +541,7 @@ func build_3x3_eval_table():
 	for ix in range(g_eval.size()):
 		set_board3x3(ix);
 		g_eval[ix] = eval3x3(g_board3x3);
+		#print(g_eval[ix]);
 	pass
 func setup_player_option_button(ob):
 	ob.add_item(": Human", 0)	
