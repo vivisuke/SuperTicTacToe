@@ -185,10 +185,10 @@
 0180 ◎ C 02/28 02/28 0.001│ToDo│func eval3(c1, c2, c3) 実装
 0181 ◎ C 02/28 02/28 0.001│ToDo│func build_3x3_eval_table() 実装
 0182 ◎ C 02/28 02/28 0.001│ToDo│Board：ローカル・グローバル盤面インデックス情報保持
-0183 ● C 02/28            │ToDo│Board::put(), undo_put()：盤面インデックス情報更新
+0183 ◎ C 02/28 03/01 0.001│ToDo│Board::put(), undo_put()：盤面インデックス情報更新
 0184 ◎ C 02/28 03/01 0.001│ToDo│Board::print()：盤面インデックス値表示
 0185 ◎ C 03/01 03/01 0.001│ToDo│Board::print()：全角表示？
-0186 ● C 03/01            │ToDo│
+0186 ● C 03/01            │ToDo│func eval_board_index() 実装
 0187 ● C 03/01            │ToDo│
 0188 ● C 03/01            │ToDo│
 0189 ● C 03/01            │ToDo│

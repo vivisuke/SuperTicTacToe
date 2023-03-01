@@ -217,10 +217,15 @@ class Board:
 		next_color = (WHITE + BLACK) - next_color	# 手番交代
 		var itm = stack.pop_back()
 		l_board[itm.x + itm.y*N_HORZ] = EMPTY
+		var gx = itm.x / 3
+		var gy = itm.y / 3
+		var ix = gx + gy*3
+		var mx = itm.x % 3;
+		var my = itm.y % 3;
+		bd_index[ix] -= g_pow_table[mx+my*3] * (1 if next_color==WHITE else 2);	#	盤面インデックス更新
 		if itm.linedup:				# 着手で三目並んだ場合
-			var gx = itm.x / 3
-			var gy = itm.y / 3
 			g_board[gx + gy*3] = EMPTY
+			gbd_index -= g_pow_table[ix] * (1 if col==WHITE else 2);	#	盤面インデックス更新
 			is_game_over = false
 		next_board = itm.next_board
 		pass
@@ -404,6 +409,9 @@ class Board:
 			else:
 				ev -= 16
 		return ev
+	func eval_board_index():	# 現局面を（○から見た）評価
+		var ev = 0
+		return ev
 	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
 		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする
 		#print("can_lined_up(%d, %d)" % [gx, gy])
@@ -480,6 +488,8 @@ func _ready():
 	build_3x3_eval_table()			# 3x3盤面→評価値テーブル構築
 	#
 	g_bd = Board.new()
+	g_bd.put(0, 0, WHITE)
+	g_bd.undo_put()
 	g_bd.print()
 	#print("eval_board = ", g_bd.eval_board())
 	#g_bd.put(0, 0, WHITE)
