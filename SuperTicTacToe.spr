@@ -188,8 +188,8 @@
 0183 ◎ C 02/28 03/01 0.001│ToDo│Board::put(), undo_put()：盤面インデックス情報更新
 0184 ◎ C 02/28 03/01 0.001│ToDo│Board::print()：盤面インデックス値表示
 0185 ◎ C 03/01 03/01 0.001│ToDo│Board::print()：全角表示？
-0186 ● C 03/01            │ToDo│func eval_board_index() 実装
-0187 ● C 03/01            │ToDo│
+0186 ◎ C 03/01 03/02 0.001│ToDo│func eval_board_index() 実装
+0187 ◎ C 03/01 03/02 0.001│ToDo│g_eval[] は Board のメンバ変数に？
 0188 ● C 03/01            │ToDo│
 0189 ● C 03/01            │ToDo│
 0190 ● C 03/01            │ToDo│

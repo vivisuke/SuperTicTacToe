@@ -6,6 +6,7 @@ const NEXT_LOCAL_BOARD = 0
 #const MARU = 1
 #const BATSU = 0
 const WAIT = 6*3
+const GVAL = 100
 const ev_put_table = [	# 空き箇所に打った場合の利得
 	1,  	# ・・・
 	8,  	# ・・Ｘ
@@ -101,6 +102,7 @@ class Board:
 	var bd_index = []			# 各ローカルボード盤面インデックス
 	var gbd_index				# グローバルボード盤面インデックス
 	var stack = []				# 要素：HistItem
+	var r_eval					# 盤面インデックス→評価値テーブルへの参照
 	var rng = RandomNumberGenerator.new()
 	func _init():
 		rng.randomize()		# Setups a time-based seed
@@ -111,7 +113,7 @@ class Board:
 	func init():
 		n_put = 0
 		is_game_over = false
-		winner = -1
+		winner = EMPTY
 		next_color = WHITE
 		n_put_local = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		three_lined_up = [false, false, false, false, false, false, false, false, false]
@@ -132,8 +134,13 @@ class Board:
 		g_board = s.g_board.duplicate()
 		n_put_local = s.n_put_local.duplicate()
 		three_lined_up = s.three_lined_up.duplicate()
+		bd_index = s.bd_index.duplicate()
+		gbd_index = s.gbd_index
+		r_eval = s.r_eval
 		stack = s.stack.duplicate()
 		pass
+	func set_eval(ev_table):
+		r_eval = ev_table
 	func last_put_pos():
 		if stack.empty(): return [-1, -1]
 		else: return [stack.back().x, stack.back().y]
@@ -174,6 +181,7 @@ class Board:
 		txt += "last_put_pos = [%d, %d]\n" % last_put_pos()
 		print(txt)
 		#print("last_put_pos = ", last_put_pos())
+		print("eval = ", eval_board_index())
 	func is_empty(x : int, y : int):			# ローカルボード内のセル状態取得
 		return l_board[x + y*N_HORZ] == EMPTY
 	func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
@@ -225,7 +233,7 @@ class Board:
 		bd_index[ix] -= g_pow_table[mx+my*3] * (1 if next_color==WHITE else 2);	#	盤面インデックス更新
 		if itm.linedup:				# 着手で三目並んだ場合
 			g_board[gx + gy*3] = EMPTY
-			gbd_index -= g_pow_table[ix] * (1 if col==WHITE else 2);	#	盤面インデックス更新
+			gbd_index -= g_pow_table[ix] * (1 if next_color==WHITE else 2);	#	盤面インデックス更新
 			is_game_over = false
 		next_board = itm.next_board
 		pass
@@ -339,6 +347,7 @@ class Board:
 			return beta
 	func select_depth_3():		# ３手先読み＋評価関数で着手決定
 		var bd = Board.new()
+		#bd.set_eval(g_eval)
 		bd.copy(self)
 		var DEPTH = 3
 		var ps;
@@ -410,7 +419,13 @@ class Board:
 				ev -= 16
 		return ev
 	func eval_board_index():	# 現局面を（○から見た）評価
+		if( is_game_over ):
+			return winner * GVAL * GVAL;
 		var ev = 0
+		for i in range(9):
+			if !three_lined_up[i]:
+				ev += r_eval[bd_index[i]]
+		ev += r_eval[gbd_index] * GVAL
 		return ev
 	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
 		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする
@@ -488,6 +503,7 @@ func _ready():
 	build_3x3_eval_table()			# 3x3盤面→評価値テーブル構築
 	#
 	g_bd = Board.new()
+	g_bd.set_eval(g_eval)
 	g_bd.put(0, 0, WHITE)
 	g_bd.undo_put()
 	g_bd.print()
