@@ -68,7 +68,7 @@ const ev_pat_table = [	# ○から見たパターン評価値
 const g_pow_table = [	pow(3, 8), pow(3, 7), pow(3, 6),
 						pow(3, 5), pow(3, 4), pow(3, 3),
 						pow(3, 2), pow(3, 1), pow(3, 0), ]
-const mb_str = ["Ｘ", "Ｏ"]
+const mb_str = ["Ｘ", "・", "Ｏ"]
 enum {
 	BLACK = -1, EMPTY, WHITE,				#	盤面石値、WHITE for 先手
 	TS_EMPTY = -1, TS_BATSU, TS_MARU,		#	タイルセットID
@@ -218,7 +218,7 @@ class Board:
 		if !is_game_over && n_put == N_HORZ*N_VERT:
 			is_game_over = true
 		stack.push_back(HistItem.new(x, y, linedup, next_board))
-		next_color = (WHITE + BLACK) - next_color	# 手番交代
+		next_color = (WHITE + BLACK) - col		# 手番交代
 		update_next_board(x, y)					# next_board 設定
 	func undo_put():
 		if stack.empty(): return
@@ -721,7 +721,7 @@ func put_and_post_proc(x : int, y : int):	# 着手処理とその後処理
 		if is_three_stones_global(gx, gy):
 			print("*** Game Over")
 			#game_started = false
-			$MessLabel.text = mb_str[next_color] + " won."		# 
+			$MessLabel.text = mb_str[next_color+1] + " won."		# 
 			do_game_over()
 			return true;		# ゲームオーバー
 	if n_put_board[next_board] == 9 || three_lined_up[next_board]:	# 空欄が無い or すでに三目並んでいる
