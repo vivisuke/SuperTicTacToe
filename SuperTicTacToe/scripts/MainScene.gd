@@ -310,16 +310,19 @@ class Board:
 			#print(txt)
 		return p
 	func alpha_bata(alpha, beta, depth):
-		if depth == 0: return eval_board()
+		if depth <= 0 || is_game_over:
+			return eval_board_index()
 		var x0
 		var y0
 		var NH = 3
 		var NV = 3
+		var D = 1
 		if next_board < 0:		# 全ローカルボードに着手可能
 			x0 = 0
 			y0 = 0
 			NH = N_HORZ
 			NV = N_VERT
+			D = 2
 		else:
 			x0 = (next_board % 3) * 3
 			y0 = (next_board / 3) * 3
@@ -327,13 +330,13 @@ class Board:
 			for h in range(NH):
 				if is_empty(x0+h, y0+v):
 					put(x0+h, y0+v, next_color)
-					if is_game_over:
-						undo_put()
-						if next_color == WHITE:
-							return 9000
-						else:
-							return -9000
-					var ev = alpha_bata(alpha, beta, depth-1)
+					#if is_game_over:
+					#	undo_put()
+					#	if next_color == WHITE:
+					#		return GVAL*GVAL
+					#	else:
+					#		return -9000
+					var ev = alpha_bata(alpha, beta, depth-D)
 					undo_put()
 					if next_color == WHITE:
 						alpha = max(ev, alpha)
@@ -351,17 +354,19 @@ class Board:
 		bd.copy(self)
 		var DEPTH = 3
 		var ps;
-		var alpha = -9999
-		var beta = 9999
+		var alpha = -99999
+		var beta = 99999
 		var x0
 		var y0
 		var NH = 3
 		var NV = 3
+		var D = 1
 		if next_board < 0:		# 全ローカルボードに着手可能
 			x0 = 0
 			y0 = 0
 			NH = N_HORZ
 			NV = N_VERT
+			D = 2
 		else:
 			x0 = (next_board % 3) * 3
 			y0 = (next_board / 3) * 3
@@ -369,7 +374,7 @@ class Board:
 			for h in range(NH):
 				if bd.is_empty(x0+h, y0+v):
 					bd.put(x0+h, y0+v, next_color)
-					var ev = bd.alpha_bata(alpha, beta, DEPTH)
+					var ev = bd.alpha_bata(alpha, beta, DEPTH-D)
 					bd.undo_put()
 					if next_color == WHITE:
 						if ev > alpha:
