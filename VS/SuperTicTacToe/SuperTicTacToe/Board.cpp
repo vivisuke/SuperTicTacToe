@@ -248,15 +248,17 @@ int Board::eval_diff_index() const {
 	const int GVAL = 100;
 	++g_eval_count;
 	++g_count;
-	if( is_game_over() )
-		return m_winner * GVAL * GVAL;
 	int ev = 0;
-	for(int i = 0; i != GBD_SIZE; ++i) {
-		if( !m_linedup[i] )
-			ev += g_eval[m_bd_index[i]];
+	if( is_game_over() ) {
+		ev = m_winner * GVAL * GVAL;
+	} else {
+		for(int i = 0; i != GBD_SIZE; ++i) {
+			if( !m_linedup[i] )
+				ev += g_eval[m_bd_index[i]];
+		}
+		ev += g_eval[m_gbd_index] * GVAL;
 	}
-	ev += g_eval[m_gbd_index] * GVAL;
-	cout << g_eval_count << ": eval = " << ev << "\n";
+	cout << g_eval_count << ": eval = " << ev << ", next_board = " << (int)m_next_board << "\n";
 	return ev;
 }
 void Board::update_next_board(int x, int y) {
@@ -512,14 +514,14 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 				if( is_white_turn() ) {
 					if( ev > alpha ) {
 						if( (alpha = ev) >= beta ) {
-							cout << "beta cut ";
+							cout << "*** beta cut ";
 							goto ret;
 						}
 					}
 				} else {
 					if( ev < beta ) {
 						if( (beta = ev) <= alpha ) {
-							cout << "alpha cut ";
+							cout << "*** alpha cut ";
 							goto ret;
 						}
 					}

@@ -230,6 +230,7 @@ class Board:
 		var gx = itm.x / 3
 		var gy = itm.y / 3
 		var ix = gx + gy*3
+		n_put_local[ix] -= 1
 		var mx = itm.x % 3;
 		var my = itm.y % 3;
 		bd_index[ix] -= g_pow_table[mx+my*3] * (1 if next_color==WHITE else 2);	#	盤面インデックス更新
@@ -344,11 +345,12 @@ class Board:
 						if alpha >= beta:
 							print("*** alpha cut, beta = ", beta)
 							return beta
+		print("alpha = ", alpha, ", beta = ", beta)
 		if next_color == WHITE:
-			print("alpha = ", alpha)
+			#print("alpha = ", alpha)
 			return alpha
 		else:
-			print("beta = ", beta)
+			#print("beta = ", beta)
 			return beta
 	func select_depth_3():		# ３手先読み＋評価関数で着手決定
 		var bd = Board.new()
@@ -428,14 +430,17 @@ class Board:
 		return ev
 	func eval_board_index():	# 現局面を（○から見た）評価
 		g_eval_count += 1
-		if( is_game_over ):
-			return winner * GVAL * GVAL;
+		if( g_eval_count == 38 ):
+			print("stoped for Debug.")
 		var ev = 0
-		for i in range(9):
-			if !three_lined_up[i]:
-				ev += r_eval[bd_index[i]]
-		ev += r_eval[gbd_index] * GVAL
-		print(g_eval_count, ": ev = ", ev)
+		if( is_game_over ):
+			ev = winner * GVAL * GVAL;
+		else:
+			for i in range(9):
+				if !three_lined_up[i]:
+					ev += r_eval[bd_index[i]]
+			ev += r_eval[gbd_index] * GVAL
+		print(g_eval_count, ": ev = ", ev, ", next_board = ", next_board)
 		return ev
 	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
 		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする
