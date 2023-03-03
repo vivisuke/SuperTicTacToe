@@ -6,6 +6,7 @@
 using namespace std;
 
 extern int g_count;
+extern int g_eval_count;
 
 void do_search(Board &bd, int depth) {
 	if( bd.is_game_over() || depth == 0 ) {
@@ -27,6 +28,9 @@ int main()
 	build_3x3_eval_table();
 	//
     Board bd;
+    bd.put(0, 0, WHITE);
+	auto mv = bd.sel_move_AlphaBeta(3);
+	cout << (int)mv.m_x << ", " << (int)mv.m_y << "\n";
 #if 0
     auto ev1 = bd.eval();
     auto ev2 = bd.eval_index();
@@ -40,6 +44,7 @@ int main()
     assert( ev1 == ev2 );
     assert( ev1 == ev3 );
 #endif
+#if 0
     auto start = std::chrono::system_clock::now();      // 計測スタート時刻を保存
     int wwin = 0, bwin = 0;
     const int LOOP = 100;
@@ -74,6 +79,7 @@ int main()
     cout << "black won: " << (100.0)*bwin/LOOP << "%\n";
     cout << "draw: " << (100.0)*(LOOP - wwin - bwin)/LOOP << "%\n";
     cout << "\ndur = " << msec << "millisec\n";
+#endif
 
 #if 0
     bd.print();

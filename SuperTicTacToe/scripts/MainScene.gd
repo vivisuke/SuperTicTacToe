@@ -103,6 +103,7 @@ class Board:
 	var gbd_index				# グローバルボード盤面インデックス
 	var stack = []				# 要素：HistItem
 	var r_eval					# 盤面インデックス→評価値テーブルへの参照
+	var g_eval_count
 	var rng = RandomNumberGenerator.new()
 	func _init():
 		rng.randomize()		# Setups a time-based seed
@@ -111,6 +112,7 @@ class Board:
 		#print(ev_put_table)
 		pass
 	func init():
+		g_eval_count = 0
 		n_put = 0
 		is_game_over = false
 		winner = EMPTY
@@ -181,7 +183,7 @@ class Board:
 		txt += "last_put_pos = [%d, %d]\n" % last_put_pos()
 		print(txt)
 		#print("last_put_pos = ", last_put_pos())
-		print("eval = ", eval_board_index())
+		#print("eval = ", eval_board_index())
 	func is_empty(x : int, y : int):			# ローカルボード内のセル状態取得
 		return l_board[x + y*N_HORZ] == EMPTY
 	func get_color(x : int, y : int):			# ローカルボード内のセル状態取得
@@ -330,26 +332,27 @@ class Board:
 			for h in range(NH):
 				if is_empty(x0+h, y0+v):
 					put(x0+h, y0+v, next_color)
-					#if is_game_over:
-					#	undo_put()
-					#	if next_color == WHITE:
-					#		return GVAL*GVAL
-					#	else:
-					#		return -9000
 					var ev = alpha_bata(alpha, beta, depth-D)
 					undo_put()
 					if next_color == WHITE:
 						alpha = max(ev, alpha)
-						if alpha >= beta: return alpha
+						if alpha >= beta:
+							print("*** beta cut, alpha = ", alpha)
+							return alpha
 					else:
 						beta = min(ev, beta)
-						if alpha >= beta: return beta
+						if alpha >= beta:
+							print("*** alpha cut, beta = ", beta)
+							return beta
 		if next_color == WHITE:
+			print("alpha = ", alpha)
 			return alpha
 		else:
+			print("beta = ", beta)
 			return beta
 	func select_depth_3():		# ３手先読み＋評価関数で着手決定
 		var bd = Board.new()
+		#bd.g_eval_count = 0
 		#bd.set_eval(g_eval)
 		bd.copy(self)
 		var DEPTH = 3
@@ -424,6 +427,7 @@ class Board:
 				ev -= 16
 		return ev
 	func eval_board_index():	# 現局面を（○から見た）評価
+		g_eval_count += 1
 		if( is_game_over ):
 			return winner * GVAL * GVAL;
 		var ev = 0
@@ -431,6 +435,7 @@ class Board:
 			if !three_lined_up[i]:
 				ev += r_eval[bd_index[i]]
 		ev += r_eval[gbd_index] * GVAL
+		print(g_eval_count, ": ev = ", ev)
 		return ev
 	func can_lined_up(gx: int, gy: int):		# グローバルボード gx, gy で三目作れるか？
 		# 前提条件：NOT(でに三目並んでいる or 空きが無い) とする

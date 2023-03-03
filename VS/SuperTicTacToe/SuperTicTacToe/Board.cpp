@@ -24,6 +24,7 @@ short g_pow_table[] = {	pow(3, 8), pow(3, 7), pow(3, 6),
 						pow(3, 5), pow(3, 4), pow(3, 3),
 						pow(3, 2), pow(3, 1), pow(3, 0), };
 int g_count;
+int g_eval_count;
 
 //----------------------------------------------------------------------
 Board::Board() {
@@ -245,6 +246,7 @@ int Board::eval_index() const {
 }
 int Board::eval_diff_index() const {
 	const int GVAL = 100;
+	++g_eval_count;
 	++g_count;
 	if( is_game_over() )
 		return m_winner * GVAL * GVAL;
@@ -253,7 +255,9 @@ int Board::eval_diff_index() const {
 		if( !m_linedup[i] )
 			ev += g_eval[m_bd_index[i]];
 	}
-	return ev + g_eval[m_gbd_index] * GVAL;
+	ev += g_eval[m_gbd_index] * GVAL;
+	cout << g_eval_count << ": eval = " << ev << "\n";
+	return ev;
 }
 void Board::update_next_board(int x, int y) {
 	int x3 = x % 3;
@@ -303,10 +307,10 @@ void Board::undo_put() {
 		m_linedup[gix] = false;
 		m_gboard[gix] = EMPTY;
 		m_gbd_index -= g_pow_table[gix] * (item.m_col==WHITE?1:2);	//	盤面インデックス更新
+		m_game_over = false;
 	}
 	m_next_board = item.m_next_board;
 	m_stack.pop_back();
-	m_game_over = false;
 	m_next_color = (WHITE + BLACK) - m_next_color;		//	手番交代
 }
 void Board::gen_moves(Moves& mvs) {
@@ -507,13 +511,17 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 				undo_put();
 				if( is_white_turn() ) {
 					if( ev > alpha ) {
-						if( (alpha = ev) >= beta )
+						if( (alpha = ev) >= beta ) {
+							cout << "beta cut ";
 							goto ret;
+						}
 					}
 				} else {
 					if( ev < beta ) {
-						if( (beta = ev) <= alpha )
+						if( (beta = ev) <= alpha ) {
+							cout << "alpha cut ";
 							goto ret;
+						}
 					}
 				}
 			}
@@ -522,11 +530,12 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
 ret:
 	//cout << (is_white_turn() ? "max() = " : "min() = ") << mm << "\n";
 	//cout << (is_white_turn() ? "W: " : "B: ");
-	//cout << "alpha = " << alpha << ", beta = " << beta << "\n";
+	cout << "alpha = " << alpha << ", beta = " << beta << "\n";
 	return is_white_turn() ? alpha : beta;
 }
 Move Board::sel_move_AlphaBeta(int depth) {
 	g_count = 0;
+	g_eval_count = 0;
 	Move mmv(-1, -1);
 	//int mm = is_white_turn() ? -INT_MAX : INT_MAX;
 	int alpha = -20000;		//-INT_MAX;
